@@ -39,40 +39,47 @@ POST_BY_SLUG = {p["slug"]: p for p in POSTS}
 # SVG ICONS (inline, currentColor, no manufacturer trademarks)
 # ---------------------------------------------------------------------------
 ICONS = {
-    # part categories
-    "engine": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V7a1 1 0 0 1 1-1h3l2-2h2v3h3l2 2v2h2v4h-2v2l-2 2h-6l-2-2H6v2H4v-4H2v-4h2V9z"/><path d="M9 9v6"/></svg>',
-    "suspension": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3M16 3v3"/><path d="M8 6c0 2 8 2 8 4s-8 2-8 4 8 2 8 4"/><path d="M6 21h4M14 21h4"/><path d="M8 18v3M16 18v3"/></svg>',
-    "brakes": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3"/><path d="M18 6l-2 2M6 6l2 2"/></svg>',
-    "filter": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg>',
-    "electrical": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>',
-    "body": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l2-5a2 2 0 0 1 1.9-1.3h10.2A2 2 0 0 1 19 8l2 5"/><path d="M2 13h20v4a1 1 0 0 1-1 1h-1a2 2 0 0 1-4 0H8a2 2 0 0 1-4 0H3a1 1 0 0 1-1-1z"/><path d="M6.5 16h.01M17.5 16h.01"/></svg>',
-    "transmission": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="7" r="2"/><path d="M7 9v6M7 7h10M17 9v0"/><path d="M17 9a4 4 0 0 1-4 4H9"/></svg>',
-    "cooling": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/><path d="M12 2l3 3M12 2 9 5M12 22l3-3M12 22l-3-3M2 12l3-3M2 12l3 3M22 12l-3-3M22 12l-3 3"/><path d="m5 5 14 14M19 5 5 19"/></svg>',
-    "steering": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.4"/><path d="M12 14.4V21M10 12H3.2M14 12h6.8"/></svg>',
-    # UI
-    "whatsapp": '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.49s1.07 2.89 1.22 3.09c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.09 1.77-.72 2.02-1.42.25-.7.25-1.29.17-1.42-.07-.13-.27-.2-.57-.35zM12.05 21.7h-.01a9.6 9.6 0 0 1-4.9-1.34l-.35-.21-3.64.95.97-3.55-.23-.36a9.56 9.56 0 0 1-1.47-5.1c0-5.29 4.31-9.6 9.61-9.6 2.57 0 4.98 1 6.79 2.82a9.54 9.54 0 0 1 2.81 6.79c0 5.29-4.31 9.6-9.6 9.6zm8.17-17.77A11.5 11.5 0 0 0 12.05.55C5.7.55.55 5.7.55 12.04c0 2.02.53 4 1.54 5.74L.5 23.5l5.86-1.54a11.47 11.47 0 0 0 5.69 1.45h.01c6.35 0 11.5-5.16 11.5-11.5a11.44 11.44 0 0 0-3.34-8.08z"/></svg>',
-    "phone": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L7.9 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg>',
-    "location": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>',
-    "clock": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
-    "mail": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
-    "check": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
-    "arrow": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
-    "chevron": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
-    "menu": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>',
-    "close": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
-    "search": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
-    "shield": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5z"/><path d="m9 12 2 2 4-4"/></svg>',
-    "truck": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h11v9H3zM14 9h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/></svg>',
-    "vin": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5v14M7 5v14M11 5v10M11 18v1M15 5v14M19 5v14M21 5v14"/></svg>',
-    "quote": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h10M4 18h7"/><path d="m15 15 3 3 4-5"/></svg>',
-    "chat": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 21l1.8-5.5A8 8 0 1 1 21 12z"/></svg>',
-    "tag": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 13.5 12 22l-9-9V4a1 1 0 0 1 1-1h8.5z"/><circle cx="7.5" cy="7.5" r="1.4"/></svg>',
-    "star": '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 2 3 6.3 6.9.9-5 4.8 1.2 6.9L12 17.8 5.9 20.9 7.1 14l-5-4.8 6.9-.9z"/></svg>',
-    "money": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9v6M18 9v6"/></svg>',
-    "wrench": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5l-6 6 2.4 2.4 6-6a4 4 0 0 0 5-5.4l-2.5 2.5-2-2z"/></svg>',
-    "box": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m21 8-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8"/><path d="m12 13v8"/></svg>',
-    "headset": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13a8 8 0 0 1 16 0"/><rect x="2.5" y="13" width="4" height="6" rx="1.4"/><rect x="17.5" y="13" width="4" height="6" rx="1.4"/><path d="M20 19a4 4 0 0 1-4 3h-2"/></svg>',
-    "external": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>',
+    'engine': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13H3v-3h2V8h3l2-2h4v2h3l2 2v3h2v3h-2v2l-2 2h-4l-2-2H8l-2 2H5z"/><path d="M8 10v4"/><path d="M14 6v3"/></svg>',
+    'suspension': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3h4"/><path d="M12 3v3"/><path d="M8 6h8l-1.5 3H9.5z"/><path d="M12 9c-2 1.4-2 2.6 0 4s2 2.6 0 4"/><path d="M8 21h8l-1.5-3H9.5z"/><path d="M12 18v3"/></svg>',
+    'brakes': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="12" r="7.5"/><circle cx="11" cy="12" r="3"/><path d="M18 8.5a4 4 0 0 1 3 3.5v2a1.5 1.5 0 0 1-1.5 1.5H18"/></svg>',
+    'filter': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M7 5v3.5a2 2 0 0 0 .6 1.4L12 14v6"/><path d="M17 5v3.5a2 2 0 0 1-.6 1.4L12 14"/></svg>',
+    'electrical': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 5 13h5l-1 9 8-11h-5z"/></svg>',
+    'body': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l1.6-4.2A3 3 0 0 1 7.4 7h9.2a3 3 0 0 1 2.8 1.8L21 13"/><path d="M2.5 13h19v3.5a1 1 0 0 1-1 1H19a2 2 0 0 1-4 0H9a2 2 0 0 1-4 0H3.5a1 1 0 0 1-1-1z"/><path d="M6.5 15.5h.01M17.5 15.5h.01"/></svg>',
+    'transmission': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="2.4"/><circle cx="7" cy="17" r="2.4"/><path d="M7 9.4v5.2"/><path d="M7 7h5a2 2 0 0 1 2 2v0"/><circle cx="16.5" cy="9" r="2.4"/><path d="M16.5 11.4V15a2 2 0 0 1-2 2h-3"/></svg>',
+    'cooling': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M4.5 6.5 12 11l7.5-4.5"/><path d="M4.5 17.5 12 13l7.5 4.5"/><path d="M12 2 9.5 4M12 2l2.5 2M12 22l-2.5-2M12 22l2.5-2M3 12l2.2-1.3M3 12l2.2 1.3M21 12l-2.2-1.3M21 12l-2.2 1.3"/></svg>',
+    'steering': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.4"/><path d="M12 14.4V21M9.9 11 3.7 8.4M14.1 11l6.2-2.6"/></svg>',
+    'whatsapp': '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.49s1.07 2.89 1.22 3.09c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.09 1.77-.72 2.02-1.42.25-.7.25-1.29.17-1.42-.07-.13-.27-.2-.57-.35zM12.05 21.7h-.01a9.6 9.6 0 0 1-4.9-1.34l-.35-.21-3.64.95.97-3.55-.23-.36a9.56 9.56 0 0 1-1.47-5.1c0-5.29 4.31-9.6 9.61-9.6 2.57 0 4.98 1 6.79 2.82a9.54 9.54 0 0 1 2.81 6.79c0 5.29-4.31 9.6-9.6 9.6zm8.17-17.77A11.5 11.5 0 0 0 12.05.55C5.7.55.55 5.7.55 12.04c0 2.02.53 4 1.54 5.74L.5 23.5l5.86-1.54a11.47 11.47 0 0 0 5.69 1.45h.01c6.35 0 11.5-5.16 11.5-11.5a11.44 11.44 0 0 0-3.34-8.08z"/></svg>',
+    'phone': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3h-2A1.5 1.5 0 0 0 3 4.6C3 13 11 21 19.4 21A1.5 1.5 0 0 0 21 19.5v-2a1 1 0 0 0-.8-1l-3-.6a1 1 0 0 0-1 .4l-.9 1.2a13 13 0 0 1-5.8-5.8l1.2-.9a1 1 0 0 0 .4-1l-.6-3a1 1 0 0 0-1-.8z"/></svg>',
+    'location': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 5.5-8 12-8 12s-8-6.5-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="2.6"/></svg>',
+    'clock': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 1.8"/></svg>',
+    'mail': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.2"/><path d="m4 7 8 5.5L20 7"/></svg>',
+    'check': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+    'arrow': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>',
+    'chevron': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+    'menu': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
+    'close': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+    'search': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
+    'shield': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 4.5 5.2v6.1c0 4.6 3.2 7.8 7.5 9.7 4.3-1.9 7.5-5.1 7.5-9.7V5.2z"/><path d="m8.8 12 2.2 2.2 4.2-4.4"/></svg>',
+    'truck': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H13a1 1 0 0 1 1 1v9H3z"/><path d="M14 9h3.5a2 2 0 0 1 1.6.8L21 12.5V15h-7z"/><circle cx="7" cy="18" r="1.9"/><circle cx="17.5" cy="18" r="1.9"/></svg>',
+    'vin': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="1.5"/><path d="M6 9v6M9 9l1.5 6L12 9l1.5 6L15 9M18 9v6"/></svg>',
+    'quote': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 11h9"/><path d="m14 13 2.5 2.5L22 10"/><path d="M4 16h6"/></svg>',
+    'chat': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 20.5 12z"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01"/></svg>',
+    'tag': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 12 22l-9-9V4.5A1.5 1.5 0 0 1 4.5 3H13z"/><circle cx="7.5" cy="7.5" r="1.3"/></svg>',
+    'star': '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 2.5 2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 18.9 6.1 21l1.1-6.5L2.5 9.9l6.5-.9z"/></svg>',
+    'money': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/></svg>',
+    'wrench': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15.2 6.3a4 4 0 0 0-5.3 5L3.5 17.7l2.8 2.8 6.4-6.4a4 4 0 0 0 5-5.3l-2.6 2.6-2.2-2.2z"/></svg>',
+    'box': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8.2 12 3 3 8.2m18 0L12 13.4 3 8.2m18 0V16L12 21m0-7.6V21M3 8.2V16l9 5"/></svg>',
+    'headset': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13a8 8 0 0 1 16 0"/><rect x="2.5" y="13" width="4" height="6" rx="1.6"/><rect x="17.5" y="13" width="4" height="6" rx="1.6"/><path d="M20 19a4 4 0 0 1-4 3h-2.5"/></svg>',
+    'external': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"/></svg>',
+    'dot': '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="6"/></svg>',
+    'sparkles': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"/><path d="M18 14l.8 2.2L21 17l-2.2.8L18 20l-.8-2.2L15 17l2.2-.8z"/></svg>',
+    'award': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="5.5"/><path d="M9 13.5 7.5 21l4.5-2.5L16.5 21 15 13.5"/></svg>',
+    'gauge': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15a8 8 0 1 1 16 0"/><path d="M12 15l4-4"/><circle cx="12" cy="15" r="1"/></svg>',
+    'layers': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>',
+    'plus': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>',
+    'car': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l1.7-4.5A3 3 0 0 1 7.5 6h9a3 3 0 0 1 2.8 1.5L21 12"/><path d="M2.5 12h19v4.5a1 1 0 0 1-1 1H19a2 2 0 0 1-4 0H9a2 2 0 0 1-4 0H3.5a1 1 0 0 1-1-1z"/><path d="M6.5 15h.01M17.5 15h.01"/></svg>',
+    'spark': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg>',
+    'refresh': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.3"/><path d="M21 4v5h-5"/></svg>',
 }
 
 
@@ -359,9 +366,13 @@ def nav(active=""):
     return f"""<header class="site-header" data-header>
   <div class="topbar">
     <div class="container topbar__inner">
-      <span class="topbar__item">{icon('location','ic ic--sm')} {esc(SITE['address']['line2'])}, {esc(SITE['address']['city'])}</span>
+      <span class="topbar__item topbar__loc">{icon('location','ic ic--sm')} {esc(SITE['address']['line2'])}, {esc(SITE['address']['city'])}</span>
+      <span class="status" data-hours-status role="status" aria-live="polite">
+        <span class="status__dot"></span>
+        <span class="status__text">Sat–Thu 8AM–9PM &middot; closed Fri</span>
+      </span>
       <span class="topbar__spacer"></span>
-      <span class="topbar__item">{icon('clock','ic ic--sm')} Sat–Thu 9AM–9PM</span>
+      <a class="topbar__item topbar__link topbar__wa" href="{wa_link(WA_GENERIC)}" target="_blank" rel="noopener">{icon('whatsapp','ic ic--sm')} WhatsApp</a>
       <a class="topbar__item topbar__link" href="{tel_link()}">{icon('phone','ic ic--sm')} {esc(SITE['phone_display'])}</a>
     </div>
   </div>
@@ -517,6 +528,37 @@ def footer():
 # ---------------------------------------------------------------------------
 # WHATSAPP ENQUIRY ASSISTANT (floating button + drawer) — on every page
 # ---------------------------------------------------------------------------
+def parts_catalog_json():
+    import json as _json
+    cat = [{"cat": c["name"], "icon": c["icon"], "items": c["items"]} for c in CATEGORIES]
+    return _json.dumps(cat, ensure_ascii=False)
+
+
+def parts_builder():
+    cat_opts = "".join(f'<option value="{esc(c["name"])}">{esc(c["name"])}</option>' for c in CATEGORIES)
+    return f"""<div class="pb" data-parts-builder>
+      <span class="field__label">Parts you need <b>*</b></span>
+      <div class="pb__pickrow">
+        <div class="pb__field">
+          <select class="pb__select" data-pb-cat aria-label="Part category">
+            <option value="" disabled selected>Choose a category</option>{cat_opts}
+            <option value="__other">Something else / not sure</option>
+          </select>
+        </div>
+        <div class="pb__field">
+          <select class="pb__select" data-pb-part aria-label="Select part" disabled>
+            <option value="" disabled selected>Select a category first</option>
+          </select>
+        </div>
+        <button type="button" class="pb__add" data-pb-add aria-label="Add part">{icon('plus','ic ic--sm')}<span>Add</span></button>
+      </div>
+      <input type="text" class="pb__other" data-pb-other placeholder="Type the exact part or describe the fault" hidden>
+      <ul class="pb__list" data-pb-list aria-live="polite"></ul>
+      <p class="pb__empty" data-pb-empty>No parts added yet — pick a category and part above, or type your own.</p>
+      <input type="hidden" name="parts" data-pb-hidden>
+    </div>"""
+
+
 def whatsapp_widget():
     make_opts = "".join(f'<option value="{esc(b["name"])}">{esc(b["name"])}</option>' for b in BRANDS)
     return f"""<button class="wa-fab" data-enquiry-open aria-label="Request a part on WhatsApp">
@@ -533,7 +575,7 @@ def whatsapp_widget():
       </div>
       <button class="enquiry__close" data-enquiry-close aria-label="Close">{icon('close','ic')}</button>
     </header>
-    <p class="enquiry__intro">Tell us your vehicle and the part you need. We'll open WhatsApp with your message ready to send — then we confirm the exact part and quote you.</p>
+    <p class="enquiry__intro">Add one or more parts to your list, tell us your vehicle, and we'll open WhatsApp with everything ready to send. We confirm the exact parts and quote you.</p>
     <form class="enquiry__form" data-enquiry-form>
       <label class="field"><span>Your name</span><input type="text" name="name" placeholder="e.g. Ahmed" autocomplete="name"></label>
       <div class="field-row">
@@ -550,11 +592,12 @@ def whatsapp_widget():
         <label class="field"><span>Year</span><input type="text" name="year" inputmode="numeric" placeholder="e.g. 2019"></label>
         <label class="field"><span>VIN / chassis no.</span><input type="text" name="vin" placeholder="Helps us match exactly"></label>
       </div>
-      <label class="field"><span>Part(s) you need <b>*</b></span><textarea name="part" rows="2" required placeholder="e.g. front air struts, or describe the fault"></textarea></label>
+      {parts_builder()}
       <label class="field"><span>Notes (optional)</span><textarea name="notes" rows="2" placeholder="Anything else that helps"></textarea></label>
-      <button type="submit" class="btn btn--wa btn--block btn--lg">{icon('whatsapp','ic ic--sm')} Send on WhatsApp</button>
+      <button type="submit" class="btn btn--wa btn--block btn--lg">{icon('whatsapp','ic ic--sm')} Send my list on WhatsApp</button>
       <p class="enquiry__fine">No account needed. Opens WhatsApp to <b>{esc(SITE['phone_display'])}</b>.</p>
     </form>
+    <script type="application/json" data-parts-catalog>{parts_catalog_json()}</script>
   </aside>
 </div>
 """
@@ -617,11 +660,12 @@ def brands_grid(limit=None, ids=None):
 def category_card(c, brand=None):
     href = f'/brands/{brand["slug"]}/{c["slug"]}/' if brand else f'/parts/{c["slug"]}/'
     name = f'{brand["name"]} {c["name"]}' if brand else c["name"]
+    img = media("/assets/images/categories/" + c["slug"] + ".jpg", name, "16x9", c["name"], c["icon"], "ccard__img")
     return (f'<a class="ccard" href="{href}">'
-            f'<span class="ccard__ic">{icon(c["icon"],"ccard__icon")}</span>'
+            f'<span class="ccard__media">{img}<span class="ccard__badge">{icon(c["icon"],"ccard__badge-ic")}</span></span>'
             f'<span class="ccard__body"><span class="ccard__name">{esc(name)}</span>'
-            f'<span class="ccard__desc">{esc(c["card"])}</span></span>'
-            f'<span class="ccard__go">{icon("arrow","ic ic--sm")}</span></a>')
+            f'<span class="ccard__desc">{esc(c["card"])}</span>'
+            f'<span class="ccard__go">Browse {icon("arrow","ic ic--sm")}</span></span></a>')
 
 
 def categories_grid(brand=None, limit=None):
@@ -747,11 +791,26 @@ def cta_banner(title, text, make=None, label="Request a Part"):
 # ---------------------------------------------------------------------------
 # PAGE: HOME
 # ---------------------------------------------------------------------------
+def trust_strip():
+    items = [
+        ("shield", "Genuine &amp; OEM", "No mystery brands"),
+        ("vin", "VIN-matched", "Fits first time"),
+        ("truck", "UAE-wide delivery", "Often same/next day"),
+        ("headset", "Real parts experts", "We know these cars"),
+    ]
+    cells = "".join(
+        f'<div class="trust"><span class="trust__ic">{icon(i,"trust__icon")}</span>'
+        f'<span class="trust__tx"><b>{t}</b><span>{s}</span></span></div>'
+        for i, t, s in items
+    )
+    return f'<section class="trustband-sec"><div class="container"><div class="trustband">{cells}</div></div></section>'
+
+
 def build_home():
     marquee = "".join(f'<span class="marquee__item">{esc(b["name"])}</span>' for b in BRANDS)
     marquee = marquee + marquee  # duplicate for seamless loop
     hero = f"""<section class="hero">
-      <div class="hero__bg" aria-hidden="true"><span class="hero__grid"></span><span class="hero__glow"></span></div>
+      <div class="hero__bg" aria-hidden="true"><img class="hero__photo" src="/assets/images/site/hero.jpg" alt="" loading="eager" onload="this.classList.add('is-in')" onerror="this.remove()"><span class="hero__grid"></span><span class="hero__glow"></span></div>
       <div class="container hero__inner">
         <div class="hero__content">
           <span class="hero__eyebrow">{icon('shield','ic ic--sm')} 9 premium marques &middot; Sharjah, UAE</span>
@@ -824,7 +883,7 @@ def build_home():
     cta = cta_banner("Can't find your part?",
                      "Send us your vehicle and the part on WhatsApp — genuine or OEM, we'll track it down and quote you.")
 
-    body = hero + brands + cats + why + steps + popular + coverage + blog + faq + cta
+    body = hero + trust_strip() + brands + cats + why + steps + popular + coverage + blog + faq + cta
     title = "Al Jawareh Auto Spare Parts | Genuine & OEM Parts in Sharjah, UAE"
     desc = ("Genuine & OEM spare parts for Range Rover, Land Rover, Jaguar, Mercedes-Benz, BMW, Audi, "
             "Volkswagen, Porsche & GMC. Based in Sharjah, delivering across the UAE. Request a part on WhatsApp.")
@@ -1288,7 +1347,7 @@ def build_about():
           <div class="panel panel--accent">
             <h3 class="panel__t">{icon('location','ic ic--sm')} Find us</h3>
             <p>{esc(SITE['address']['line1'])}, {esc(SITE['address']['line2'])}, {esc(SITE['address']['city'])}, UAE.</p>
-            <p class="panel__note">Sat–Thu 9AM–9PM &middot; Fri 2PM–9PM</p>
+            <p class="panel__note">Daily 8AM–1PM &amp; 4PM–9PM &middot; closed 1–4 PM</p>
             {btn_wa_link('Message us', WA_GENERIC, cls='btn btn--wa btn--block')}
           </div>
         </aside>
@@ -1319,11 +1378,12 @@ def enquiry_form_inline():
         <label class="field"><span>Year</span><input type="text" name="year" inputmode="numeric" placeholder="e.g. 2019"></label>
         <label class="field"><span>VIN / chassis no.</span><input type="text" name="vin" placeholder="Helps us match exactly"></label>
       </div>
-      <label class="field"><span>Part(s) you need <b>*</b></span><textarea name="part" rows="3" required placeholder="e.g. front air struts, or describe the fault"></textarea></label>
+      {parts_builder()}
       <label class="field"><span>Notes (optional)</span><textarea name="notes" rows="2" placeholder="Anything else that helps"></textarea></label>
-      <button type="submit" class="btn btn--wa btn--block btn--lg">{icon('whatsapp','ic ic--sm')} Send on WhatsApp</button>
+      <button type="submit" class="btn btn--wa btn--block btn--lg">{icon('whatsapp','ic ic--sm')} Send my list on WhatsApp</button>
       <p class="enquiry__fine">No account needed. Opens WhatsApp to <b>{esc(SITE['phone_display'])}</b>.</p>
-    </form>"""
+    </form>
+    <script type="application/json" data-parts-catalog>{parts_catalog_json()}</script>"""
 
 
 # ---------------------------------------------------------------------------

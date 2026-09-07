@@ -2,12 +2,7 @@
 """
 Embedded site assets for Al Jawareh Auto Spare Parts.
 
-The whole website builds from a few Python files (build.py, data.py, theme.py),
-so nothing but these needs to live in the repo. build.py writes these into
-dist/assets/ on every build.
-
-Editable: STYLE_CSS (design/CSS), MAIN_JS (menus + WhatsApp logic).
-Do not hand-edit the *_B64 blobs (binary images: logo, favicon, share image).
+Editable: STYLE_CSS (design), MAIN_JS (menus, live hours, parts builder, WhatsApp).
 """
 
 STYLE_CSS = r"""/* ==========================================================================
@@ -698,6 +693,83 @@ p{margin:0}
   .cta__actions,.hero__actions,.pagehead__actions,.brandhead__actions,.notfound__actions{width:100%}
   .cta__actions .btn,.hero__actions .btn,.brandhead__actions .btn{flex:1 1 auto}
 }
+
+/* ==========================================================================
+   v2 UPGRADES — status bar, parts builder, image cards, trust strip
+   ========================================================================== */
+
+/* --- top bar live status --- */
+.status{display:inline-flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--on-dark)}
+.status__dot{width:8px;height:8px;border-radius:50%;background:var(--silver-2);position:relative;flex:none}
+.status__dot::after{content:"";position:absolute;inset:-4px;border-radius:50%;background:inherit;opacity:.35;animation:pulseDot 2.2s ease-out infinite}
+.status[data-state="open"] .status__dot{background:var(--wa)}
+.status[data-state="break"] .status__dot{background:var(--amber)}
+.status[data-state="closed"] .status__dot{background:#e5533d}
+.status[data-state="closed"] .status__dot::after{animation:none}
+.status__text b{color:#fff;font-weight:700}
+@keyframes pulseDot{0%{transform:scale(1);opacity:.4}70%{transform:scale(2.6);opacity:0}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.status__dot::after{animation:none}}
+.topbar__wa svg{color:var(--wa)}
+@media (max-width:760px){ .topbar__loc{display:none} }
+@media (max-width:560px){ .topbar__wa{display:none} .topbar{font-size:.76rem} .status{font-size:.76rem} }
+
+/* --- hero background photo (optional; removes itself if absent) --- */
+.hero__photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;
+  transition:opacity 1.2s ease;filter:grayscale(.2) contrast(1.04)}
+.hero__photo.is-in{opacity:.16}
+
+/* --- trust strip under hero --- */
+.trustband-sec{background:var(--surface);padding:clamp(26px,4vw,40px) 0;border-bottom:1px solid var(--line)}
+.trustband{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh)}
+.trust{display:flex;align-items:center;gap:.85rem;background:var(--surface);padding:1.2rem 1.3rem}
+.trust__ic{width:46px;height:46px;border-radius:13px;background:var(--amber-soft);color:var(--amber-700);display:grid;place-items:center;flex:none}
+.trust__ic svg{width:24px;height:24px}
+.trust__tx{display:flex;flex-direction:column;line-height:1.25}
+.trust__tx b{font-family:var(--f-head);color:var(--ink-2);font-size:.98rem}
+.trust__tx span{font-size:.8rem;color:var(--muted)}
+@media (max-width:860px){.trustband{grid-template-columns:1fr 1fr}}
+@media (max-width:460px){.trustband{grid-template-columns:1fr}}
+
+/* --- image-led category cards (override earlier row layout) --- */
+.ccard{display:flex;flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden}
+.ccard__media{position:relative;display:block}
+.ccard__media .media{border-radius:0}
+.ccard__media .media img{transition:transform .55s ease,opacity .6s ease}
+.ccard:hover .ccard__media .media img{transform:scale(1.06)}
+.ccard__badge{position:absolute;left:16px;bottom:-22px;width:52px;height:52px;border-radius:14px;
+  background:var(--graphite);color:var(--amber);display:grid;place-items:center;border:2px solid var(--surface);box-shadow:var(--sh);z-index:2}
+.ccard__badge-ic svg{width:26px;height:26px}
+.ccard__body{padding:1.9rem 1.3rem 1.4rem;display:flex;flex-direction:column;gap:.3rem}
+.ccard__go{margin-top:.7rem}
+
+/* --- multi-part builder --- */
+.field__label{font-family:var(--f-head);font-weight:600;font-size:.82rem;color:var(--ink-2)}
+.field__label b{color:var(--amber-700)}
+.pb{display:flex;flex-direction:column;gap:.6rem}
+.pb__pickrow{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.pb__field{min-width:0}
+.pb__select{width:100%;border:1px solid var(--line-2);border-radius:var(--r-sm);padding:.68rem .8rem;
+  font:inherit;font-size:.9rem;background:var(--surface);color:var(--ink-2);transition:border-color .18s,box-shadow .18s}
+.pb__select:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px var(--amber-soft)}
+.pb__add{grid-column:1 / -1;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  padding:.68rem 1rem;border-radius:var(--r-sm);background:var(--graphite);color:#fff;
+  font-family:var(--f-head);font-weight:700;font-size:.86rem}
+.pb__add:hover{background:var(--charcoal)}
+.pb__add svg{color:var(--amber)}
+.pb__other{border:1px solid var(--line-2);border-radius:var(--r-sm);padding:.68rem .8rem;font:inherit;font-size:.9rem;color:var(--ink-2)}
+.pb__other:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px var(--amber-soft)}
+.pb__list{display:flex;flex-wrap:wrap;gap:.45rem;margin:.15rem 0 0}
+.pb__chip{display:inline-flex;align-items:center;gap:.45rem;background:var(--amber-soft);
+  border:1px solid rgba(245,166,35,.35);color:var(--ink-2);border-radius:var(--pill);
+  padding:.35rem .35rem .35rem .85rem;font-size:.84rem;font-weight:600}
+.pb__chip-x{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(0,0,0,.06);color:var(--muted);font-size:1.05rem;line-height:1}
+.pb__chip-x:hover{background:var(--amber);color:#1a1305}
+.pb__empty{font-size:.82rem;color:var(--muted);margin:0}
+.pb--error .pb__pickrow{outline:2px solid rgba(229,83,61,.55);outline-offset:5px;border-radius:var(--r-sm)}
+.pb--error .pb__empty{color:#c0392b;font-weight:600}
+@media (max-width:380px){.pb__pickrow{grid-template-columns:1fr}}
 """
 
 MAIN_JS = r"""/* ==========================================================================
@@ -730,24 +802,17 @@ MAIN_JS = r"""/* ===============================================================
   var mobile = $("[data-mobile]");
   function openMenu() {
     if (!mobile) return;
-    mobile.hidden = false;
-    lockScroll(true);
-    var b = $(".nav__burger");
-    if (b) b.setAttribute("aria-expanded", "true");
+    mobile.hidden = false; lockScroll(true);
+    var b = $(".nav__burger"); if (b) b.setAttribute("aria-expanded", "true");
   }
   function closeMenu() {
     if (!mobile || mobile.hidden) return;
-    mobile.hidden = true;
-    lockScroll(false);
-    var b = $(".nav__burger");
-    if (b) b.setAttribute("aria-expanded", "false");
+    mobile.hidden = true; lockScroll(false);
+    var b = $(".nav__burger"); if (b) b.setAttribute("aria-expanded", "false");
   }
   $$("[data-menu-open]").forEach(function (el) { el.addEventListener("click", openMenu); });
   $$("[data-menu-close]").forEach(function (el) { el.addEventListener("click", closeMenu); });
-  // close the mobile menu when a real link inside it is tapped
-  if (mobile) {
-    $$("a", mobile).forEach(function (a) { a.addEventListener("click", closeMenu); });
-  }
+  if (mobile) { $$("a", mobile).forEach(function (a) { a.addEventListener("click", closeMenu); }); }
 
   /* ---------- desktop dropdown / mega (touch + keyboard) ---------- */
   $$(".nav__group").forEach(function (group) {
@@ -757,7 +822,6 @@ MAIN_JS = r"""/* ===============================================================
       e.preventDefault();
       var open = group.classList.toggle("is-open");
       toggle.setAttribute("aria-expanded", open ? "true" : "false");
-      // close siblings
       $$(".nav__group").forEach(function (g) {
         if (g !== group) { g.classList.remove("is-open"); var t = $(".nav__toggle", g); if (t) t.setAttribute("aria-expanded", "false"); }
       });
@@ -776,10 +840,8 @@ MAIN_JS = r"""/* ===============================================================
   var lastFocused = null;
   function openEnquiry(make) {
     if (!enquiry) return;
-    enquiry.hidden = false;
-    lockScroll(true);
+    enquiry.hidden = false; lockScroll(true);
     lastFocused = document.activeElement;
-    // preselect make if provided
     if (make) {
       var sel = $('select[name="make"]', enquiry);
       if (sel) {
@@ -788,27 +850,127 @@ MAIN_JS = r"""/* ===============================================================
         sel.value = found ? make : "Other";
       }
     }
-    var first = $("input, select, textarea", enquiry);
+    var first = $("select, input, textarea", enquiry);
     if (first) setTimeout(function () { first.focus(); }, 60);
   }
   function closeEnquiry() {
     if (!enquiry || enquiry.hidden) return;
-    enquiry.hidden = true;
-    lockScroll(false);
+    enquiry.hidden = true; lockScroll(false);
     if (lastFocused && lastFocused.focus) lastFocused.focus();
   }
   $$("[data-enquiry-open]").forEach(function (el) {
-    el.addEventListener("click", function () {
-      closeMenu();
-      openEnquiry(el.getAttribute("data-make") || "");
-    });
+    el.addEventListener("click", function () { closeMenu(); openEnquiry(el.getAttribute("data-make") || ""); });
   });
   $$("[data-enquiry-close]").forEach(function (el) { el.addEventListener("click", closeEnquiry); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { closeEnquiry(); closeMenu(); } });
 
-  /* ---------- esc closes overlays ---------- */
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") { closeEnquiry(); closeMenu(); }
-  });
+  /* ---------- live opening-hours status (Asia/Dubai) ---------- */
+  function initHoursStatus() {
+    var els = $$("[data-hours-status]");
+    if (!els.length) return;
+    var OPEN = [[8 * 60, 13 * 60], [16 * 60, 21 * 60]]; // open windows, minutes from midnight (Sat–Thu)
+    function nowInfo() {
+      try {
+        var p = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Dubai", weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false }).formatToParts(new Date());
+        var wd = "", h = 0, m = 0;
+        p.forEach(function (x) { if (x.type === "weekday") wd = x.value; if (x.type === "hour") h = +x.value; if (x.type === "minute") m = +x.value; });
+        if (h === 24) h = 0;
+        return { wd: wd, mins: h * 60 + m };
+      } catch (e) {
+        var d = new Date(), names = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        return { wd: names[d.getDay()], mins: d.getHours() * 60 + d.getMinutes() };
+      }
+    }
+    function fmt(mins) {
+      var h = Math.floor(mins / 60), m = mins % 60, ap = h >= 12 ? "PM" : "AM", hh = h % 12; if (hh === 0) hh = 12;
+      return hh + (m ? ":" + (m < 10 ? "0" : "") + m : "") + " " + ap;
+    }
+    function compute() {
+      var info = nowInfo(), t = info.mins, wd = info.wd, i;
+      // Friday: closed all day
+      if (wd === "Fri") return { state: "closed", label: "Closed Fridays", sub: "opens Saturday 8:00 AM" };
+      // open windows (Sat–Thu)
+      for (i = 0; i < OPEN.length; i++) {
+        if (t >= OPEN[i][0] && t < OPEN[i][1]) return { state: "open", label: "Open now", sub: "until " + fmt(OPEN[i][1]) };
+      }
+      // afternoon break
+      if (t >= OPEN[0][1] && t < OPEN[1][0]) return { state: "break", label: "On break", sub: "reopens " + fmt(OPEN[1][0]) };
+      // before opening today
+      if (t < OPEN[0][0]) return { state: "closed", label: "Closed", sub: "opens " + fmt(OPEN[0][0]) };
+      // after evening close: Thursday night -> next is Saturday (Friday closed)
+      if (wd === "Thu") return { state: "closed", label: "Closed", sub: "opens Saturday 8:00 AM" };
+      return { state: "closed", label: "Closed", sub: "opens 8:00 AM" };
+    }
+    function render() {
+      var s = compute();
+      els.forEach(function (el) {
+        el.setAttribute("data-state", s.state);
+        var txt = $(".status__text", el);
+        if (txt) { txt.innerHTML = "<b>" + s.label + "</b> \u00b7 " + s.sub; }
+      });
+    }
+    render();
+    setInterval(render, 60000);
+  }
+
+  /* ---------- multi-part builder (cascading dropdowns -> removable list) ---------- */
+  function initPartsBuilders() {
+    var catalog = [];
+    var src = $("[data-parts-catalog]");
+    if (src) { try { catalog = JSON.parse(src.textContent); } catch (e) { catalog = []; } }
+    var byCat = {};
+    catalog.forEach(function (c) { byCat[c.cat] = c.items || []; });
+
+    $$("[data-parts-builder]").forEach(function (pb) {
+      var catSel = $("[data-pb-cat]", pb), partSel = $("[data-pb-part]", pb),
+          other = $("[data-pb-other]", pb), addBtn = $("[data-pb-add]", pb),
+          list = $("[data-pb-list]", pb), empty = $("[data-pb-empty]", pb),
+          hidden = $("[data-pb-hidden]", pb);
+      var selected = [];
+
+      function sync() { hidden.value = selected.join("\n"); empty.style.display = selected.length ? "none" : ""; }
+      function renderList() {
+        list.innerHTML = "";
+        selected.forEach(function (p, idx) {
+          var li = document.createElement("li"); li.className = "pb__chip";
+          var span = document.createElement("span"); span.className = "pb__chip-t"; span.textContent = p; li.appendChild(span);
+          var x = document.createElement("button"); x.type = "button"; x.className = "pb__chip-x"; x.setAttribute("aria-label", "Remove " + p); x.innerHTML = "&times;";
+          x.addEventListener("click", function () { selected.splice(idx, 1); renderList(); });
+          li.appendChild(x); list.appendChild(li);
+        });
+        sync();
+      }
+      function fillParts(catName) {
+        partSel.innerHTML = "";
+        var ph = document.createElement("option"); ph.value = ""; ph.disabled = true; ph.selected = true; ph.textContent = "Select a part"; partSel.appendChild(ph);
+        (byCat[catName] || []).forEach(function (it) { var o = document.createElement("option"); o.value = it; o.textContent = it; partSel.appendChild(o); });
+        var t = document.createElement("option"); t.value = "__type"; t.textContent = "Other in this category…"; partSel.appendChild(t);
+        partSel.disabled = false;
+      }
+      catSel.addEventListener("change", function () {
+        pb.classList.remove("pb--error");
+        if (catSel.value === "__other") { partSel.disabled = true; partSel.innerHTML = '<option>—</option>'; other.hidden = false; other.focus(); }
+        else { other.hidden = true; other.value = ""; fillParts(catSel.value); }
+      });
+      partSel.addEventListener("change", function () {
+        if (partSel.value === "__type") { other.hidden = false; other.focus(); } else { other.hidden = true; }
+      });
+      function add() {
+        var val = "";
+        if (catSel.value === "__other" || partSel.value === "__type") { val = (other.value || "").trim(); }
+        else { val = partSel.value || ""; }
+        if (!val) { other.hidden = false; other.focus(); return; }
+        if (selected.indexOf(val) === -1) selected.push(val);
+        renderList();
+        other.value = ""; other.hidden = true;
+        if (catSel.value !== "__other" && partSel.options.length) partSel.selectedIndex = 0;
+        pb.classList.remove("pb--error");
+      }
+      addBtn.addEventListener("click", add);
+      other.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); add(); } });
+      renderList();
+    });
+  }
 
   /* ---------- WhatsApp message builder ---------- */
   function val(form, name) {
@@ -816,56 +978,68 @@ MAIN_JS = r"""/* ===============================================================
     return f && f.value ? f.value.trim() : "";
   }
   function buildMessage(form) {
-    var name = val(form, "name");
-    var make = val(form, "make");
-    var model = val(form, "model");
-    var year = val(form, "year");
-    var vin = val(form, "vin");
-    var part = val(form, "part");
-    var notes = val(form, "notes");
-
+    var name = val(form, "name"), make = val(form, "make"), model = val(form, "model"),
+        year = val(form, "year"), vin = val(form, "vin"), notes = val(form, "notes");
+    var parts = [];
+    var pf = form.querySelector('[name="parts"]');
+    if (pf && pf.value.trim()) { parts = pf.value.split("\n").filter(Boolean); }
+    var single = val(form, "part"); if (single) parts.push(single);
     var vehicle = [make, model, year].filter(Boolean).join(" ");
-    var lines = ["Hello Al Jawareh Auto Spare Parts,", "", "I'd like to enquire about a spare part."];
+    var lines = ["Hello Al Jawareh Auto Spare Parts,", "", "I'd like to enquire about spare parts."];
     if (name) lines.push("Name: " + name);
     if (vehicle) lines.push("Vehicle: " + vehicle);
     if (vin) lines.push("VIN / Chassis: " + vin);
-    if (part) lines.push("Part needed: " + part);
+    if (parts.length === 1) { lines.push("Part needed: " + parts[0]); }
+    else if (parts.length > 1) { lines.push("Parts needed:"); parts.forEach(function (p) { lines.push("\u2022 " + p); }); }
     if (notes) lines.push("Notes: " + notes);
     return lines.join("\n");
   }
   function submitToWhatsApp(form) {
-    if (form.reportValidity && !form.reportValidity()) return;
+    var pb = form.querySelector("[data-parts-builder]");
+    if (pb) {
+      var makeSel = form.querySelector('[name="make"]');
+      if (makeSel && !makeSel.value) { if (form.reportValidity) form.reportValidity(); return; }
+      var hidden = form.querySelector('[name="parts"]');
+      if (!(hidden && hidden.value.trim())) {
+        pb.classList.add("pb--error");
+        var em = pb.querySelector("[data-pb-empty]");
+        if (em) { em.textContent = "Add at least one part to send your list."; em.style.display = ""; }
+        pb.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+    } else if (form.reportValidity && !form.reportValidity()) { return; }
     var text = buildMessage(form);
-    var url = "https://wa.me/" + WA_NUMBER + "?text=" + encodeURIComponent(text);
-    window.open(url, "_blank", "noopener");
+    window.open("https://wa.me/" + WA_NUMBER + "?text=" + encodeURIComponent(text), "_blank", "noopener");
     closeEnquiry();
   }
   $$("[data-enquiry-form], [data-quick-form]").forEach(function (form) {
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      submitToWhatsApp(form);
-    });
+    form.addEventListener("submit", function (e) { e.preventDefault(); submitToWhatsApp(form); });
   });
 
-  /* ---------- back to top ---------- */
-  $$("[data-scroll-top]").forEach(function (el) {
-    el.addEventListener("click", function () {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  });
-
-  /* ---------- footer year ---------- */
+  /* ---------- back to top, year, smooth anchors ---------- */
+  $$("[data-scroll-top]").forEach(function (el) { el.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); }); });
   $$("[data-year]").forEach(function (el) { el.textContent = String(new Date().getFullYear()); });
-
-  /* ---------- smooth in-page anchors ---------- */
   $$('a[href^="#"]').forEach(function (a) {
     a.addEventListener("click", function (e) {
-      var id = a.getAttribute("href");
-      if (id.length < 2) return;
+      var id = a.getAttribute("href"); if (id.length < 2) return;
       var target = document.getElementById(id.slice(1));
       if (target) { e.preventDefault(); target.scrollIntoView({ behavior: "smooth", block: "start" }); }
     });
   });
+
+  /* ---------- reveal-on-scroll (subtle) ---------- */
+  function initReveal() {
+    var els = $$("[data-reveal]");
+    if (!els.length || !("IntersectionObserver" in window)) { els.forEach(function (el) { el.classList.add("is-in"); }); return; }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add("is-in"); io.unobserve(en.target); } });
+    }, { threshold: 0.12 });
+    els.forEach(function (el) { io.observe(el); });
+  }
+
+  initHoursStatus();
+  initPartsBuilders();
+  initReveal();
 })();
 """
 
@@ -876,7 +1050,6 @@ FAVICON_SVG = r"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" ro
 </svg>
 """
 
-# --- binary assets (base64) -------------------------------------------------
 FAVICON_ICO_B64 = (
     "AAABAAMAEBAAAAAAIABpAgAANgAAACAgAAAAACAASQUAAJ8CAAAwMAAAAAAgAF8IAADoBwAAiVBORw0KGgoAAAANSUhEUgAAABAA"
     "AAAQCAYAAAAf8/9hAAACMElEQVR4nKWTP0jVURTHP+fe+0wDdbGMDB/PHlEI/fGJoUNDCmLRIFGBS20REU4NjTYF1pDQ0NjgnFAE"

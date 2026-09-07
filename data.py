@@ -33,16 +33,19 @@ SITE = {
     # Replace with the exact pin from Google Maps for perfect accuracy.
     "geo": {"lat": "25.3126", "lng": "55.4370"},
     "maps_query": "Al Jawareh Auto Spare Parts, Industrial Area 12, Sharjah",
-    # Opening hours — confirm & edit as needed.
+    # Opening hours — split shift with an afternoon break, Sat–Thu. Closed Fridays.
     "hours_display": [
-        ("Saturday – Thursday", "9:00 AM – 9:00 PM"),
-        ("Friday", "2:00 PM – 9:00 PM"),
+        ("Sat – Thu morning", "8:00 AM – 1:00 PM"),
+        ("Afternoon break", "1:00 PM – 4:00 PM"),
+        ("Sat – Thu evening", "4:00 PM – 9:00 PM"),
+        ("Friday", "Closed"),
     ],
-    # Structured hours for schema.org (24h, ISO weekday names).
+    # Structured hours for schema.org (24h, ISO weekday names). Two windows, Sat–Thu.
     "hours_schema": [
         {"days": ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"],
-         "opens": "09:00", "closes": "21:00"},
-        {"days": ["Friday"], "opens": "14:00", "closes": "21:00"},
+         "opens": "08:00", "closes": "13:00"},
+        {"days": ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"],
+         "opens": "16:00", "closes": "21:00"},
     ],
     "founded": "2016",
     "price_range": "$$",
