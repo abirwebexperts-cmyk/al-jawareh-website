@@ -1,0 +1,15 @@
+---
+deployment:
+  tasks:
+    # Al Jawareh Auto Spare Parts — auto-deploy.
+    # cPanel runs these on each deploy (the cron triggers it after every GitHub push).
+    #
+    # DEPLOYPATH = where the live site lives. Correct for the primary domain.
+    - export DEPLOYPATH=/home/alraszcu/public_html/
+    #
+    # Build the site from source (data.py + build.py + theme.py) into dist/.
+    # If `which python3` shows a different path on your server, change it here.
+    - /usr/bin/python3 build.py
+    #
+    # Publish: copy the built site (including the hidden .htaccess) into public_html.
+    - /bin/cp -R dist/. $DEPLOYPATH

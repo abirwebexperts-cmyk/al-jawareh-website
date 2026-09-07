@@ -20,6 +20,7 @@ from datetime import date
 from urllib.parse import quote
 
 from data import SITE, BRANDS, CATEGORIES, LOCATIONS, FAQS, POSTS
+import theme
 
 DIST = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dist")
 ASSETS_SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
@@ -718,8 +719,9 @@ def coverage_block():
 
 
 def blog_card(p):
+    _img = media("/assets/images/blog/" + p["slug"] + ".jpg", p["title"], "16x9", p["category"], "quote", "pcard__media")
     return (f'<article class="pcard"><a class="pcard__link" href="/blog/{p["slug"]}/">'
-            f'{media(f"/assets/images/blog/{p['slug']}.jpg", p["title"], "16x9", p["category"], "quote", "pcard__media")}'
+            f'{_img}'
             f'<span class="pcard__body"><span class="pcard__cat">{esc(p["category"])}</span>'
             f'<span class="pcard__title">{esc(p["title"])}</span>'
             f'<span class="pcard__excerpt">{esc(p["excerpt"])}</span>'
@@ -1551,11 +1553,42 @@ def build_404():
 # ASSETS, SEO FILES, SITE IMAGES
 # ---------------------------------------------------------------------------
 def copy_assets():
-    dst = os.path.join(DIST, "assets")
-    if os.path.isdir(ASSETS_SRC):
-        shutil.copytree(ASSETS_SRC, dst)
-    else:
-        os.makedirs(dst, exist_ok=True)
+    """Write CSS/JS/images from the embedded theme module, so the repo needs
+    only the .py files. Any real photos placed under ./assets/images are copied
+    on top (optional)."""
+    import base64
+    a = os.path.join(DIST, "assets")
+    css_dir = os.path.join(a, "css")
+    js_dir = os.path.join(a, "js")
+    img_dir = os.path.join(a, "images")
+    site_dir = os.path.join(img_dir, "site")
+    for d in [css_dir, js_dir, site_dir,
+              os.path.join(img_dir, "brands"),
+              os.path.join(img_dir, "categories"),
+              os.path.join(img_dir, "blog")]:
+        os.makedirs(d, exist_ok=True)
+    with open(os.path.join(css_dir, "style.css"), "w", encoding="utf-8") as f:
+        f.write(theme.STYLE_CSS)
+    with open(os.path.join(js_dir, "main.js"), "w", encoding="utf-8") as f:
+        f.write(theme.MAIN_JS)
+    with open(os.path.join(site_dir, "favicon.svg"), "w", encoding="utf-8") as f:
+        f.write(theme.FAVICON_SVG)
+    for name, b64 in theme.SITE_IMAGES_B64.items():
+        with open(os.path.join(site_dir, name), "wb") as f:
+            f.write(base64.b64decode(b64))
+    with open(os.path.join(DIST, "favicon.ico"), "wb") as f:
+        f.write(base64.b64decode(theme.FAVICON_ICO_B64))
+    # optional: copy real photos the user has added under ./assets/images/
+    local_img = os.path.join(ASSETS_SRC, "images")
+    if os.path.isdir(local_img):
+        for root, _dirs, files in os.walk(local_img):
+            rel = os.path.relpath(root, local_img)
+            dest = img_dir if rel == "." else os.path.join(img_dir, rel)
+            os.makedirs(dest, exist_ok=True)
+            for fn in files:
+                if fn == "favicon.svg":
+                    continue
+                shutil.copy2(os.path.join(root, fn), os.path.join(dest, fn))
 
 
 def build_sitemap():
@@ -1764,7 +1797,6 @@ def main():
     os.makedirs(DIST)
 
     copy_assets()
-    generate_site_images()
 
     build_home()
     build_brands_index()
