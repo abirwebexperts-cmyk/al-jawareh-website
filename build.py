@@ -368,8 +368,7 @@ def nav(active=""):
   <div class="nav">
     <div class="container nav__inner">
       <a class="brand" href="/" aria-label="{esc(SITE['name'])} home">
-        <span class="brand__mark">AJ</span>
-        <span class="brand__text"><span class="brand__name">AL JAWAREH</span><span class="brand__tag">AUTO SPARE PARTS</span></span>
+        <img class="brand__logo" src="/assets/images/site/logo-full.png" alt="{esc(SITE['name'])}" width="495" height="160">
       </a>
       <nav class="nav__links" aria-label="Primary navigation">
         <a class="nav__link{act('home')}" href="/">Home</a>
@@ -406,7 +405,7 @@ def nav(active=""):
   <div class="mobile" data-mobile hidden>
     <div class="mobile__panel">
       <div class="mobile__head">
-        <span class="brand__name">AL JAWAREH</span>
+        <img class="brand__logo" src="/assets/images/site/logo-full.png" alt="{esc(SITE['name'])}" width="495" height="160">
         <button class="mobile__close" data-menu-close aria-label="Close menu">{icon('close','ic')}</button>
       </div>
       <div class="mobile__body">
@@ -468,8 +467,7 @@ def footer():
   <div class="container footer__grid">
     <div class="footer__col footer__brand">
       <a class="brand brand--footer" href="/">
-        <span class="brand__mark">AJ</span>
-        <span class="brand__text"><span class="brand__name">AL JAWAREH</span><span class="brand__tag">AUTO SPARE PARTS</span></span>
+        <img class="brand__logo" src="/assets/images/site/logo-full.png" alt="{esc(SITE['name'])}" width="495" height="160">
       </a>
       <p class="footer__blurb">Genuine &amp; OEM spare parts for premium European and American vehicles — supplied across the UAE from our shop in Sharjah.</p>
       <div class="footer__contact">
