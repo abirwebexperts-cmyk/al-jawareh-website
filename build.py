@@ -1,0 +1,1811 @@
+# -*- coding: utf-8 -*-
+"""
+build.py — Static site generator for Al Jawareh Auto Spare Parts.
+
+Reads content from data.py and writes a complete static website into dist/.
+Pure HTML + modern CSS + vanilla JS. No frameworks, no runtime dependencies.
+
+Usage:
+    python3 build.py
+Then commit the whole repo (including dist/) and let cPanel deploy dist/ to
+public_html via .cpanel.yml.  See README.md.
+"""
+
+import os
+import re
+import json
+import shutil
+import html as _html
+from datetime import date
+from urllib.parse import quote
+
+from data import SITE, BRANDS, CATEGORIES, LOCATIONS, FAQS, POSTS
+
+DIST = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dist")
+ASSETS_SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
+TODAY = date.today().isoformat()
+
+# Collected for sitemap.xml as we write pages.
+PAGES = []
+
+# Quick lookups
+BRAND_BY_SLUG = {b["slug"]: b for b in BRANDS}
+CAT_BY_SLUG = {c["slug"]: c for c in CATEGORIES}
+POST_BY_SLUG = {p["slug"]: p for p in POSTS}
+
+
+# ---------------------------------------------------------------------------
+# SVG ICONS (inline, currentColor, no manufacturer trademarks)
+# ---------------------------------------------------------------------------
+ICONS = {
+    # part categories
+    "engine": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V7a1 1 0 0 1 1-1h3l2-2h2v3h3l2 2v2h2v4h-2v2l-2 2h-6l-2-2H6v2H4v-4H2v-4h2V9z"/><path d="M9 9v6"/></svg>',
+    "suspension": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3M16 3v3"/><path d="M8 6c0 2 8 2 8 4s-8 2-8 4 8 2 8 4"/><path d="M6 21h4M14 21h4"/><path d="M8 18v3M16 18v3"/></svg>',
+    "brakes": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3"/><path d="M18 6l-2 2M6 6l2 2"/></svg>',
+    "filter": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg>',
+    "electrical": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>',
+    "body": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l2-5a2 2 0 0 1 1.9-1.3h10.2A2 2 0 0 1 19 8l2 5"/><path d="M2 13h20v4a1 1 0 0 1-1 1h-1a2 2 0 0 1-4 0H8a2 2 0 0 1-4 0H3a1 1 0 0 1-1-1z"/><path d="M6.5 16h.01M17.5 16h.01"/></svg>',
+    "transmission": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="7" r="2"/><path d="M7 9v6M7 7h10M17 9v0"/><path d="M17 9a4 4 0 0 1-4 4H9"/></svg>',
+    "cooling": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/><path d="M12 2l3 3M12 2 9 5M12 22l3-3M12 22l-3-3M2 12l3-3M2 12l3 3M22 12l-3-3M22 12l-3 3"/><path d="m5 5 14 14M19 5 5 19"/></svg>',
+    "steering": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.4"/><path d="M12 14.4V21M10 12H3.2M14 12h6.8"/></svg>',
+    # UI
+    "whatsapp": '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.49s1.07 2.89 1.22 3.09c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.09 1.77-.72 2.02-1.42.25-.7.25-1.29.17-1.42-.07-.13-.27-.2-.57-.35zM12.05 21.7h-.01a9.6 9.6 0 0 1-4.9-1.34l-.35-.21-3.64.95.97-3.55-.23-.36a9.56 9.56 0 0 1-1.47-5.1c0-5.29 4.31-9.6 9.61-9.6 2.57 0 4.98 1 6.79 2.82a9.54 9.54 0 0 1 2.81 6.79c0 5.29-4.31 9.6-9.6 9.6zm8.17-17.77A11.5 11.5 0 0 0 12.05.55C5.7.55.55 5.7.55 12.04c0 2.02.53 4 1.54 5.74L.5 23.5l5.86-1.54a11.47 11.47 0 0 0 5.69 1.45h.01c6.35 0 11.5-5.16 11.5-11.5a11.44 11.44 0 0 0-3.34-8.08z"/></svg>',
+    "phone": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L7.9 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg>',
+    "location": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+    "clock": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    "mail": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+    "check": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+    "arrow": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    "chevron": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+    "menu": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>',
+    "close": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+    "search": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
+    "shield": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5z"/><path d="m9 12 2 2 4-4"/></svg>',
+    "truck": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h11v9H3zM14 9h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/></svg>',
+    "vin": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5v14M7 5v14M11 5v10M11 18v1M15 5v14M19 5v14M21 5v14"/></svg>',
+    "quote": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h10M4 18h7"/><path d="m15 15 3 3 4-5"/></svg>',
+    "chat": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 21l1.8-5.5A8 8 0 1 1 21 12z"/></svg>',
+    "tag": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 13.5 12 22l-9-9V4a1 1 0 0 1 1-1h8.5z"/><circle cx="7.5" cy="7.5" r="1.4"/></svg>',
+    "star": '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 2 3 6.3 6.9.9-5 4.8 1.2 6.9L12 17.8 5.9 20.9 7.1 14l-5-4.8 6.9-.9z"/></svg>',
+    "money": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9v6M18 9v6"/></svg>',
+    "wrench": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5l-6 6 2.4 2.4 6-6a4 4 0 0 0 5-5.4l-2.5 2.5-2-2z"/></svg>',
+    "box": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m21 8-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8"/><path d="m12 13v8"/></svg>',
+    "headset": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13a8 8 0 0 1 16 0"/><rect x="2.5" y="13" width="4" height="6" rx="1.4"/><rect x="17.5" y="13" width="4" height="6" rx="1.4"/><path d="M20 19a4 4 0 0 1-4 3h-2"/></svg>',
+    "external": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>',
+}
+
+
+def icon(name, cls="ic"):
+    svg = ICONS.get(name, "")
+    return f'<span class="{cls}" aria-hidden="true">{svg}</span>'
+
+
+# ---------------------------------------------------------------------------
+# SMALL HELPERS
+# ---------------------------------------------------------------------------
+def esc(s):
+    return _html.escape(str(s), quote=True)
+
+
+def abs_url(path):
+    if not path:
+        return SITE["base_url"] + "/"
+    if str(path).startswith("http"):
+        return path
+    return SITE["base_url"].rstrip("/") + path
+
+
+def wa_link(text):
+    return f'https://wa.me/{SITE["whatsapp"]}?text={quote(text)}'
+
+
+WA_GENERIC = "Hello Al Jawareh Auto Spare Parts, I'd like to enquire about a spare part."
+
+
+def tel_link():
+    return f'tel:{SITE["phone_href"]}'
+
+
+def media(path, alt, ratio="4x3", label=None, icon_name="box", cls=""):
+    """Image with a graceful branded placeholder that stays until the real image loads."""
+    label = label or alt
+    return (
+        f'<figure class="media media--{ratio} ph {cls}" data-ph>'
+        f'<img src="{esc(path)}" alt="{esc(alt)}" loading="lazy" decoding="async" '
+        f'onload="this.closest(\'[data-ph]\').classList.add(\'is-loaded\')" '
+        f'onerror="this.closest(\'[data-ph]\').classList.add(\'is-fallback\')">'
+        f'<span class="ph__fill" aria-hidden="true">{icon(icon_name,"ph__icon")}'
+        f'<span class="ph__label">{esc(label)}</span>'
+        f'<span class="ph__hint">Photo coming soon</span></span>'
+        f'</figure>'
+    )
+
+
+def logo_slot(brand, size="md"):
+    """Brand logo upload slot — shows the marque name as text until a logo file is added.
+    No manufacturer logos are reproduced."""
+    slug = brand["slug"]
+    name = brand["name"]
+    return (
+        f'<span class="logoslot logoslot--{size} ph" data-ph title="{esc(name)}">'
+        f'<img src="/assets/images/brands/{slug}-logo.svg" alt="{esc(name)} logo" loading="lazy" '
+        f'onload="this.closest(\'[data-ph]\').classList.add(\'is-loaded\')" '
+        f'onerror="this.closest(\'[data-ph]\').classList.add(\'is-fallback\')">'
+        f'<span class="logoslot__text" aria-hidden="true">{esc(name)}</span>'
+        f'</span>'
+    )
+
+
+def monogram(name):
+    """Neutral text initials used as a placeholder tile in dense grids (not a logo)."""
+    words = [w for w in re.split(r"[^A-Za-z0-9]+", name) if w]
+    if len(words) >= 2:
+        m = (words[0][0] + words[1][0]).upper()
+    elif words:
+        m = words[0][:2].upper()
+    else:
+        m = "?"
+    return f'<span class="mono" aria-hidden="true">{esc(m)}</span>'
+
+
+def title_of_brand_cat(brand, cat, loc="Sharjah & UAE"):
+    return f'{brand["name"]} {cat["name"]}'
+
+
+# ---------------------------------------------------------------------------
+# JSON-LD SCHEMA BUILDERS
+# ---------------------------------------------------------------------------
+def store_schema():
+    a = SITE["address"]
+    obj = {
+        "@context": "https://schema.org",
+        "@type": "AutoPartsStore",
+        "@id": SITE["base_url"] + "/#store",
+        "name": SITE["name"],
+        "url": SITE["base_url"] + "/",
+        "image": abs_url(SITE["og_image"]),
+        "telephone": SITE["phone_intl"],
+        "email": SITE["email"],
+        "priceRange": SITE["price_range"],
+        "currenciesAccepted": "AED",
+        "paymentAccepted": "Cash, Card, Bank Transfer",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": a["line1"] + ", " + a["line2"],
+            "addressLocality": a["city"],
+            "addressRegion": a["region"],
+            "addressCountry": a["country_code"],
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": SITE["geo"]["lat"],
+            "longitude": SITE["geo"]["lng"],
+        },
+        "areaServed": [{"@type": "City", "name": l["name"]} for l in LOCATIONS],
+        "openingHoursSpecification": [
+            {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": h["days"],
+                "opens": h["opens"],
+                "closes": h["closes"],
+            }
+            for h in SITE["hours_schema"]
+        ],
+    }
+    sameas = [v for v in SITE["social"].values() if v]
+    if sameas:
+        obj["sameAs"] = sameas
+    return obj
+
+
+def breadcrumb_schema(items):
+    elements = []
+    for i, (label, path) in enumerate(items, start=1):
+        el = {"@type": "ListItem", "position": i, "name": label}
+        if path:
+            el["item"] = abs_url(path)
+        elements.append(el)
+    return {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": elements,
+    }
+
+
+def faq_schema(faqs):
+    return {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": q,
+                "acceptedAnswer": {"@type": "Answer", "text": a},
+            }
+            for q, a in faqs
+        ],
+    }
+
+
+def article_schema(post):
+    return {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": post["title"],
+        "description": post["excerpt"],
+        "datePublished": post["date"],
+        "dateModified": post["date"],
+        "image": abs_url(f'/assets/images/blog/{post["slug"]}.jpg'),
+        "author": {"@type": "Organization", "name": SITE["name"]},
+        "publisher": {
+            "@type": "Organization",
+            "name": SITE["name"],
+            "logo": {"@type": "ImageObject", "url": abs_url("/assets/images/site/logo.png")},
+        },
+        "mainEntityOfPage": abs_url(f'/blog/{post["slug"]}/'),
+    }
+
+
+def jsonld_tags(objs):
+    out = ""
+    for o in objs:
+        out += '<script type="application/ld+json">' + json.dumps(o, ensure_ascii=False) + "</script>\n"
+    return out
+
+
+# ---------------------------------------------------------------------------
+# HEAD + PAGE SHELL
+# ---------------------------------------------------------------------------
+def render_head(title, description, path, jsonld_objs, og_type="website", image=None):
+    canonical = abs_url(path)
+    img = abs_url(image or SITE["og_image"])
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{esc(title)}</title>
+<meta name="description" content="{esc(description)}">
+<link rel="canonical" href="{esc(canonical)}">
+<meta name="theme-color" content="#12161d">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="format-detection" content="telephone=no">
+<meta property="og:type" content="{og_type}">
+<meta property="og:site_name" content="{esc(SITE['name'])}">
+<meta property="og:title" content="{esc(title)}">
+<meta property="og:description" content="{esc(description)}">
+<meta property="og:url" content="{esc(canonical)}">
+<meta property="og:image" content="{esc(img)}">
+<meta property="og:locale" content="en_AE">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{esc(title)}">
+<meta name="twitter:description" content="{esc(description)}">
+<meta name="twitter:image" content="{esc(img)}">
+<link rel="icon" href="/assets/images/site/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/assets/images/site/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="/assets/css/style.css">
+{jsonld_tags(jsonld_objs)}</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+"""
+
+
+def render_page(title, description, path, body, jsonld_objs, active="", og_type="website", image=None,
+                priority="0.7", changefreq="monthly", lastmod=None):
+    doc = (
+        render_head(title, description, path, jsonld_objs, og_type, image)
+        + nav(active)
+        + f'<main id="main">{body}</main>'
+        + footer()
+        + whatsapp_widget()
+        + '<script src="/assets/js/main.js" defer></script>\n</body>\n</html>\n'
+    )
+    write_page(path, doc, priority=priority, changefreq=changefreq, lastmod=lastmod)
+
+
+def write_page(path, doc, priority="0.7", changefreq="monthly", lastmod=None):
+    # path like "/brands/range-rover/" -> dist/brands/range-rover/index.html
+    rel = path.strip("/")
+    if rel == "":
+        out_dir = DIST
+    else:
+        out_dir = os.path.join(DIST, *rel.split("/"))
+    os.makedirs(out_dir, exist_ok=True)
+    with open(os.path.join(out_dir, "index.html"), "w", encoding="utf-8") as f:
+        f.write(doc)
+    PAGES.append({"loc": abs_url(path if path.endswith("/") or path == "/" else path + "/"),
+                  "priority": priority, "changefreq": changefreq, "lastmod": lastmod or TODAY})
+
+
+# ---------------------------------------------------------------------------
+# HEADER / NAV
+# ---------------------------------------------------------------------------
+def nav(active=""):
+    def act(key):
+        return " is-active" if active == key else ""
+
+    # Brands mega panel
+    brand_links = "".join(
+        f'<a class="mega__item" href="/brands/{b["slug"]}/">'
+        f'<span class="mega__name">{esc(b["name"])}</span>'
+        f'<span class="mega__sub">{esc(b["origin"])}</span></a>'
+        for b in BRANDS
+    )
+    # Parts mega panel
+    cat_links = "".join(
+        f'<a class="mega__item mega__item--icon" href="/parts/{c["slug"]}/">'
+        f'{icon(c["icon"], "mega__ic")}'
+        f'<span><span class="mega__name">{esc(c["name"])}</span>'
+        f'<span class="mega__sub">{esc(c["short"])}</span></span></a>'
+        for c in CATEGORIES
+    )
+    # Locations dropdown
+    loc_links = "".join(
+        f'<a class="dd__item" href="/locations/{l["slug"]}/">{esc(l["name"])}</a>'
+        for l in LOCATIONS
+    )
+
+    # Mobile accordion sections
+    m_brands = "".join(f'<a href="/brands/{b["slug"]}/">{esc(b["name"])}</a>' for b in BRANDS)
+    m_parts = "".join(f'<a href="/parts/{c["slug"]}/">{esc(c["name"])}</a>' for c in CATEGORIES)
+    m_locs = "".join(f'<a href="/locations/{l["slug"]}/">{esc(l["name"])}</a>' for l in LOCATIONS)
+
+    return f"""<header class="site-header" data-header>
+  <div class="topbar">
+    <div class="container topbar__inner">
+      <span class="topbar__item">{icon('location','ic ic--sm')} {esc(SITE['address']['line2'])}, {esc(SITE['address']['city'])}</span>
+      <span class="topbar__spacer"></span>
+      <span class="topbar__item">{icon('clock','ic ic--sm')} Sat–Thu 9AM–9PM</span>
+      <a class="topbar__item topbar__link" href="{tel_link()}">{icon('phone','ic ic--sm')} {esc(SITE['phone_display'])}</a>
+    </div>
+  </div>
+  <div class="nav">
+    <div class="container nav__inner">
+      <a class="brand" href="/" aria-label="{esc(SITE['name'])} home">
+        <span class="brand__mark">AJ</span>
+        <span class="brand__text"><span class="brand__name">AL JAWAREH</span><span class="brand__tag">AUTO SPARE PARTS</span></span>
+      </a>
+      <nav class="nav__links" aria-label="Primary navigation">
+        <a class="nav__link{act('home')}" href="/">Home</a>
+        <div class="nav__group has-mega">
+          <button class="nav__link nav__toggle{act('brands')}" aria-expanded="false" aria-haspopup="true">Brands {icon('chevron','ic ic--xs')}</button>
+          <div class="mega mega--brands" role="menu">
+            <div class="mega__grid">{brand_links}</div>
+            <a class="mega__all" href="/brands/">All brands {icon('arrow','ic ic--sm')}</a>
+          </div>
+        </div>
+        <div class="nav__group has-mega">
+          <button class="nav__link nav__toggle{act('parts')}" aria-expanded="false" aria-haspopup="true">Parts {icon('chevron','ic ic--xs')}</button>
+          <div class="mega mega--parts" role="menu">
+            <div class="mega__grid mega__grid--icon">{cat_links}</div>
+            <a class="mega__all" href="/parts/">All part categories {icon('arrow','ic ic--sm')}</a>
+          </div>
+        </div>
+        <div class="nav__group has-dd">
+          <button class="nav__link nav__toggle{act('locations')}" aria-expanded="false" aria-haspopup="true">Areas {icon('chevron','ic ic--xs')}</button>
+          <div class="dd" role="menu">{loc_links}</div>
+        </div>
+        <a class="nav__link{act('blog')}" href="/blog/">Blog</a>
+        <a class="nav__link{act('about')}" href="/about/">About</a>
+        <a class="nav__link{act('faq')}" href="/faq/">FAQ</a>
+        <a class="nav__link{act('contact')}" href="/contact/">Contact</a>
+      </nav>
+      <div class="nav__cta">
+        <a class="btn btn--ghost btn--sm nav__call" href="{tel_link()}">{icon('phone','ic ic--sm')}<span>Call</span></a>
+        <button class="btn btn--wa btn--sm" data-enquiry-open>{icon('whatsapp','ic ic--sm')}<span>Request a Part</span></button>
+        <button class="nav__burger" data-menu-open aria-label="Open menu" aria-expanded="false">{icon('menu','ic')}</button>
+      </div>
+    </div>
+  </div>
+  <div class="mobile" data-mobile hidden>
+    <div class="mobile__panel">
+      <div class="mobile__head">
+        <span class="brand__name">AL JAWAREH</span>
+        <button class="mobile__close" data-menu-close aria-label="Close menu">{icon('close','ic')}</button>
+      </div>
+      <div class="mobile__body">
+        <a class="mobile__link" href="/">Home</a>
+        <details class="mobile__acc"><summary>Brands {icon('chevron','ic ic--xs')}</summary><div class="mobile__sub">{m_brands}<a href="/brands/">All brands</a></div></details>
+        <details class="mobile__acc"><summary>Parts {icon('chevron','ic ic--xs')}</summary><div class="mobile__sub">{m_parts}<a href="/parts/">All part categories</a></div></details>
+        <details class="mobile__acc"><summary>Areas {icon('chevron','ic ic--xs')}</summary><div class="mobile__sub">{m_locs}</div></details>
+        <a class="mobile__link" href="/blog/">Blog</a>
+        <a class="mobile__link" href="/about/">About</a>
+        <a class="mobile__link" href="/faq/">FAQ</a>
+        <a class="mobile__link" href="/contact/">Contact</a>
+      </div>
+      <div class="mobile__foot">
+        <button class="btn btn--wa btn--block" data-enquiry-open>{icon('whatsapp','ic ic--sm')} Request a Part</button>
+        <a class="btn btn--ghost btn--block" href="{tel_link()}">{icon('phone','ic ic--sm')} {esc(SITE['phone_display'])}</a>
+      </div>
+    </div>
+    <div class="mobile__scrim" data-menu-close></div>
+  </div>
+</header>
+"""
+
+
+# ---------------------------------------------------------------------------
+# BREADCRUMBS
+# ---------------------------------------------------------------------------
+def breadcrumbs(items):
+    """items: list of (label, path|None). Returns HTML string."""
+    parts = []
+    for i, (label, path) in enumerate(items):
+        last = i == len(items) - 1
+        if last or not path:
+            parts.append(f'<span aria-current="page">{esc(label)}</span>')
+        else:
+            parts.append(f'<a href="{esc(path)}">{esc(label)}</a>')
+    sep = f'<span class="crumbs__sep">{icon("chevron","ic ic--xs")}</span>'
+    inner = sep.join(parts)
+    return f'<nav class="crumbs" aria-label="Breadcrumb"><div class="container">{inner}</div></nav>'
+
+
+# ---------------------------------------------------------------------------
+# FOOTER
+# ---------------------------------------------------------------------------
+def footer():
+    a = SITE["address"]
+    brand_cols = "".join(f'<li><a href="/brands/{b["slug"]}/">{esc(b["name"])}</a></li>' for b in BRANDS)
+    cat_cols = "".join(f'<li><a href="/parts/{c["slug"]}/">{esc(c["name"])}</a></li>' for c in CATEGORIES)
+    loc_cols = "".join(f'<li><a href="/locations/{l["slug"]}/">{esc(l["name"])}</a></li>' for l in LOCATIONS)
+    hours = "".join(f'<li><span>{esc(d)}</span><span>{esc(t)}</span></li>' for d, t in SITE["hours_display"])
+
+    socials = ""
+    labels = {"facebook": "Facebook", "instagram": "Instagram", "tiktok": "TikTok",
+              "youtube": "YouTube", "google_business": "Google"}
+    for key, url in SITE["social"].items():
+        if url:
+            socials += f'<a class="soc" href="{esc(url)}" target="_blank" rel="noopener" aria-label="{labels.get(key,key)}">{labels.get(key,key)}</a>'
+
+    return f"""<footer class="footer">
+  <div class="container footer__grid">
+    <div class="footer__col footer__brand">
+      <a class="brand brand--footer" href="/">
+        <span class="brand__mark">AJ</span>
+        <span class="brand__text"><span class="brand__name">AL JAWAREH</span><span class="brand__tag">AUTO SPARE PARTS</span></span>
+      </a>
+      <p class="footer__blurb">Genuine &amp; OEM spare parts for premium European and American vehicles — supplied across the UAE from our shop in Sharjah.</p>
+      <div class="footer__contact">
+        <a href="{tel_link()}">{icon('phone','ic ic--sm')} {esc(SITE['phone_display'])}</a>
+        <a href="{wa_link(WA_GENERIC)}" target="_blank" rel="noopener">{icon('whatsapp','ic ic--sm')} WhatsApp us</a>
+        <a href="mailto:{esc(SITE['email'])}">{icon('mail','ic ic--sm')} {esc(SITE['email'])}</a>
+        <span>{icon('location','ic ic--sm')} {esc(a['line1'])}, {esc(a['line2'])}, {esc(a['city'])}</span>
+      </div>
+    </div>
+    <div class="footer__col">
+      <h3 class="footer__h">Brands</h3>
+      <ul class="footer__list">{brand_cols}</ul>
+    </div>
+    <div class="footer__col">
+      <h3 class="footer__h">Parts</h3>
+      <ul class="footer__list">{cat_cols}</ul>
+    </div>
+    <div class="footer__col">
+      <h3 class="footer__h">Areas we serve</h3>
+      <ul class="footer__list">{loc_cols}</ul>
+      <h3 class="footer__h footer__h--mt">Company</h3>
+      <ul class="footer__list">
+        <li><a href="/about/">About us</a></li>
+        <li><a href="/blog/">Blog &amp; guides</a></li>
+        <li><a href="/faq/">FAQ</a></li>
+        <li><a href="/request-a-part/">Request a part</a></li>
+        <li><a href="/contact/">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer__col">
+      <h3 class="footer__h">Opening hours</h3>
+      <ul class="footer__hours">{hours}</ul>
+      <div class="footer__socials">{socials}</div>
+    </div>
+  </div>
+  <div class="footer__bar">
+    <div class="container footer__bar-inner">
+      <p>&copy; <span data-year>{date.today().year}</span> {esc(SITE['name'])}. All rights reserved.</p>
+      <p class="footer__note">Genuine &amp; OEM parts. Brand names are used for reference only; all trademarks belong to their respective owners.</p>
+      <button class="footer__top" data-scroll-top aria-label="Back to top">{icon('chevron','ic')}<span>Top</span></button>
+    </div>
+  </div>
+</footer>
+"""
+
+
+# ---------------------------------------------------------------------------
+# WHATSAPP ENQUIRY ASSISTANT (floating button + drawer) — on every page
+# ---------------------------------------------------------------------------
+def whatsapp_widget():
+    make_opts = "".join(f'<option value="{esc(b["name"])}">{esc(b["name"])}</option>' for b in BRANDS)
+    return f"""<button class="wa-fab" data-enquiry-open aria-label="Request a part on WhatsApp">
+  {icon('whatsapp','wa-fab__icon')}
+  <span class="wa-fab__label">Request a Part</span>
+</button>
+<div class="enquiry" data-enquiry hidden>
+  <div class="enquiry__scrim" data-enquiry-close></div>
+  <aside class="enquiry__panel" role="dialog" aria-modal="true" aria-labelledby="enq-title">
+    <header class="enquiry__head">
+      <div>
+        <p class="enquiry__eyebrow">{icon('whatsapp','ic ic--sm')} WhatsApp enquiry</p>
+        <h2 class="enquiry__title" id="enq-title">Request a part / get a quote</h2>
+      </div>
+      <button class="enquiry__close" data-enquiry-close aria-label="Close">{icon('close','ic')}</button>
+    </header>
+    <p class="enquiry__intro">Tell us your vehicle and the part you need. We'll open WhatsApp with your message ready to send — then we confirm the exact part and quote you.</p>
+    <form class="enquiry__form" data-enquiry-form>
+      <label class="field"><span>Your name</span><input type="text" name="name" placeholder="e.g. Ahmed" autocomplete="name"></label>
+      <div class="field-row">
+        <label class="field"><span>Vehicle make <b>*</b></span>
+          <select name="make" required>
+            <option value="" disabled selected>Select brand</option>
+            {make_opts}
+            <option value="Other">Other</option>
+          </select>
+        </label>
+        <label class="field"><span>Model</span><input type="text" name="model" placeholder="e.g. Sport / C 200"></label>
+      </div>
+      <div class="field-row">
+        <label class="field"><span>Year</span><input type="text" name="year" inputmode="numeric" placeholder="e.g. 2019"></label>
+        <label class="field"><span>VIN / chassis no.</span><input type="text" name="vin" placeholder="Helps us match exactly"></label>
+      </div>
+      <label class="field"><span>Part(s) you need <b>*</b></span><textarea name="part" rows="2" required placeholder="e.g. front air struts, or describe the fault"></textarea></label>
+      <label class="field"><span>Notes (optional)</span><textarea name="notes" rows="2" placeholder="Anything else that helps"></textarea></label>
+      <button type="submit" class="btn btn--wa btn--block btn--lg">{icon('whatsapp','ic ic--sm')} Send on WhatsApp</button>
+      <p class="enquiry__fine">No account needed. Opens WhatsApp to <b>{esc(SITE['phone_display'])}</b>.</p>
+    </form>
+  </aside>
+</div>
+"""
+
+
+# ---------------------------------------------------------------------------
+# REUSABLE UI SECTIONS
+# ---------------------------------------------------------------------------
+def section_header(eyebrow, title, sub=None, center=False, light=False):
+    c = " sec-head--center" if center else ""
+    l = " sec-head--light" if light else ""
+    subhtml = f'<p class="sec-head__sub">{sub}</p>' if sub else ""
+    return (f'<div class="sec-head{c}{l}">'
+            f'<span class="eyebrow">{esc(eyebrow)}</span>'
+            f'<h2 class="sec-head__title">{title}</h2>{subhtml}</div>')
+
+
+def btn_enquiry(label, make=None, cls="btn btn--wa", icon_name="whatsapp"):
+    data = f' data-make="{esc(make)}"' if make else ""
+    return (f'<button class="{cls}" data-enquiry-open{data}>'
+            f'{icon(icon_name,"ic ic--sm")}<span>{esc(label)}</span></button>')
+
+
+def btn_wa_link(label, message, cls="btn btn--wa", icon_name="whatsapp"):
+    return (f'<a class="{cls}" href="{wa_link(message)}" target="_blank" rel="noopener">'
+            f'{icon(icon_name,"ic ic--sm")}<span>{esc(label)}</span></a>')
+
+
+def hero_quick_form():
+    make_opts = "".join(f'<option value="{esc(b["name"])}">{esc(b["name"])}</option>' for b in BRANDS)
+    return f"""<form class="quickform" data-quick-form>
+      <p class="quickform__title">{icon('vin','ic ic--sm')} Quick part enquiry</p>
+      <div class="quickform__fields">
+        <select name="make" required aria-label="Vehicle make">
+          <option value="" disabled selected>Brand</option>{make_opts}<option value="Other">Other</option>
+        </select>
+        <input type="text" name="model" placeholder="Model &amp; year" aria-label="Model and year">
+        <input type="text" name="part" placeholder="Part or fault" required aria-label="Part needed">
+      </div>
+      <button type="submit" class="btn btn--wa btn--block">{icon('whatsapp','ic ic--sm')} Get a quote on WhatsApp</button>
+      <span class="quickform__hint">Prefer the full form? <button type="button" class="linkbtn" data-enquiry-open>Open the request assistant</button></span>
+    </form>"""
+
+
+def brand_card(b):
+    return (f'<a class="bcard" href="/brands/{b["slug"]}/">'
+            f'<span class="bcard__logo">{monogram(b["name"])}</span>'
+            f'<span class="bcard__name">{esc(b["name"])}</span>'
+            f'<span class="bcard__sub">{esc(b["origin"])}</span>'
+            f'<span class="bcard__go">View parts {icon("arrow","ic ic--sm")}</span></a>')
+
+
+def brands_grid(limit=None, ids=None):
+    items = BRANDS if ids is None else [BRAND_BY_SLUG[i] for i in ids]
+    if limit:
+        items = items[:limit]
+    return f'<div class="grid grid--brands">{"".join(brand_card(b) for b in items)}</div>'
+
+
+def category_card(c, brand=None):
+    href = f'/brands/{brand["slug"]}/{c["slug"]}/' if brand else f'/parts/{c["slug"]}/'
+    name = f'{brand["name"]} {c["name"]}' if brand else c["name"]
+    return (f'<a class="ccard" href="{href}">'
+            f'<span class="ccard__ic">{icon(c["icon"],"ccard__icon")}</span>'
+            f'<span class="ccard__body"><span class="ccard__name">{esc(name)}</span>'
+            f'<span class="ccard__desc">{esc(c["card"])}</span></span>'
+            f'<span class="ccard__go">{icon("arrow","ic ic--sm")}</span></a>')
+
+
+def categories_grid(brand=None, limit=None):
+    items = CATEGORIES[:limit] if limit else CATEGORIES
+    return f'<div class="grid grid--cats">{"".join(category_card(c, brand) for c in items)}</div>'
+
+
+def features_why():
+    feats = [
+        ("shield", "Genuine &amp; OEM only",
+         "Manufacturer parts and top OEM suppliers — Bosch, Mahle, ATE, Sachs. No mystery-brand gambles."),
+        ("vin", "VIN-matched accuracy",
+         "Send your chassis number and we match the exact part number, so it fits the first time."),
+        ("truck", "Fast UAE-wide delivery",
+         "Based in Sharjah, delivering to Dubai, Ajman, Abu Dhabi and beyond — often same or next day."),
+        ("money", "Fair, honest pricing",
+         "Genuine and OEM side by side, so you choose the right balance of budget and quality."),
+        ("headset", "Real parts expertise",
+         "We know these cars — from Range Rover air suspension to BMW cooling. Ask us anything."),
+        ("box", "Hard-to-find parts sourced",
+         "Not on the shelf? We source it through our supplier network with a realistic timeline."),
+    ]
+    cards = "".join(
+        f'<div class="feature"><span class="feature__ic">{icon(i,"feature__icon")}</span>'
+        f'<h3 class="feature__t">{t}</h3><p class="feature__p">{p}</p></div>'
+        for i, t, p in feats
+    )
+    return f'<div class="grid grid--features">{cards}</div>'
+
+
+def steps_order():
+    steps = [
+        ("Send us the details", "Message your vehicle make, model, year, VIN and the part you need — or just describe the fault. Use the Request a Part button anywhere on this site.", "chat"),
+        ("We source &amp; quote", "We confirm the exact part, tell you whether it's genuine or OEM, and send you a clear price. No obligation.", "quote"),
+        ("You approve", "Happy with the part and price? Give us the go-ahead and choose delivery or collection.", "check"),
+        ("Delivered or collected", "Collect from our Sharjah shop, or we deliver anywhere in the UAE — often same or next day.", "truck"),
+    ]
+    items = "".join(
+        f'<li class="step"><span class="step__num">{n}</span>'
+        f'<span class="step__ic">{icon(i,"step__icon")}</span>'
+        f'<h3 class="step__t">{t}</h3><p class="step__p">{p}</p></li>'
+        for n, (t, p, i) in enumerate(steps, start=1)
+    )
+    return f'<ol class="steps">{items}</ol>'
+
+
+def faq_block(faqs, eyebrow="FAQ", title="Common questions", center=False):
+    items = "".join(
+        f'<details class="faq"><summary class="faq__q">{esc(q)}{icon("chevron","faq__chev")}</summary>'
+        f'<div class="faq__a"><p>{esc(a)}</p></div></details>'
+        for q, a in faqs
+    )
+    return (f'<div class="faqs">{section_header(eyebrow, title, center=center)}'
+            f'<div class="faqs__list">{items}</div></div>')
+
+
+# Curated high-intent brand x category internal links (SEO)
+POPULAR_COMBOS = [
+    ("range-rover", "suspension-air-struts"), ("range-rover", "brakes"),
+    ("land-rover", "engine-parts"), ("mercedes-benz", "suspension-air-struts"),
+    ("mercedes-benz", "brakes"), ("bmw", "cooling-ac"), ("bmw", "brakes"),
+    ("audi", "transmission-drivetrain"), ("audi", "engine-parts"),
+    ("porsche", "brakes"), ("volkswagen", "filters-service-parts"),
+    ("jaguar", "engine-parts"), ("gmc", "suspension-air-struts"),
+    ("mercedes-benz", "filters-service-parts"), ("range-rover", "cooling-ac"),
+    ("porsche", "suspension-air-struts"),
+]
+
+
+def popular_links():
+    tags = "".join(
+        f'<a class="poptag" href="/brands/{bs}/{cs}/">'
+        f'{esc(BRAND_BY_SLUG[bs]["name"])} {esc(CAT_BY_SLUG[cs]["name"].lower())} '
+        f'<b>Sharjah</b></a>'
+        for bs, cs in POPULAR_COMBOS
+    )
+    return f'<div class="poptags">{tags}</div>'
+
+
+def coverage_block():
+    chips = "".join(f'<a class="areachip" href="/locations/{l["slug"]}/">{esc(l["name"])}</a>' for l in LOCATIONS)
+    return f"""<div class="coverage">
+      <div class="coverage__text">
+        {section_header('UAE-wide', 'Delivering parts across the Emirates')}
+        <p>We're based in Industrial Area 12, Sharjah, and deliver genuine &amp; OEM parts right across the UAE. Nearby emirates are often same or next day.</p>
+        <div class="areachips">{chips}</div>
+      </div>
+      <div class="coverage__map">
+        <iframe title="Al Jawareh Auto Spare Parts location" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+          src="https://maps.google.com/maps?q={quote(SITE['maps_query'])}&output=embed"></iframe>
+      </div>
+    </div>"""
+
+
+def blog_card(p):
+    return (f'<article class="pcard"><a class="pcard__link" href="/blog/{p["slug"]}/">'
+            f'{media(f"/assets/images/blog/{p['slug']}.jpg", p["title"], "16x9", p["category"], "quote", "pcard__media")}'
+            f'<span class="pcard__body"><span class="pcard__cat">{esc(p["category"])}</span>'
+            f'<span class="pcard__title">{esc(p["title"])}</span>'
+            f'<span class="pcard__excerpt">{esc(p["excerpt"])}</span>'
+            f'<span class="pcard__meta">{esc(p["read_time"])} {icon("arrow","ic ic--sm")}</span></span></a></article>')
+
+
+def blog_cards(limit=3):
+    posts = sorted(POSTS, key=lambda p: p["date"], reverse=True)[:limit]
+    return f'<div class="grid grid--posts">{"".join(blog_card(p) for p in posts)}</div>'
+
+
+def cta_banner(title, text, make=None, label="Request a Part"):
+    return f"""<section class="cta">
+      <div class="container cta__inner">
+        <div class="cta__glow" aria-hidden="true"></div>
+        <div class="cta__text"><h2 class="cta__title">{title}</h2><p class="cta__p">{text}</p></div>
+        <div class="cta__actions">
+          {btn_enquiry(label, make=make, cls="btn btn--wa btn--lg")}
+          <a class="btn btn--ghost-light btn--lg" href="{tel_link()}">{icon('phone','ic ic--sm')}<span>{esc(SITE['phone_display'])}</span></a>
+        </div>
+      </div>
+    </section>"""
+
+
+# ---------------------------------------------------------------------------
+# PAGE: HOME
+# ---------------------------------------------------------------------------
+def build_home():
+    marquee = "".join(f'<span class="marquee__item">{esc(b["name"])}</span>' for b in BRANDS)
+    marquee = marquee + marquee  # duplicate for seamless loop
+    hero = f"""<section class="hero">
+      <div class="hero__bg" aria-hidden="true"><span class="hero__grid"></span><span class="hero__glow"></span></div>
+      <div class="container hero__inner">
+        <div class="hero__content">
+          <span class="hero__eyebrow">{icon('shield','ic ic--sm')} 9 premium marques &middot; Sharjah, UAE</span>
+          <h1 class="hero__title">Genuine &amp; OEM spare parts for <span class="grad">Europe's finest</span>, in stock in Sharjah</h1>
+          <p class="hero__lead">Range Rover, Mercedes-Benz, BMW, Audi, Porsche and more. Send us your vehicle and the part you need on WhatsApp — we match it to your VIN, quote you honestly, and deliver across the UAE.</p>
+          <div class="hero__actions">
+            {btn_enquiry('Request a Part', cls='btn btn--wa btn--lg')}
+            <a class="btn btn--ghost-light btn--lg" href="/brands/">Browse brands {icon('arrow','ic ic--sm')}</a>
+          </div>
+          <ul class="hero__chips">
+            <li>{icon('check','ic ic--sm')} Genuine &amp; OEM</li>
+            <li>{icon('check','ic ic--sm')} VIN-matched</li>
+            <li>{icon('check','ic ic--sm')} UAE-wide delivery</li>
+            <li>{icon('check','ic ic--sm')} Honest pricing</li>
+          </ul>
+        </div>
+        <div class="hero__aside">{hero_quick_form()}</div>
+      </div>
+      <div class="hero__marquee" aria-hidden="true"><div class="marquee">{marquee}</div></div>
+    </section>"""
+
+    brands = f"""<section class="section">
+      <div class="container">
+        {section_header('Brands we stock', 'Parts for the marques you drive', center=True)}
+        {brands_grid()}
+      </div>
+    </section>"""
+
+    cats = f"""<section class="section section--alt">
+      <div class="container">
+        {section_header('Part categories', 'Whatever your car needs', 'From engines and air suspension to brakes, filters and body panels — all genuine or quality OEM.', center=True)}
+        {categories_grid()}
+      </div>
+    </section>"""
+
+    why = f"""<section class="section">
+      <div class="container">
+        {section_header('Why buy from us', 'The right part, without the runaround', center=True)}
+        {features_why()}
+      </div>
+    </section>"""
+
+    steps = f"""<section class="section section--dark">
+      <div class="container">
+        {section_header('How ordering works', 'From WhatsApp to your doorstep in four steps', center=True, light=True)}
+        {steps_order()}
+        <div class="section__cta">{btn_enquiry('Start your request', cls='btn btn--wa btn--lg')}</div>
+      </div>
+    </section>"""
+
+    popular = f"""<section class="section section--alt">
+      <div class="container">
+        {section_header('Popular searches', 'Frequently requested parts')}
+        {popular_links()}
+      </div>
+    </section>"""
+
+    coverage = f'<section class="section"><div class="container">{coverage_block()}</div></section>'
+
+    blog = f"""<section class="section section--alt">
+      <div class="container">
+        {section_header('Guides', 'Parts buying &amp; fitment advice')}
+        {blog_cards(3)}
+        <div class="section__cta"><a class="btn btn--ghost btn--lg" href="/blog/">Read all guides {icon('arrow','ic ic--sm')}</a></div>
+      </div>
+    </section>"""
+
+    faq = f'<section class="section"><div class="container container--narrow">{faq_block(FAQS[:6], center=True)}<div class="section__cta"><a class="btn btn--ghost btn--lg" href="/faq/">All questions {icon("arrow","ic ic--sm")}</a></div></div></section>'
+
+    cta = cta_banner("Can't find your part?",
+                     "Send us your vehicle and the part on WhatsApp — genuine or OEM, we'll track it down and quote you.")
+
+    body = hero + brands + cats + why + steps + popular + coverage + blog + faq + cta
+    title = "Al Jawareh Auto Spare Parts | Genuine & OEM Parts in Sharjah, UAE"
+    desc = ("Genuine & OEM spare parts for Range Rover, Land Rover, Jaguar, Mercedes-Benz, BMW, Audi, "
+            "Volkswagen, Porsche & GMC. Based in Sharjah, delivering across the UAE. Request a part on WhatsApp.")
+    ld = [store_schema(),
+          {"@context": "https://schema.org", "@type": "WebSite", "name": SITE["name"],
+           "url": SITE["base_url"] + "/"},
+          faq_schema(FAQS[:6])]
+    render_page(title, desc, "/", body, ld, active="home", og_type="website",
+                priority="1.0", changefreq="weekly")
+
+
+# ---------------------------------------------------------------------------
+# PAGE: BRANDS INDEX
+# ---------------------------------------------------------------------------
+def build_brands_index():
+    body = f"""{breadcrumbs([('Home', '/'), ('Brands', None)])}
+    <section class="pagehead">
+      <div class="container">
+        <span class="eyebrow">Brands we stock</span>
+        <h1 class="pagehead__title">Spare parts for 9 premium marques</h1>
+        <p class="pagehead__lead">We specialise in genuine and OEM parts for premium European and select American vehicles. Pick your marque to see the parts we supply — or just send us your VIN on WhatsApp.</p>
+        <div class="pagehead__actions">{btn_enquiry('Request a Part', cls='btn btn--wa btn--lg')}</div>
+      </div>
+    </section>
+    <section class="section"><div class="container">{brands_grid()}</div></section>
+    {cta_banner('Not sure which part you need?', 'Describe the fault and your vehicle — we speak these cars fluently and will point you right.')}"""
+    ld = [breadcrumb_schema([('Home', '/'), ('Brands', '/brands/')]),
+          {"@context": "https://schema.org", "@type": "ItemList",
+           "itemListElement": [{"@type": "ListItem", "position": i, "name": b["name"],
+                                "url": abs_url(f'/brands/{b["slug"]}/')} for i, b in enumerate(BRANDS, 1)]}]
+    render_page("Car Brands We Stock Parts For | Al Jawareh Auto Spare Parts, Sharjah",
+                "Genuine & OEM spare parts for Range Rover, Land Rover, Jaguar, Mercedes-Benz, BMW, Audi, Volkswagen, Porsche and GMC — supplied in Sharjah and across the UAE.",
+                "/brands/", body, ld, active="brands", priority="0.9", changefreq="monthly")
+
+
+# ---------------------------------------------------------------------------
+# PAGE: PARTS INDEX
+# ---------------------------------------------------------------------------
+def build_parts_index():
+    body = f"""{breadcrumbs([('Home', '/'), ('Parts', None)])}
+    <section class="pagehead">
+      <div class="container">
+        <span class="eyebrow">Part categories</span>
+        <h1 class="pagehead__title">Every part your car needs</h1>
+        <p class="pagehead__lead">From engines and air suspension to brakes, filters, electrical and body panels — all genuine or quality OEM, matched to your vehicle. Browse a category or send us the part on WhatsApp.</p>
+        <div class="pagehead__actions">{btn_enquiry('Request a Part', cls='btn btn--wa btn--lg')}</div>
+      </div>
+    </section>
+    <section class="section"><div class="container">{categories_grid()}</div></section>
+    {cta_banner("Can't find the category?", "Tell us the part or the symptom on WhatsApp and we'll sort it — genuine or OEM.")}"""
+    ld = [breadcrumb_schema([('Home', '/'), ('Parts', '/parts/')]),
+          {"@context": "https://schema.org", "@type": "ItemList",
+           "itemListElement": [{"@type": "ListItem", "position": i, "name": c["name"],
+                                "url": abs_url(f'/parts/{c["slug"]}/')} for i, c in enumerate(CATEGORIES, 1)]}]
+    render_page("Car Spare Part Categories in Sharjah & UAE | Al Jawareh Auto Spare Parts",
+                "Browse spare part categories — engine, suspension & air struts, brakes, filters, electrical, body panels, transmission, cooling and steering. Genuine & OEM, delivered across the UAE.",
+                "/parts/", body, ld, active="parts", priority="0.9", changefreq="monthly")
+
+
+# ---------------------------------------------------------------------------
+# helpers for brand/category pages
+# ---------------------------------------------------------------------------
+def brand_faqs(b):
+    n = b["name"]
+    return [
+        (f"Do you stock genuine {n} parts?",
+         f"Yes. We supply genuine {n} parts and premium OEM-supplier equivalents. Tell us your budget "
+         f"and we'll show you both so you can choose."),
+        (f"Can you get a {n} part that isn't in stock?",
+         f"Almost always. If it's not on the shelf, we source it through our supplier network — genuine "
+         f"or OEM — and give you a realistic timeline before you commit."),
+        (f"Do you deliver {n} parts across the UAE?",
+         f"Yes. We're in Sharjah and deliver {n} parts to Dubai, Ajman, Abu Dhabi, Ras Al Khaimah and "
+         f"beyond, often same or next day."),
+        (f"How do I order a {n} part?",
+         f"Send your {n} model, year and VIN or chassis number on WhatsApp with the part you need. "
+         f"We'll confirm the exact part, quote you, and deliver or hold it for collection."),
+    ]
+
+
+def category_faqs(c):
+    n = c["name"].lower()
+    return [
+        (f"Are your {n} genuine or OEM?",
+         f"Both. We stock genuine (manufacturer) {n} and premium OEM-supplier equivalents. We'll tell "
+         f"you which is which and let you choose on price and warranty."),
+        (f"Can you match {n} to my exact car?",
+         f"Yes — send your VIN or chassis number and we'll match the correct part for your specification, "
+         f"so it fits the first time."),
+        (f"Do you deliver {n} across the UAE?",
+         f"Yes. From our Sharjah shop we deliver across Dubai, Ajman, Abu Dhabi and the rest of the UAE, "
+         f"often same or next day."),
+    ]
+
+
+def related_categories_chips(brand, current=None):
+    chips = "".join(
+        f'<a class="chip" href="/brands/{brand["slug"]}/{c["slug"]}/">{esc(c["name"])}</a>'
+        for c in CATEGORIES if c["slug"] != current
+    )
+    return f'<div class="chips">{chips}</div>'
+
+
+def related_brands_chips(cat, current=None):
+    chips = "".join(
+        f'<a class="chip" href="/brands/{b["slug"]}/{cat["slug"]}/">{esc(b["name"])}</a>'
+        for b in BRANDS if b["slug"] != current
+    )
+    return f'<div class="chips">{chips}</div>'
+
+
+def items_list(items, cols=True):
+    lis = "".join(f'<li>{icon("check","ic ic--sm")}<span>{esc(x)}</span></li>' for x in items)
+    cls = "ticklist ticklist--cols" if cols else "ticklist"
+    return f'<ul class="{cls}">{lis}</ul>'
+
+
+# ---------------------------------------------------------------------------
+# PAGE: BRAND
+# ---------------------------------------------------------------------------
+def build_brand(b):
+    crumbs = [('Home', '/'), ('Brands', '/brands/'), (b["name"], None)]
+    faqs = brand_faqs(b)
+    models = "".join(f'<li>{esc(m)}</li>' for m in b["models"])
+    body = f"""{breadcrumbs(crumbs)}
+    <section class="brandhead">
+      <div class="container brandhead__inner">
+        <div class="brandhead__text">
+          <div class="brandhead__logo">{logo_slot(b, 'lg')}</div>
+          <span class="eyebrow">{esc(b['origin'])} &middot; Genuine &amp; OEM</span>
+          <h1 class="brandhead__title">{esc(b['name'])} Spare Parts in Sharjah &amp; the UAE</h1>
+          <p class="brandhead__lead">{esc(b['intro'])}</p>
+          <div class="brandhead__actions">
+            {btn_enquiry(f'Request a {b["name"]} part', make=b['name'], cls='btn btn--wa btn--lg')}
+            <a class="btn btn--ghost btn--lg" href="{tel_link()}">{icon('phone','ic ic--sm')}<span>{esc(SITE['phone_display'])}</span></a>
+          </div>
+        </div>
+        <div class="brandhead__media">{media(f'/assets/images/brands/{b["slug"]}-hero.jpg', f'{b["name"]} spare parts', '4x3', b['name'], 'box')}</div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container split">
+        <div class="split__main">
+          {section_header('Popular parts', f'{esc(b["name"])} parts we supply most')}
+          {items_list(b['popular'])}
+          <p class="note">{icon('shield','ic ic--sm')} {esc(b['note'])}</p>
+        </div>
+        <aside class="split__aside">
+          <div class="panel">
+            <h3 class="panel__t">Models we cover</h3>
+            <ul class="panel__list">{models}</ul>
+            <p class="panel__note">Don't see your exact model? Message us — we cover more than we can list.</p>
+            {btn_enquiry('Check my model', make=b['name'], cls='btn btn--wa btn--block')}
+          </div>
+        </aside>
+      </div>
+    </section>
+    <section class="section section--alt">
+      <div class="container">
+        {section_header('By category', f'Browse {esc(b["name"])} parts by category')}
+        {categories_grid(brand=b)}
+      </div>
+    </section>
+    <section class="section"><div class="container container--narrow">{faq_block(faqs, eyebrow='FAQ', title=f'{esc(b["name"])} parts — questions')}</div></section>
+    {cta_banner(f'Need a {b["name"]} part today?', f'Send your VIN and the part on WhatsApp. We stock the fast-movers and can source the rest — genuine or OEM.', make=b['name'])}"""
+    ld = [breadcrumb_schema([('Home', '/'), ('Brands', '/brands/'), (b['name'], f'/brands/{b["slug"]}/')]),
+          store_schema(), faq_schema(faqs)]
+    title = f'{b["name"]} Spare Parts in Sharjah & UAE | Genuine & OEM | Al Jawareh'
+    desc = (f'{b["name"]} spare parts in Sharjah and across the UAE — {b["popular"][0].lower()}, '
+            f'{b["popular"][1].lower()} and more. Genuine & OEM, VIN-matched. Request a part on WhatsApp.')
+    render_page(title, desc, f'/brands/{b["slug"]}/', body, ld, active="brands",
+                image=f'/assets/images/brands/{b["slug"]}-hero.jpg', priority="0.8", changefreq="monthly")
+
+
+# ---------------------------------------------------------------------------
+# PAGE: CATEGORY
+# ---------------------------------------------------------------------------
+def build_category(c):
+    crumbs = [('Home', '/'), ('Parts', '/parts/'), (c["name"], None)]
+    faqs = category_faqs(c)
+    body = f"""{breadcrumbs(crumbs)}
+    <section class="pagehead pagehead--cat">
+      <div class="container pagehead__cat-inner">
+        <span class="pagehead__ic">{icon(c['icon'],'pagehead__icon')}</span>
+        <div>
+          <span class="eyebrow">Part category &middot; Genuine &amp; OEM</span>
+          <h1 class="pagehead__title">{esc(c['name'])} in Sharjah &amp; the UAE</h1>
+          <p class="pagehead__lead">{esc(c['intro'])}</p>
+          <div class="pagehead__actions">{btn_enquiry(f'Request {c["name"].lower()}', cls='btn btn--wa btn--lg')}</div>
+        </div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container split">
+        <div class="split__main">
+          {section_header("What's included", f'{esc(c["name"])} we supply')}
+          {items_list(c['items'])}
+        </div>
+        <aside class="split__aside">
+          <div class="panel panel--accent">
+            <h3 class="panel__t">{icon('vin','ic ic--sm')} Match it to your VIN</h3>
+            <p>{esc(c['name'])} vary by model and year. Send your chassis number and we'll confirm the exact part before you buy.</p>
+            {btn_enquiry('Send my VIN', cls='btn btn--wa btn--block')}
+          </div>
+        </aside>
+      </div>
+    </section>
+    <section class="section section--alt">
+      <div class="container">
+        {section_header('By brand', f'{esc(c["name"])} for the marques we stock')}
+        {brand_grid_for_category(c)}
+      </div>
+    </section>
+    <section class="section"><div class="container container--narrow">{faq_block(faqs, eyebrow='FAQ', title=f'{esc(c["name"])} — questions')}</div></section>
+    {cta_banner(f'Need {c["name"].lower()} for your car?', 'Send us your vehicle and the part on WhatsApp — genuine or OEM, matched to your VIN.')}"""
+    ld = [breadcrumb_schema([('Home', '/'), ('Parts', '/parts/'), (c['name'], f'/parts/{c["slug"]}/')]),
+          store_schema(), faq_schema(faqs)]
+    title = f'{c["name"]} in Sharjah & UAE | Genuine & OEM | Al Jawareh Auto Spare Parts'
+    desc = (f'{c["name"]} for Range Rover, Mercedes-Benz, BMW, Audi, Porsche and more in Sharjah and '
+            f'across the UAE. {c["card"]} Request a part on WhatsApp.')
+    render_page(title, desc, f'/parts/{c["slug"]}/', body, ld, active="parts", priority="0.8", changefreq="monthly")
+
+
+def brand_grid_for_category(c):
+    cards = "".join(
+        f'<a class="minicard" href="/brands/{b["slug"]}/{c["slug"]}/">'
+        f'<span class="minicard__logo">{monogram(b["name"])}</span>'
+        f'<span class="minicard__name">{esc(b["name"])} {esc(c["short"].lower())}</span>'
+        f'{icon("arrow","ic ic--sm")}</a>'
+        for b in BRANDS
+    )
+    return f'<div class="grid grid--mini">{cards}</div>'
+
+
+# ---------------------------------------------------------------------------
+# PAGE: BRAND x CATEGORY (programmatic SEO)
+# ---------------------------------------------------------------------------
+def bc_intro(b, c):
+    n, cn = b["name"], c["name"].lower()
+    variants = [
+        (f"Looking for {esc(b['name'])} {esc(cn)} in Sharjah or anywhere in the UAE? We keep genuine "
+         f"and OEM {esc(cn)} for {esc(b['name'])}, matched to your exact VIN so the part fits the first time."),
+        (f"{esc(b['name'])} {esc(cn)} shouldn't be a guessing game. We supply genuine and quality OEM "
+         f"{esc(cn)} for {esc(b['name'])} across Sharjah, Dubai and the wider UAE — send your chassis "
+         f"number and we'll confirm the right part."),
+        (f"From our shop in Industrial Area 12, Sharjah, we supply {esc(b['name'])} {esc(cn)} — genuine "
+         f"and OEM — with fast delivery across the UAE. Tell us your model and VIN and we'll quote you honestly."),
+    ]
+    idx = (len(b["slug"]) + len(c["slug"])) % len(variants)
+    p1 = variants[idx]
+    it = c["items"]
+    p2 = (f"That covers {esc(it[0].lower())}, {esc(it[1].lower())} and {esc(it[2].lower())}, and more — "
+          f"all matched to your {esc(b['name'])}'s specification. If it isn't on the shelf, we source it "
+          f"through our supplier network with a realistic timeline before you commit.")
+    return f'<p class="brandhead__lead">{p1}</p><p class="lead-2">{p2}</p>'
+
+
+def bc_faqs(b, c):
+    n, cn = b["name"], c["name"].lower()
+    return [
+        (f"Do you have genuine {n} {cn} in stock?",
+         f"We stock the fast-moving {n} {cn} and can source the rest quickly — genuine or premium OEM. "
+         f"Send your VIN and we'll confirm availability and price."),
+        (f"Can you match {n} {cn} to my exact car?",
+         f"Yes. {n} part numbers change between models and years, so we use your VIN or chassis number to "
+         f"match the correct {cn} the first time."),
+        (f"Do you deliver {n} {cn} to Dubai and across the UAE?",
+         f"Yes. We're in Sharjah and deliver {n} {cn} to Dubai, Ajman, Abu Dhabi and the rest of the UAE, "
+         f"often same or next day."),
+    ]
+
+
+def build_brand_category(b, c):
+    crumbs = [('Home', '/'), ('Brands', '/brands/'), (b["name"], f'/brands/{b["slug"]}/'), (c["name"], None)]
+    faqs = bc_faqs(b, c)
+    models = "".join(f'<li>{esc(m)}</li>' for m in b["models"])
+    body = f"""{breadcrumbs(crumbs)}
+    <section class="brandhead brandhead--bc">
+      <div class="container brandhead__inner">
+        <div class="brandhead__text">
+          <span class="eyebrow">{icon(c['icon'],'ic ic--sm')} {esc(b['name'])} &middot; {esc(c['name'])}</span>
+          <h1 class="brandhead__title">{esc(b['name'])} {esc(c['name'])} in Sharjah &amp; the UAE</h1>
+          {bc_intro(b, c)}
+          <div class="brandhead__actions">
+            {btn_enquiry(f'Request {b["name"]} {c["short"].lower()}', make=b['name'], cls='btn btn--wa btn--lg')}
+            <a class="btn btn--ghost btn--lg" href="{tel_link()}">{icon('phone','ic ic--sm')}<span>Call us</span></a>
+          </div>
+        </div>
+        <div class="brandhead__media">{media(f'/assets/images/categories/{c["slug"]}.jpg', f'{b["name"]} {c["name"]}', '4x3', f'{b["name"]} {c["short"]}', c['icon'])}</div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container split">
+        <div class="split__main">
+          {section_header('What we supply', f'{esc(b["name"])} {esc(c["name"].lower())} we stock &amp; source')}
+          {items_list(c['items'])}
+          <p class="note">{icon('shield','ic ic--sm')} Genuine and OEM options side by side — we'll tell you the difference and let you choose.</p>
+        </div>
+        <aside class="split__aside">
+          <div class="panel panel--accent">
+            <h3 class="panel__t">{icon('vin','ic ic--sm')} Send your VIN</h3>
+            <p>The fastest way to the right {esc(c['name'].lower())} for your {esc(b['name'])} is your chassis number. Send it on WhatsApp and we'll confirm the exact part.</p>
+            {btn_enquiry('Get a quote', make=b['name'], cls='btn btn--wa btn--block')}
+          </div>
+          <div class="panel">
+            <h3 class="panel__t">{esc(b['name'])} models we cover</h3>
+            <ul class="panel__list">{models}</ul>
+          </div>
+        </aside>
+      </div>
+    </section>
+    <section class="section section--alt">
+      <div class="container">
+        {section_header('Keep browsing', f'Other {esc(b["name"])} parts')}
+        {related_categories_chips(b, current=c['slug'])}
+        <div class="crosslink">
+          <h3 class="crosslink__h">{esc(c['name'])} for other brands</h3>
+          {related_brands_chips(c, current=b['slug'])}
+        </div>
+      </div>
+    </section>
+    <section class="section"><div class="container container--narrow">{faq_block(faqs, eyebrow='FAQ', title=f'{esc(b["name"])} {esc(c["name"].lower())} — questions')}</div></section>
+    {cta_banner(f'Need {b["name"]} {c["short"].lower()} now?', f'Send your VIN and the part on WhatsApp — genuine or OEM, delivered across the UAE.', make=b['name'])}"""
+    ld = [breadcrumb_schema([('Home', '/'), ('Brands', '/brands/'), (b['name'], f'/brands/{b["slug"]}/'),
+                             (c['name'], f'/brands/{b["slug"]}/{c["slug"]}/')]),
+          store_schema(), faq_schema(faqs)]
+    title = f'{b["name"]} {c["name"]} in Sharjah & UAE | Genuine & OEM | Al Jawareh'
+    desc = (f'{b["name"]} {c["name"].lower()} in Sharjah and across the UAE — {c["items"][0].lower()}, '
+            f'{c["items"][1].lower()} and more. Genuine & OEM, VIN-matched. Request a part on WhatsApp.')
+    render_page(title, desc, f'/brands/{b["slug"]}/{c["slug"]}/', body, ld, active="brands",
+                image=f'/assets/images/categories/{c["slug"]}.jpg', priority="0.6", changefreq="monthly")
+
+
+# ---------------------------------------------------------------------------
+# PAGE: LOCATIONS INDEX + LOCATION
+# ---------------------------------------------------------------------------
+def location_card(l):
+    tag = "Our shop" if l.get("is_home") else "Delivery"
+    return (f'<a class="loccard" href="/locations/{l["slug"]}/">'
+            f'<span class="loccard__ic">{icon("location","loccard__icon")}</span>'
+            f'<span class="loccard__name">{esc(l["name"])}</span>'
+            f'<span class="loccard__tag">{tag}</span>'
+            f'<span class="loccard__go">Parts in {esc(l["name"])} {icon("arrow","ic ic--sm")}</span></a>')
+
+
+def build_locations_index():
+    body = f"""{breadcrumbs([('Home', '/'), ('Areas', None)])}
+    <section class="pagehead">
+      <div class="container">
+        <span class="eyebrow">Areas we serve</span>
+        <h1 class="pagehead__title">Auto spare parts across the UAE</h1>
+        <p class="pagehead__lead">We're based in Sharjah and deliver genuine &amp; OEM parts right across the Emirates. Pick your area or send us your VIN on WhatsApp.</p>
+        <div class="pagehead__actions">{btn_enquiry('Request a Part', cls='btn btn--wa btn--lg')}</div>
+      </div>
+    </section>
+    <section class="section"><div class="container"><div class="grid grid--locs">{"".join(location_card(l) for l in LOCATIONS)}</div></div></section>
+    <section class="section section--alt"><div class="container">{coverage_block()}</div></section>
+    {cta_banner('Anywhere in the UAE', "Tell us where you are and the part you need — we'll get it to you.")}"""
+    ld = [breadcrumb_schema([('Home', '/'), ('Areas', '/locations/')]), store_schema()]
+    render_page("Auto Spare Parts Across the UAE | Sharjah, Dubai, Ajman & More | Al Jawareh",
+                "Genuine & OEM auto spare parts delivered across the UAE — Sharjah, Dubai, Ajman, Abu Dhabi, Ras Al Khaimah, Umm Al Quwain, Fujairah and Al Ain. Request a part on WhatsApp.",
+                "/locations/", body, ld, active="locations", priority="0.7", changefreq="monthly")
+
+
+def location_faqs(l):
+    n = l["name"]
+    return [
+        (f"Do you deliver car parts to {n}?",
+         f"Yes. {l['delivery']} Send your vehicle details and the part on WhatsApp and we'll quote and dispatch."),
+        (f"Can I collect my part instead of delivery to {n}?",
+         f"Absolutely. You're welcome to collect from our shop in Industrial Area 12, Sharjah — often the "
+         f"same day for in-stock parts."),
+        (f"How do I order parts from {n}?",
+         f"Message us your make, model, year and VIN with the part you need. We confirm the exact part, "
+         f"quote you, and deliver to {n} or hold it for collection."),
+    ]
+
+
+def build_location(l):
+    crumbs = [('Home', '/'), ('Areas', '/locations/'), (l["name"], None)]
+    faqs = location_faqs(l)
+    areas = "".join(f'<span class="tagpill">{esc(a)}</span>' for a in l["areas"])
+    body = f"""{breadcrumbs(crumbs)}
+    <section class="pagehead">
+      <div class="container">
+        <span class="eyebrow">{icon('location','ic ic--sm')} {esc(l['name'])}, UAE</span>
+        <h1 class="pagehead__title">Auto Spare Parts in {esc(l['name'])}</h1>
+        <p class="pagehead__lead">{esc(l['intro'])}</p>
+        <div class="pagehead__actions">
+          {btn_enquiry('Request a Part', cls='btn btn--wa btn--lg')}
+          <a class="btn btn--ghost btn--lg" href="{tel_link()}">{icon('phone','ic ic--sm')}<span>{esc(SITE['phone_display'])}</span></a>
+        </div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container split">
+        <div class="split__main">
+          <p class="prose">{esc(l['detail'])}</p>
+          <h3 class="mini-h">Areas we cover in {esc(l['name'])}</h3>
+          <div class="tagpills">{areas}</div>
+          <p class="note">{icon('truck','ic ic--sm')} {esc(l['delivery'])}</p>
+        </div>
+        <aside class="split__aside">
+          <div class="panel panel--accent">
+            <h3 class="panel__t">Fast parts in {esc(l['name'])}</h3>
+            <p>Genuine &amp; OEM parts for Range Rover, Mercedes, BMW, Audi, Porsche and more — matched to your VIN.</p>
+            {btn_enquiry('Send my VIN', cls='btn btn--wa btn--block')}
+          </div>
+        </aside>
+      </div>
+    </section>
+    <section class="section section--alt">
+      <div class="container">
+        {section_header('Brands', f'Popular marques we supply to {esc(l["name"])}')}
+        {brands_grid()}
+      </div>
+    </section>
+    <section class="section"><div class="container">{coverage_block()}</div></section>
+    <section class="section section--alt"><div class="container container--narrow">{faq_block(faqs, eyebrow='FAQ', title=f'Parts in {esc(l["name"])} — questions')}</div></section>
+    {cta_banner(f'Need a part in {l["name"]}?', 'Send us your vehicle and the part on WhatsApp — we deliver across the UAE.')}"""
+    ld = [breadcrumb_schema([('Home', '/'), ('Areas', '/locations/'), (l['name'], f'/locations/{l["slug"]}/')]),
+          store_schema(), faq_schema(faqs)]
+    title = f'Auto Spare Parts in {l["name"]} | Genuine & OEM | Al Jawareh'
+    desc = (f'Genuine & OEM auto spare parts in {l["name"]}, UAE — for Range Rover, Mercedes-Benz, BMW, '
+            f'Audi, Porsche and more. {l["delivery"]} Request a part on WhatsApp.')
+    render_page(title, desc, f'/locations/{l["slug"]}/', body, ld, active="locations", priority="0.7", changefreq="monthly")
+
+
+# ---------------------------------------------------------------------------
+# PAGE: ABOUT
+# ---------------------------------------------------------------------------
+def build_about():
+    stats = [("9", "premium marques"), ("UAE-wide", "delivery network"),
+             ("Genuine &amp; OEM", "no mystery brands"), ("Sharjah", "walk-in shop")]
+    stat_html = "".join(f'<div class="stat"><span class="stat__n">{n}</span><span class="stat__l">{l}</span></div>' for n, l in stats)
+    vals = [
+        ("shield", "Honesty first", "We tell you whether a part is genuine or OEM, what it costs, and what the warranty is — before you buy. No surprises."),
+        ("vin", "Right the first time", "We match parts to your VIN so you don't lose days to returns and wrong-fit parts."),
+        ("headset", "We know these cars", "Range Rover air suspension, BMW cooling, Mercedes AIRMATIC — we deal with them every day and we'll steer you right."),
+        ("truck", "Fast across the UAE", "Based in Sharjah, delivering to Dubai, Ajman, Abu Dhabi and beyond — often same or next day."),
+    ]
+    val_html = "".join(f'<div class="feature"><span class="feature__ic">{icon(i,"feature__icon")}</span><h3 class="feature__t">{t}</h3><p class="feature__p">{p}</p></div>' for i, t, p in vals)
+    body = f"""{breadcrumbs([('Home', '/'), ('About', None)])}
+    <section class="pagehead">
+      <div class="container">
+        <span class="eyebrow">About us</span>
+        <h1 class="pagehead__title">Your parts partner in Sharjah</h1>
+        <p class="pagehead__lead">Al Jawareh Auto Spare Parts supplies genuine and OEM parts for premium European and American vehicles — from a Range Rover air strut to a Mercedes service kit — with fast delivery across the UAE.</p>
+      </div>
+    </section>
+    <section class="section"><div class="container"><div class="statband">{stat_html}</div></div></section>
+    <section class="section">
+      <div class="container split">
+        <div class="split__main">
+          {section_header('Our story', 'Built on getting the right part, fast')}
+          <p class="prose">We started with a simple frustration shared by every European car owner in the UAE: finding the correct part shouldn't take a week of phone calls and a wrong-fit return. So we built a shop that does the opposite — deep stock on the parts these cars actually need, an honest choice between genuine and OEM, and a WhatsApp line where you can send your VIN and get a straight answer.</p>
+          <p class="prose">Today we supply parts for Range Rover, Land Rover, Jaguar, Mercedes-Benz, BMW, Audi, Volkswagen, Porsche and GMC. Air suspension, brakes, cooling, service parts and hard-to-find components — matched to your chassis number and delivered anywhere in the Emirates.</p>
+          <p class="prose">Whether you're a workshop that needs parts on a deadline or an owner fixing your own car, you get the same thing from us: the right part, a fair price, and no runaround.</p>
+        </div>
+        <aside class="split__aside">
+          <div class="panel panel--accent">
+            <h3 class="panel__t">{icon('location','ic ic--sm')} Find us</h3>
+            <p>{esc(SITE['address']['line1'])}, {esc(SITE['address']['line2'])}, {esc(SITE['address']['city'])}, UAE.</p>
+            <p class="panel__note">Sat–Thu 9AM–9PM &middot; Fri 2PM–9PM</p>
+            {btn_wa_link('Message us', WA_GENERIC, cls='btn btn--wa btn--block')}
+          </div>
+        </aside>
+      </div>
+    </section>
+    <section class="section section--alt"><div class="container">{section_header('What we stand for', 'How we do business', center=True)}<div class="grid grid--features">{val_html}</div></div></section>
+    {cta_banner('Ready when you are', 'Send your vehicle and the part on WhatsApp — genuine or OEM, matched to your VIN and delivered across the UAE.')}"""
+    ld = [breadcrumb_schema([('Home', '/'), ('About', '/about/')]), store_schema()]
+    render_page("About Al Jawareh Auto Spare Parts | Sharjah Parts Specialists",
+                "Al Jawareh Auto Spare Parts supplies genuine & OEM parts for Range Rover, Mercedes-Benz, BMW, Audi, Porsche and more — from our shop in Industrial Area 12, Sharjah, across the UAE.",
+                "/about/", body, ld, active="about", priority="0.6", changefreq="yearly")
+
+
+# ---------------------------------------------------------------------------
+# shared enquiry form (inline version for the Request page)
+# ---------------------------------------------------------------------------
+def enquiry_form_inline():
+    make_opts = "".join(f'<option value="{esc(b["name"])}">{esc(b["name"])}</option>' for b in BRANDS)
+    return f"""<form class="enquiry__form enquiry__form--inline" data-enquiry-form>
+      <label class="field"><span>Your name</span><input type="text" name="name" placeholder="e.g. Ahmed" autocomplete="name"></label>
+      <div class="field-row">
+        <label class="field"><span>Vehicle make <b>*</b></span>
+          <select name="make" required><option value="" disabled selected>Select brand</option>{make_opts}<option value="Other">Other</option></select>
+        </label>
+        <label class="field"><span>Model</span><input type="text" name="model" placeholder="e.g. Sport / C 200"></label>
+      </div>
+      <div class="field-row">
+        <label class="field"><span>Year</span><input type="text" name="year" inputmode="numeric" placeholder="e.g. 2019"></label>
+        <label class="field"><span>VIN / chassis no.</span><input type="text" name="vin" placeholder="Helps us match exactly"></label>
+      </div>
+      <label class="field"><span>Part(s) you need <b>*</b></span><textarea name="part" rows="3" required placeholder="e.g. front air struts, or describe the fault"></textarea></label>
+      <label class="field"><span>Notes (optional)</span><textarea name="notes" rows="2" placeholder="Anything else that helps"></textarea></label>
+      <button type="submit" class="btn btn--wa btn--block btn--lg">{icon('whatsapp','ic ic--sm')} Send on WhatsApp</button>
+      <p class="enquiry__fine">No account needed. Opens WhatsApp to <b>{esc(SITE['phone_display'])}</b>.</p>
+    </form>"""
+
+
+# ---------------------------------------------------------------------------
+# PAGE: REQUEST A PART
+# ---------------------------------------------------------------------------
+def build_request():
+    body = f"""{breadcrumbs([('Home', '/'), ('Request a part', None)])}
+    <section class="pagehead">
+      <div class="container">
+        <span class="eyebrow">{icon('whatsapp','ic ic--sm')} WhatsApp enquiry</span>
+        <h1 class="pagehead__title">Request a part / get a quote</h1>
+        <p class="pagehead__lead">Fill in the details below and we'll open WhatsApp with your message ready to send. We confirm the exact part, tell you whether it's genuine or OEM, and quote you — no obligation.</p>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container split split--form">
+        <div class="split__main">
+          <div class="formcard">{enquiry_form_inline()}</div>
+        </div>
+        <aside class="split__aside">
+          <div class="panel">
+            <h3 class="panel__t">What happens next</h3>
+            <ol class="ministeps">
+              <li><b>You send</b> — vehicle, VIN and the part (or the fault).</li>
+              <li><b>We confirm &amp; quote</b> — exact part, genuine or OEM, clear price.</li>
+              <li><b>You approve</b> — pick delivery or collection.</li>
+              <li><b>Delivered</b> — anywhere in the UAE, often same or next day.</li>
+            </ol>
+          </div>
+          <div class="panel panel--accent">
+            <h3 class="panel__t">{icon('vin','ic ic--sm')} Have your VIN ready</h3>
+            <p>Your chassis number is on your Mulkiya, the windscreen base, or the driver's door jamb. It's the fastest route to the right part.</p>
+            <a class="linkbtn" href="/blog/find-the-right-part-using-vin-chassis-number/">How to find your VIN {icon('arrow','ic ic--sm')}</a>
+          </div>
+          <div class="panel">
+            <h3 class="panel__t">Prefer to talk?</h3>
+            <p>Call or WhatsApp us directly.</p>
+            <a class="btn btn--ghost btn--block" href="{tel_link()}">{icon('phone','ic ic--sm')} {esc(SITE['phone_display'])}</a>
+          </div>
+        </aside>
+      </div>
+    </section>"""
+    ld = [breadcrumb_schema([('Home', '/'), ('Request a part', '/request-a-part/')]), store_schema()]
+    render_page("Request a Part / Get a Quote | Al Jawareh Auto Spare Parts",
+                "Request a genuine or OEM car part in the UAE. Send your vehicle, VIN and the part you need — we confirm the exact part and quote you on WhatsApp. Delivery across the UAE.",
+                "/request-a-part/", body, ld, active="", priority="0.8", changefreq="monthly")
+
+
+# ---------------------------------------------------------------------------
+# PAGE: CONTACT
+# ---------------------------------------------------------------------------
+def build_contact():
+    a = SITE["address"]
+    hours = "".join(f'<li><span>{esc(d)}</span><span>{esc(t)}</span></li>' for d, t in SITE["hours_display"])
+    cards = [
+        ("whatsapp", "WhatsApp", SITE["phone_display"], wa_link(WA_GENERIC), True),
+        ("phone", "Call us", SITE["phone_display"], tel_link(), False),
+        ("mail", "Email", SITE["email"], f'mailto:{SITE["email"]}', False),
+    ]
+    card_html = "".join(
+        f'<a class="contactcard{" contactcard--wa" if wa else ""}" href="{href}"{" target=_blank rel=noopener" if wa else ""}>'
+        f'<span class="contactcard__ic">{icon(i,"contactcard__icon")}</span>'
+        f'<span class="contactcard__label">{lbl}</span>'
+        f'<span class="contactcard__val">{esc(val)}</span></a>'
+        for i, lbl, val, href, wa in cards
+    )
+    body = f"""{breadcrumbs([('Home', '/'), ('Contact', None)])}
+    <section class="pagehead">
+      <div class="container">
+        <span class="eyebrow">Contact</span>
+        <h1 class="pagehead__title">Talk to us about your part</h1>
+        <p class="pagehead__lead">The fastest way to reach us is WhatsApp — send your vehicle and the part and we'll take it from there. Or call, email, or drop by the shop in Sharjah.</p>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container">
+        <div class="contactgrid">{card_html}</div>
+      </div>
+    </section>
+    <section class="section section--alt">
+      <div class="container split">
+        <div class="split__main">
+          <div class="contactinfo">
+            <h2 class="mini-h">{icon('location','ic ic--sm')} Our shop</h2>
+            <p class="prose">{esc(a['line1'])}<br>{esc(a['line2'])}<br>{esc(a['city'])}, {esc(a['country'])}</p>
+            <h2 class="mini-h">{icon('clock','ic ic--sm')} Opening hours</h2>
+            <ul class="footer__hours contactinfo__hours">{hours}</ul>
+            <div class="contactinfo__cta">{btn_enquiry('Request a Part', cls='btn btn--wa btn--lg')}</div>
+          </div>
+        </div>
+        <aside class="split__aside">
+          <div class="mapcard">
+            <iframe title="Al Jawareh Auto Spare Parts location map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+              src="https://maps.google.com/maps?q={quote(SITE['maps_query'])}&output=embed"></iframe>
+          </div>
+        </aside>
+      </div>
+    </section>
+    {cta_banner('We reply during working hours', "Send your enquiry any time on WhatsApp — we'll get back to you as soon as we're open.")}"""
+    ld = [breadcrumb_schema([('Home', '/'), ('Contact', '/contact/')]), store_schema()]
+    render_page("Contact Al Jawareh Auto Spare Parts | Sharjah | 050 149 4916",
+                "Contact Al Jawareh Auto Spare Parts in Industrial Area 12, Sharjah. WhatsApp or call 050 149 4916 for genuine & OEM parts, delivered across the UAE.",
+                "/contact/", body, ld, active="contact", priority="0.7", changefreq="monthly")
+
+
+# ---------------------------------------------------------------------------
+# PAGE: FAQ
+# ---------------------------------------------------------------------------
+def build_faq():
+    body = f"""{breadcrumbs([('Home', '/'), ('FAQ', None)])}
+    <section class="pagehead">
+      <div class="container">
+        <span class="eyebrow">FAQ</span>
+        <h1 class="pagehead__title">Ordering, delivery &amp; warranty</h1>
+        <p class="pagehead__lead">Everything you might want to know before you send us a part request. Still stuck? Message us on WhatsApp — we're happy to help.</p>
+      </div>
+    </section>
+    <section class="section"><div class="container container--narrow">{faq_block(FAQS, eyebrow='Questions', title='Frequently asked questions')}</div></section>
+    {cta_banner('Question not answered?', 'Ask us directly on WhatsApp — real answers, no call centre.')}"""
+    ld = [breadcrumb_schema([('Home', '/'), ('FAQ', '/faq/')]), faq_schema(FAQS), store_schema()]
+    render_page("FAQ | Al Jawareh Auto Spare Parts | Ordering, Delivery & Warranty",
+                "Answers on ordering car parts, genuine vs OEM, VIN matching, UAE delivery, warranty and payment — from Al Jawareh Auto Spare Parts, Sharjah.",
+                "/faq/", body, ld, active="faq", priority="0.6", changefreq="monthly")
+
+
+# ---------------------------------------------------------------------------
+# PAGE: BLOG INDEX + POST
+# ---------------------------------------------------------------------------
+def render_blocks(blocks):
+    out = []
+    for kind, val in blocks:
+        if kind == "p":
+            out.append(f"<p>{esc(val)}</p>")
+        elif kind == "h2":
+            out.append(f'<h2 class="post__h2">{esc(val)}</h2>')
+        elif kind == "ul":
+            lis = "".join(f'<li>{icon("check","ic ic--sm")}<span>{esc(x)}</span></li>' for x in val)
+            out.append(f'<ul class="post__ul">{lis}</ul>')
+    return "".join(out)
+
+
+def build_blog_index():
+    posts = sorted(POSTS, key=lambda p: p["date"], reverse=True)
+    body = f"""{breadcrumbs([('Home', '/'), ('Blog', None)])}
+    <section class="pagehead">
+      <div class="container">
+        <span class="eyebrow">Guides</span>
+        <h1 class="pagehead__title">Parts buying &amp; fitment guides</h1>
+        <p class="pagehead__lead">Straight-talking advice on buying the right part — VIN matching, genuine vs OEM, and marque-specific fitment guides from the shop floor.</p>
+      </div>
+    </section>
+    <section class="section"><div class="container"><div class="grid grid--posts">{"".join(blog_card(p) for p in posts)}</div></div></section>
+    {cta_banner("Reading up before you buy?", "When you're ready, send us your vehicle and the part on WhatsApp for a quote.")}"""
+    ld = [breadcrumb_schema([('Home', '/'), ('Blog', '/blog/')]),
+          {"@context": "https://schema.org", "@type": "Blog", "name": f'{SITE["name"]} Blog',
+           "url": abs_url("/blog/"),
+           "blogPost": [{"@type": "BlogPosting", "headline": p["title"], "url": abs_url(f'/blog/{p["slug"]}/'),
+                         "datePublished": p["date"]} for p in posts]}]
+    render_page("Parts Buying & Fitment Guides | Al Jawareh Auto Spare Parts Blog",
+                "Guides on buying car parts in the UAE — VIN matching, genuine vs OEM vs aftermarket, Range Rover air suspension, Mercedes service parts and more.",
+                "/blog/", body, ld, active="blog", priority="0.7", changefreq="weekly")
+
+
+def build_post(p):
+    crumbs = [('Home', '/'), ('Blog', '/blog/'), (p["title"], None)]
+    related = [x for x in POSTS if x["slug"] != p["slug"]]
+    related = sorted(related, key=lambda x: x["date"], reverse=True)[:3]
+    rel_html = "".join(blog_card(x) for x in related)
+    body = f"""{breadcrumbs(crumbs)}
+    <article class="post">
+      <div class="container container--narrow">
+        <header class="post__head">
+          <span class="post__cat">{esc(p['category'])}</span>
+          <h1 class="post__title">{esc(p['title'])}</h1>
+          <p class="post__meta"><span>{esc(p['read_time'])}</span> &middot; <span>Al Jawareh Auto Spare Parts</span></p>
+        </header>
+        {media(f'/assets/images/blog/{p["slug"]}.jpg', p['title'], '16x9', p['category'], 'quote', 'post__hero')}
+        <div class="post__body">{render_blocks(p['body'])}</div>
+        <div class="post__cta">
+          <h3>Need this part for your car?</h3>
+          <p>Send us your vehicle and VIN on WhatsApp — genuine or OEM, matched and quoted.</p>
+          {btn_enquiry('Request a Part', cls='btn btn--wa btn--lg')}
+        </div>
+      </div>
+    </article>
+    <section class="section section--alt">
+      <div class="container">
+        {section_header('Keep reading', 'More guides')}
+        <div class="grid grid--posts">{rel_html}</div>
+      </div>
+    </section>"""
+    ld = [breadcrumb_schema([('Home', '/'), ('Blog', '/blog/'), (p['title'], f'/blog/{p["slug"]}/')]),
+          article_schema(p)]
+    title = f'{p["title"]} | Al Jawareh Auto Spare Parts'
+    render_page(title, p["excerpt"], f'/blog/{p["slug"]}/', body, ld, active="blog", og_type="article",
+                image=f'/assets/images/blog/{p["slug"]}.jpg', priority="0.6", changefreq="yearly",
+                lastmod=p["date"])
+
+
+# ---------------------------------------------------------------------------
+# PAGE: 404 (written raw, not in sitemap)
+# ---------------------------------------------------------------------------
+def build_404():
+    body = """<section class="notfound">
+      <div class="container">
+        <span class="notfound__code">404</span>
+        <h1 class="notfound__title">This part isn't here</h1>
+        <p class="notfound__lead">The page you're after has moved or never existed. Let's get you back on track.</p>
+        <div class="notfound__actions">
+          <a class="btn btn--wa btn--lg" href="/">Back to home</a>
+          <a class="btn btn--ghost btn--lg" href="/brands/">Browse brands</a>
+          <a class="btn btn--ghost btn--lg" href="/parts/">Browse parts</a>
+        </div>
+      </div>
+    </section>"""
+    doc = (render_head("Page not found | Al Jawareh Auto Spare Parts",
+                       "The page you're looking for could not be found.", "/404.html", [], "website")
+           + nav("") + f'<main id="main">{body}</main>' + footer() + whatsapp_widget()
+           + '<script src="/assets/js/main.js" defer></script>\n</body>\n</html>\n')
+    with open(os.path.join(DIST, "404.html"), "w", encoding="utf-8") as f:
+        f.write(doc)
+
+
+# ---------------------------------------------------------------------------
+# ASSETS, SEO FILES, SITE IMAGES
+# ---------------------------------------------------------------------------
+def copy_assets():
+    dst = os.path.join(DIST, "assets")
+    if os.path.isdir(ASSETS_SRC):
+        shutil.copytree(ASSETS_SRC, dst)
+    else:
+        os.makedirs(dst, exist_ok=True)
+
+
+def build_sitemap():
+    urls = "".join(
+        f"  <url><loc>{esc(p['loc'])}</loc><lastmod>{p['lastmod']}</lastmod>"
+        f"<changefreq>{p['changefreq']}</changefreq><priority>{p['priority']}</priority></url>\n"
+        for p in PAGES
+    )
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+           f"{urls}</urlset>\n")
+    with open(os.path.join(DIST, "sitemap.xml"), "w", encoding="utf-8") as f:
+        f.write(xml)
+
+
+def build_robots():
+    txt = (f"User-agent: *\n"
+           f"Allow: /\n"
+           f"Disallow: /404.html\n\n"
+           f"Sitemap: {SITE['base_url']}/sitemap.xml\n")
+    with open(os.path.join(DIST, "robots.txt"), "w", encoding="utf-8") as f:
+        f.write(txt)
+
+
+def build_htaccess():
+    txt = r"""# ============================================================================
+# Al Jawareh Auto Spare Parts — .htaccess
+# Generated by build.py. Edit build.py (build_htaccess) to change.
+# ============================================================================
+
+Options -Indexes
+DirectoryIndex index.html
+ServerSignature Off
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Force HTTPS + www (canonical host) in a single 301
+    RewriteCond %{HTTPS} off [OR]
+    RewriteCond %{HTTP_HOST} !^www\. [NC]
+    RewriteCond %{HTTP_HOST} ^(?:www\.)?(.+)$ [NC]
+    RewriteRule ^ https://www.%1%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# Custom error page
+ErrorDocument 404 /404.html
+
+# ---------------------------------------------------------------------------
+# Compression
+# ---------------------------------------------------------------------------
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+    AddOutputFilterByType DEFLATE application/javascript application/x-javascript text/javascript
+    AddOutputFilterByType DEFLATE application/json application/xml application/rss+xml
+    AddOutputFilterByType DEFLATE image/svg+xml application/xhtml+xml
+    AddOutputFilterByType DEFLATE font/ttf font/otf font/woff font/woff2 application/vnd.ms-fontobject
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# Browser caching
+# ---------------------------------------------------------------------------
+<IfModule mod_expires.c>
+    ExpiresActive On
+    # Never cache HTML so content updates go live immediately
+    ExpiresByType text/html "access plus 0 seconds"
+    ExpiresByType application/xml "access plus 0 seconds"
+    ExpiresByType text/xml "access plus 0 seconds"
+    # Long cache for static, fingerprint-safe assets
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType text/javascript "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/ttf "access plus 1 year"
+</IfModule>
+
+<IfModule mod_headers.c>
+    # Cache policy
+    <FilesMatch "\.(css|js|jpg|jpeg|png|webp|gif|svg|ico|woff2|woff|ttf)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+    <FilesMatch "\.(html|xml)$">
+        Header set Cache-Control "no-cache, must-revalidate"
+    </FilesMatch>
+
+    # Security headers
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=HTTPS
+    Header unset X-Powered-By
+    Header unset Server
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# Correct MIME types
+# ---------------------------------------------------------------------------
+<IfModule mod_mime.c>
+    AddType image/svg+xml .svg
+    AddType application/font-woff2 .woff2
+    AddType image/x-icon .ico
+</IfModule>
+
+# Protect dotfiles (except .well-known)
+<FilesMatch "^\.(?!well-known)">
+    Require all denied
+</FilesMatch>
+"""
+    with open(os.path.join(DIST, ".htaccess"), "w", encoding="utf-8") as f:
+        f.write(txt)
+
+
+def _find_ttf(bold=False):
+    names = (["DejaVuSans-Bold.ttf", "DejaVuSans.ttf"] if bold else ["DejaVuSans.ttf"])
+    roots = ["/usr/share/fonts", "/usr/local/share/fonts",
+             os.path.join(os.path.dirname(__file__), "assets", "fonts")]
+    for r in roots:
+        for dp, _, fs in os.walk(r) if os.path.isdir(r) else []:
+            for want in names:
+                if want in fs:
+                    return os.path.join(dp, want)
+    return None
+
+
+def generate_site_images():
+    """Generate favicon.ico, apple-touch-icon.png and og-default.jpg if Pillow is available.
+    The site works fine without them (favicon.svg is shipped as a vector fallback)."""
+    site_dir = os.path.join(DIST, "assets", "images", "site")
+    os.makedirs(site_dir, exist_ok=True)
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+    except Exception:
+        print("  (Pillow not available — skipping raster favicon/OG; favicon.svg still shipped)")
+        return
+
+    GRAPHITE = (18, 22, 29)
+    AMBER = (245, 166, 35)
+    WHITE = (246, 247, 249)
+
+    def font(sz, bold=True):
+        p = _find_ttf(bold)
+        try:
+            return ImageFont.truetype(p, sz) if p else ImageFont.load_default()
+        except Exception:
+            return ImageFont.load_default()
+
+    # favicon.ico + png (rounded amber tile with "AJ")
+    def mark(size):
+        img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+        d = ImageDraw.Draw(img)
+        r = int(size * 0.22)
+        d.rounded_rectangle([0, 0, size - 1, size - 1], radius=r, fill=GRAPHITE)
+        d.rounded_rectangle([int(size*0.06), int(size*0.06), int(size*0.94), int(size*0.94)],
+                            radius=int(r*0.8), outline=AMBER, width=max(2, int(size*0.05)))
+        f = font(int(size * 0.5))
+        t = "AJ"
+        try:
+            bb = d.textbbox((0, 0), t, font=f)
+            tw, th = bb[2]-bb[0], bb[3]-bb[1]
+            d.text(((size-tw)/2 - bb[0], (size-th)/2 - bb[1]), t, font=f, fill=AMBER)
+        except Exception:
+            d.text((size*0.25, size*0.25), t, fill=AMBER)
+        return img
+
+    try:
+        ico = mark(64)
+        ico.save(os.path.join(DIST, "favicon.ico"),
+                 sizes=[(16, 16), (32, 32), (48, 48)])
+        mark(180).convert("RGB").save(os.path.join(site_dir, "apple-touch-icon.png"))
+        mark(512).save(os.path.join(site_dir, "logo.png"))
+    except Exception as e:
+        print(f"  (favicon generation skipped: {e})")
+
+    # OG default 1200x630
+    try:
+        W, H = 1200, 630
+        og = Image.new("RGB", (W, H), GRAPHITE)
+        d = ImageDraw.Draw(og)
+        for i in range(H):  # subtle vertical gradient
+            k = i / H
+            d.line([(0, i), (W, i)], fill=(int(18+8*k), int(22+8*k), int(29+10*k)))
+        d.rectangle([0, 0, 16, H], fill=AMBER)
+        d.text((80, 150), "AL JAWAREH", font=font(96), fill=WHITE)
+        d.text((84, 262), "AUTO SPARE PARTS", font=font(44), fill=AMBER)
+        d.text((84, 360), "Genuine & OEM parts for premium European", font=font(34), fill=(200, 205, 213))
+        d.text((84, 404), "& American vehicles — Sharjah, UAE", font=font(34), fill=(200, 205, 213))
+        d.text((84, 512), "WhatsApp  050 149 4916", font=font(36), fill=WHITE)
+        og.save(os.path.join(site_dir, "og-default.jpg"), quality=88)
+    except Exception as e:
+        print(f"  (OG image generation skipped: {e})")
+
+
+# ---------------------------------------------------------------------------
+# MAIN
+# ---------------------------------------------------------------------------
+def main():
+    if os.path.isdir(DIST):
+        shutil.rmtree(DIST)
+    os.makedirs(DIST)
+
+    copy_assets()
+    generate_site_images()
+
+    build_home()
+    build_brands_index()
+    build_parts_index()
+    for b in BRANDS:
+        build_brand(b)
+    for c in CATEGORIES:
+        build_category(c)
+    for b in BRANDS:
+        for c in CATEGORIES:
+            build_brand_category(b, c)
+    build_locations_index()
+    for l in LOCATIONS:
+        build_location(l)
+    build_about()
+    build_contact()
+    build_faq()
+    build_request()
+    build_blog_index()
+    for p in POSTS:
+        build_post(p)
+    build_404()
+
+    build_sitemap()
+    build_robots()
+    build_htaccess()
+
+    n_bc = len(BRANDS) * len(CATEGORIES)
+    print("=" * 60)
+    print(f"  Built {len(PAGES)} URLs into dist/")
+    print("-" * 60)
+    print(f"  Home ............................ 1")
+    print(f"  Brand pages ..................... {len(BRANDS)}")
+    print(f"  Category pages .................. {len(CATEGORIES)}")
+    print(f"  Brand x Category pages .......... {n_bc}")
+    print(f"  Location pages .................. {len(LOCATIONS)}")
+    print(f"  Blog (index + posts) ............ {1 + len(POSTS)}")
+    print(f"  Core (brands/parts/locations idx, about, contact, faq, request) .. 7")
+    print(f"  + 404.html, sitemap.xml, robots.txt, .htaccess")
+    print("=" * 60)
+
+
+if __name__ == "__main__":
+    main()

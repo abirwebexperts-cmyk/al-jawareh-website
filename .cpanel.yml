@@ -1,0 +1,9 @@
+---
+deployment:
+  tasks:
+    # 1. Set this to YOUR cPanel home path. On Namecheap it's usually
+    #    /home/<cpanel-username>/public_html/  (find the username in cPanel top-right).
+    - export DEPLOYPATH=/home/CPANEL_USERNAME/public_html/
+
+    # 2. Copy the built site (contents of dist/, including the .htaccess) into public_html.
+    - /bin/cp -R dist/. $DEPLOYPATH
