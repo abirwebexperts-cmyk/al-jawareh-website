@@ -813,7 +813,7 @@ def build_home():
       <div class="hero__bg" aria-hidden="true"><img class="hero__photo" src="/assets/images/site/hero.jpg" alt="" loading="eager" onload="this.classList.add('is-in')" onerror="this.remove()"><span class="hero__grid"></span><span class="hero__glow"></span></div>
       <div class="container hero__inner">
         <div class="hero__content">
-          <span class="hero__eyebrow">{icon('shield','ic ic--sm')} 9 premium marques &middot; Sharjah, UAE</span>
+          <span class="hero__eyebrow">{icon('shield','ic ic--sm')} Trusted Range Rover &amp; Land Rover spare parts in Sharjah</span>
           <h1 class="hero__title">Genuine &amp; OEM spare parts for <span class="grad">Europe's finest</span>, in stock in Sharjah</h1>
           <p class="hero__lead">Range Rover, Mercedes-Benz, BMW, Audi, Porsche and more. Send us your vehicle and the part you need on WhatsApp — we match it to your VIN, quote you honestly, and deliver across the UAE.</p>
           <div class="hero__actions">
