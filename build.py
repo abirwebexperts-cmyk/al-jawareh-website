@@ -810,7 +810,7 @@ def build_home():
     marquee = "".join(f'<span class="marquee__item">{esc(b["name"])}</span>' for b in BRANDS)
     marquee = marquee + marquee  # duplicate for seamless loop
     hero = f"""<section class="hero">
-      <div class="hero__bg" aria-hidden="true"><img class="hero__photo" src="/assets/images/site/hero.jpg" alt="" loading="eager" onload="this.classList.add('is-in')" onerror="this.remove()"><span class="hero__grid"></span><span class="hero__glow"></span></div>
+      <div class="hero__bg" aria-hidden="true"><img class="hero__photo" src="/assets/images/site/hero.jpg" alt="" loading="eager" onload="this.classList.add('is-in')" onerror="this.remove()"><span class="hero__scrim"></span><span class="hero__grid"></span><span class="hero__glow"></span></div>
       <div class="container hero__inner">
         <div class="hero__content">
           <span class="hero__eyebrow">{icon('shield','ic ic--sm')} Trusted Range Rover &amp; Land Rover spare parts in Sharjah</span>
