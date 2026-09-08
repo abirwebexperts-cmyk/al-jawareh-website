@@ -414,6 +414,7 @@ def nav(active=""):
     </div>
   </div>
   <div class="mobile" data-mobile hidden>
+    <div class="mobile__scrim" data-menu-close></div>
     <div class="mobile__panel">
       <div class="mobile__head">
         <img class="brand__logo" src="/assets/images/site/logo-full.png" alt="{esc(SITE['name'])}" width="495" height="160">
@@ -435,7 +436,6 @@ def nav(active=""):
         <a class="btn btn--ghost-light btn--block" href="{tel_link()}">{icon('phone','ic ic--sm')} {esc(SITE['phone_display'])}</a>
       </div>
     </div>
-    <div class="mobile__scrim" data-menu-close></div>
   </div>
 </header>
 """
