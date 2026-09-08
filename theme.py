@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Embedded site assets for Al Jawareh Auto Spare Parts.
-
-Editable: STYLE_CSS (design), MAIN_JS (menus, live hours, parts builder, WhatsApp).
-Binary blobs (favicon, logo, hero photo, share image) are base64 — don't hand-edit.
+Editable: STYLE_CSS, MAIN_JS. Binary blobs are base64 — don't hand-edit.
 """
 
 STYLE_CSS = r"""/* ==========================================================================
@@ -65,7 +63,7 @@ STYLE_CSS = r"""/* =============================================================
 }
 
 *,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;overflow-x:hidden}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 body{
   margin:0;font-family:var(--f-body);color:var(--body);background:var(--surface);
@@ -195,26 +193,33 @@ p{margin:0}
 /* mobile off-canvas */
 .mobile{position:fixed;inset:0;z-index:150}
 .mobile[hidden]{display:none}
-.mobile__scrim{position:absolute;inset:0;background:rgba(6,8,12,.55);backdrop-filter:blur(2px);animation:fade .2s ease}
-.mobile__panel{position:absolute;top:0;right:0;height:100%;width:min(360px,90vw);background:var(--surface);
-  display:flex;flex-direction:column;box-shadow:var(--sh-lg);animation:slideIn .25s ease}
-.mobile__head{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.2rem;border-bottom:1px solid var(--line);background:var(--graphite)}
-.mobile__head .brand__name{color:#fff}
+.mobile__scrim{position:absolute;inset:0;background:rgba(6,8,12,.7);animation:fade .2s ease}
+.mobile__panel{position:absolute;top:0;right:0;height:100%;height:100dvh;width:min(372px,88vw);
+  background:#0c0f15;background:linear-gradient(180deg,#151a23 0%,#0b0e13 100%);color:var(--on-dark);
+  display:flex;flex-direction:column;box-shadow:-22px 0 55px rgba(0,0,0,.55);
+  animation:slideIn .28s cubic-bezier(.22,.61,.36,1);border-left:1px solid rgba(255,255,255,.06)}
+.mobile__head{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.15rem;border-bottom:1px solid rgba(255,255,255,.08)}
 .mobile__head .brand__logo{height:34px;filter:none}
-.mobile__close{width:42px;height:42px;color:#fff;display:grid;place-items:center;border-radius:var(--r-sm)}
-.mobile__close:hover{background:rgba(255,255,255,.1)}
-.mobile__body{flex:1;overflow-y:auto;padding:.6rem}
-.mobile__link{display:block;padding:.85rem 1rem;font-family:var(--f-head);font-weight:600;color:var(--ink-2);border-radius:var(--r-sm)}
-.mobile__link:hover{background:var(--surface-2)}
-.mobile__acc summary{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;
-  font-family:var(--f-head);font-weight:600;color:var(--ink-2);border-radius:var(--r-sm);list-style:none;cursor:pointer}
+.mobile__close{width:42px;height:42px;color:#fff;display:grid;place-items:center;border-radius:var(--r-sm);border:1px solid rgba(255,255,255,.12)}
+.mobile__close:hover{background:rgba(255,255,255,.08)}
+.mobile__status{display:flex;padding:.7rem 1.15rem;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.18)}
+.mobile__status .status{font-size:.82rem}
+.mobile__body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:.5rem .6rem}
+.mobile__link{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.95rem 1rem;
+  font-family:var(--f-head);font-weight:600;font-size:1.03rem;color:var(--on-dark);border-radius:var(--r-sm);
+  border-bottom:1px solid rgba(255,255,255,.05)}
+.mobile__link:hover,.mobile__link:active{background:rgba(245,166,35,.12);color:#fff}
+.mobile__acc{border-bottom:1px solid rgba(255,255,255,.05)}
+.mobile__acc summary{display:flex;align-items:center;justify-content:space-between;padding:.95rem 1rem;
+  font-family:var(--f-head);font-weight:600;font-size:1.03rem;color:var(--on-dark);border-radius:var(--r-sm);list-style:none;cursor:pointer}
 .mobile__acc summary::-webkit-details-marker{display:none}
-.mobile__acc summary svg{transition:transform .2s;color:var(--muted)}
+.mobile__acc summary svg{transition:transform .25s;color:var(--amber)}
+.mobile__acc[open] summary{color:#fff}
 .mobile__acc[open] summary svg{transform:rotate(180deg)}
-.mobile__sub{display:flex;flex-direction:column;padding:.2rem .4rem .6rem 1rem}
-.mobile__sub a{padding:.55rem .7rem;color:var(--body);font-size:.92rem;border-radius:var(--r-sm)}
-.mobile__sub a:hover{background:var(--surface-2);color:var(--amber-700)}
-.mobile__foot{padding:1rem 1.2rem;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:.6rem}
+.mobile__sub{display:flex;flex-direction:column;padding:.1rem .3rem .7rem .55rem}
+.mobile__sub a{padding:.62rem .8rem;color:var(--on-dark-muted);font-size:.95rem;border-radius:var(--r-sm)}
+.mobile__sub a:hover,.mobile__sub a:active{background:rgba(255,255,255,.06);color:var(--amber)}
+.mobile__foot{padding:1rem 1.15rem calc(1rem + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:.65rem;background:rgba(0,0,0,.25)}
 
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
@@ -778,6 +783,12 @@ p{margin:0}
 .pb--error .pb__pickrow{outline:2px solid rgba(229,83,61,.55);outline-offset:5px;border-radius:var(--r-sm)}
 .pb--error .pb__empty{color:#c0392b;font-weight:600}
 @media (max-width:380px){.pb__pickrow{grid-template-columns:1fr}}
+
+
+/* --- mobile viewport hardening: fields >=16px stop iOS auto-zoom on focus --- */
+@media (max-width:768px){
+  input, select, textarea{font-size:16px !important}
+}
 """
 
 MAIN_JS = r"""/* ==========================================================================

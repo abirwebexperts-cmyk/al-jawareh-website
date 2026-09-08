@@ -271,7 +271,7 @@ def render_head(title, description, path, jsonld_objs, og_type="website", image=
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(description)}">
 <link rel="canonical" href="{esc(canonical)}">
@@ -419,6 +419,7 @@ def nav(active=""):
         <img class="brand__logo" src="/assets/images/site/logo-full.png" alt="{esc(SITE['name'])}" width="495" height="160">
         <button class="mobile__close" data-menu-close aria-label="Close menu">{icon('close','ic')}</button>
       </div>
+      <div class="mobile__status"><span class="status" data-hours-status role="status"><span class="status__dot"></span><span class="status__text">Sat–Thu 8AM–9PM &middot; closed Fri</span></span></div>
       <div class="mobile__body">
         <a class="mobile__link" href="/">Home</a>
         <details class="mobile__acc"><summary>Brands {icon('chevron','ic ic--xs')}</summary><div class="mobile__sub">{m_brands}<a href="/brands/">All brands</a></div></details>
@@ -431,7 +432,7 @@ def nav(active=""):
       </div>
       <div class="mobile__foot">
         <button class="btn btn--wa btn--block" data-enquiry-open>{icon('whatsapp','ic ic--sm')} Request a Part</button>
-        <a class="btn btn--ghost btn--block" href="{tel_link()}">{icon('phone','ic ic--sm')} {esc(SITE['phone_display'])}</a>
+        <a class="btn btn--ghost-light btn--block" href="{tel_link()}">{icon('phone','ic ic--sm')} {esc(SITE['phone_display'])}</a>
       </div>
     </div>
     <div class="mobile__scrim" data-menu-close></div>
