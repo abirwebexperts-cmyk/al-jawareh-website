@@ -21,6 +21,21 @@ from urllib.parse import quote
 
 from data import SITE, BRANDS, CATEGORIES, LOCATIONS, FAQS, POSTS
 import theme
+import hashlib
+
+
+def _asset_version():
+    h = hashlib.sha1()
+    for part in (theme.STYLE_CSS, theme.MAIN_JS, theme.FAVICON_SVG):
+        h.update(part.encode("utf-8"))
+    for d in (getattr(theme, "SITE_IMAGES_B64", {}), getattr(theme, "BRAND_LOGOS_B64", {})):
+        for k in sorted(d):
+            h.update(k.encode("utf-8"))
+            h.update(d[k].encode("utf-8"))
+    return h.hexdigest()[:10]
+
+
+ASSET_VER = _asset_version()
 
 DIST = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dist")
 ASSETS_SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
@@ -161,7 +176,7 @@ def brand_logo(b, size="sm"):
     Falls back to the marque name if the logo image isn't present."""
     slug, name = b["slug"], b["name"]
     return (f'<span class="blogo blogo--{size} ph" data-ph title="{esc(name)}">'
-            f'<img src="/assets/images/brands/{slug}-logo.png" alt="{esc(name)} logo" loading="lazy" '
+            f'<img src="/assets/images/brands/{slug}-logo.png?v={ASSET_VER}" alt="{esc(name)} logo" loading="lazy" '
             f'onload="this.closest(\'[data-ph]\').classList.add(\'is-loaded\')" '
             f'onerror="this.closest(\'[data-ph]\').classList.add(\'is-fallback\')">'
             f'<span class="blogo__text" aria-hidden="true">{esc(name)}</span></span>')
@@ -307,7 +322,7 @@ def render_head(title, description, path, jsonld_objs, og_type="website", image=
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap">
-<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/style.css?v={ASSET_VER}">
 {jsonld_tags(jsonld_objs)}</head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -322,7 +337,7 @@ def render_page(title, description, path, body, jsonld_objs, active="", og_type=
         + f'<main id="main">{body}</main>'
         + footer()
         + whatsapp_widget()
-        + '<script src="/assets/js/main.js" defer></script>\n</body>\n</html>\n'
+        + '<script src="/assets/js/main.js?v=' + ASSET_VER + '" defer></script>\n</body>\n</html>\n'
     )
     write_page(path, doc, priority=priority, changefreq=changefreq, lastmod=lastmod)
 
@@ -390,7 +405,7 @@ def nav(active=""):
   <div class="nav">
     <div class="container nav__inner">
       <a class="brand" href="/" aria-label="{esc(SITE['name'])} home">
-        <img class="brand__logo" src="/assets/images/site/logo-full.png" alt="{esc(SITE['name'])}" width="495" height="160">
+        <img class="brand__logo" src="/assets/images/site/logo-full.png?v={ASSET_VER}" alt="{esc(SITE['name'])}" width="495" height="160">
       </a>
       <nav class="nav__links" aria-label="Primary navigation">
         <a class="nav__link{act('home')}" href="/">Home</a>
@@ -428,7 +443,7 @@ def nav(active=""):
     <div class="mobile__scrim" data-menu-close></div>
     <div class="mobile__panel">
       <div class="mobile__head">
-        <img class="brand__logo" src="/assets/images/site/logo-full.png" alt="{esc(SITE['name'])}" width="495" height="160">
+        <img class="brand__logo" src="/assets/images/site/logo-full.png?v={ASSET_VER}" alt="{esc(SITE['name'])}" width="495" height="160">
         <button class="mobile__close" data-menu-close aria-label="Close menu">{icon('close','ic')}</button>
       </div>
       <div class="mobile__status"><span class="status" data-hours-status role="status"><span class="status__dot"></span><span class="status__text">Sat–Thu 8AM–9PM &middot; closed Fri</span></span></div>
@@ -490,7 +505,7 @@ def footer():
   <div class="container footer__grid">
     <div class="footer__col footer__brand">
       <a class="brand brand--footer" href="/">
-        <img class="brand__logo" src="/assets/images/site/logo-full.png" alt="{esc(SITE['name'])}" width="495" height="160">
+        <img class="brand__logo" src="/assets/images/site/logo-full.png?v={ASSET_VER}" alt="{esc(SITE['name'])}" width="495" height="160">
       </a>
       <p class="footer__blurb">Genuine &amp; OEM spare parts for premium European and American vehicles — supplied across the UAE from our shop in Sharjah.</p>
       <div class="footer__contact">
@@ -822,7 +837,7 @@ def build_home():
     marquee = "".join(f'<span class="marquee__item">{esc(b["name"])}</span>' for b in BRANDS)
     marquee = marquee + marquee  # duplicate for seamless loop
     hero = f"""<section class="hero">
-      <div class="hero__bg" aria-hidden="true"><img class="hero__photo" src="/assets/images/site/hero.jpg" alt="" loading="eager" onload="this.classList.add('is-in')" onerror="this.remove()"><span class="hero__scrim"></span><span class="hero__grid"></span><span class="hero__glow"></span></div>
+      <div class="hero__bg" aria-hidden="true"><img class="hero__photo" src="/assets/images/site/hero.jpg?v={ASSET_VER}" alt="" loading="eager" onload="this.classList.add('is-in')" onerror="this.remove()"><span class="hero__scrim"></span><span class="hero__grid"></span><span class="hero__glow"></span></div>
       <div class="container hero__inner">
         <div class="hero__content">
           <span class="hero__eyebrow">{icon('shield','ic ic--sm')} Trusted Range Rover &amp; Land Rover spare parts in Sharjah</span>
@@ -1614,7 +1629,7 @@ def build_404():
     doc = (render_head("Page not found | Al Jawareh Auto Spare Parts",
                        "The page you're looking for could not be found.", "/404.html", [], "website")
            + nav("") + f'<main id="main">{body}</main>' + footer() + whatsapp_widget()
-           + '<script src="/assets/js/main.js" defer></script>\n</body>\n</html>\n')
+           + '<script src="/assets/js/main.js?v=' + ASSET_VER + '" defer></script>\n</body>\n</html>\n')
     with open(os.path.join(DIST, "404.html"), "w", encoding="utf-8") as f:
         f.write(doc)
 
