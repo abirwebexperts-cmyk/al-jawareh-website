@@ -156,6 +156,17 @@ def monogram(name):
     return f'<span class="mono" aria-hidden="true">{esc(m)}</span>'
 
 
+def brand_logo(b, size="sm"):
+    """Real brand logo inside a white badge (works on light cards and dark headers).
+    Falls back to the marque name if the logo image isn't present."""
+    slug, name = b["slug"], b["name"]
+    return (f'<span class="blogo blogo--{size} ph" data-ph title="{esc(name)}">'
+            f'<img src="/assets/images/brands/{slug}-logo.png" alt="{esc(name)} logo" loading="lazy" '
+            f'onload="this.closest(\'[data-ph]\').classList.add(\'is-loaded\')" '
+            f'onerror="this.closest(\'[data-ph]\').classList.add(\'is-fallback\')">'
+            f'<span class="blogo__text" aria-hidden="true">{esc(name)}</span></span>')
+
+
 def title_of_brand_cat(brand, cat, loc="Sharjah & UAE"):
     return f'{brand["name"]} {cat["name"]}'
 
@@ -645,7 +656,7 @@ def hero_quick_form():
 
 def brand_card(b):
     return (f'<a class="bcard" href="/brands/{b["slug"]}/">'
-            f'<span class="bcard__logo">{monogram(b["name"])}</span>'
+            f'<span class="bcard__logo">{brand_logo(b, "sm")}</span>'
             f'<span class="bcard__name">{esc(b["name"])}</span>'
             f'<span class="bcard__sub">{esc(b["origin"])}</span>'
             f'<span class="bcard__go">View parts {icon("arrow","ic ic--sm")}</span></a>')
@@ -1013,7 +1024,7 @@ def build_brand(b):
     <section class="brandhead">
       <div class="container brandhead__inner">
         <div class="brandhead__text">
-          <div class="brandhead__logo">{logo_slot(b, 'lg')}</div>
+          <div class="brandhead__logo">{brand_logo(b, 'lg')}</div>
           <span class="eyebrow">{esc(b['origin'])} &middot; Genuine &amp; OEM</span>
           <h1 class="brandhead__title">{esc(b['name'])} Spare Parts in Sharjah &amp; the UAE</h1>
           <p class="brandhead__lead">{esc(b['intro'])}</p>
@@ -1111,7 +1122,7 @@ def build_category(c):
 def brand_grid_for_category(c):
     cards = "".join(
         f'<a class="minicard" href="/brands/{b["slug"]}/{c["slug"]}/">'
-        f'<span class="minicard__logo">{monogram(b["name"])}</span>'
+        f'<span class="minicard__logo">{brand_logo(b, "mini")}</span>'
         f'<span class="minicard__name">{esc(b["name"])} {esc(c["short"].lower())}</span>'
         f'{icon("arrow","ic ic--sm")}</a>'
         for b in BRANDS
@@ -1637,6 +1648,9 @@ def copy_assets():
             f.write(base64.b64decode(b64))
     with open(os.path.join(DIST, "favicon.ico"), "wb") as f:
         f.write(base64.b64decode(theme.FAVICON_ICO_B64))
+    for slug, b64 in getattr(theme, "BRAND_LOGOS_B64", {}).items():
+        with open(os.path.join(img_dir, "brands", f"{slug}-logo.png"), "wb") as f:
+            f.write(base64.b64decode(b64))
     # optional: copy real photos the user has added under ./assets/images/
     local_img = os.path.join(ASSETS_SRC, "images")
     if os.path.isdir(local_img):
