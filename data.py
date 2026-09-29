@@ -652,3 +652,35 @@ POSTS = [
         ],
     },
 ]
+
+
+# ---------------------------------------------------------------------------
+# BRANCHES — each gets its own page, menu link and schema.org listing
+# ---------------------------------------------------------------------------
+BRANCH_1 = {
+    "slug": "branch-1",
+    "menu": "Branch 1",
+    "name": "Al Jawareh New Auto Spare Parts - Branch 1",
+    "legal": "Al Jawareh New Auto Spare Parts Tr. Sole Proprietorship LLC - Branch 1",
+    "area": "Al Sajaa",
+    "city": "Sharjah",
+    "plus_code": "8JJH+J6W",
+    "landmarks": "near Tasheel Roundabout and Al Safi Medical Center, opposite the mosque",
+    "phone_display": "058 251 7009",
+    "phone_intl": "+971582517009",
+    "whatsapp": "971582517009",
+    "maps_url": "https://maps.app.goo.gl/iDTUedbicwWgKeV49",
+    "geo": {"lat": 25.331612, "lng": 55.628078},   # decoded from plus code 7HQQ8JJH+J6W
+    "brands": ["range-rover", "land-rover", "jaguar", "bmw", "mercedes-benz"],
+    "categories": ["engine-parts", "transmission-drivetrain", "brakes", "suspension-air-struts",
+                   "filters-service-parts", "electrical-sensors", "body-panels-lights"],
+    "about": [
+        "Al Jawareh New Auto Spare Parts specialises in Range Rover, Land Rover, Jaguar, BMW and "
+        "Mercedes-Benz spare parts in Al Sajaa, Sharjah. We supply genuine, OEM and quality aftermarket "
+        "components — engine and transmission parts, brakes, suspension, filters, electricals, body panels "
+        "and more — for both new and classic models.",
+        "Tell us your chassis or VIN number and we'll match the exact part, at a fair price. Find us near "
+        "Tasheel Roundabout and Al Safi Medical Center, opposite the mosque. Walk in, call, or message us "
+        "on WhatsApp. Delivery available across Sharjah, Dubai and the wider UAE.",
+    ],
+}

@@ -20,6 +20,10 @@ from datetime import date
 from urllib.parse import quote
 
 from data import SITE, BRANDS, CATEGORIES, LOCATIONS, FAQS, POSTS
+try:
+    from data import BRANCH_1
+except ImportError:
+    BRANCH_1 = None
 import theme
 import hashlib
 
@@ -248,6 +252,8 @@ def store_schema():
             for c in CATEGORIES
         ],
     }
+    if BRANCH_1:
+        obj["department"] = [{"@id": abs_url("/" + BRANCH_1["slug"] + "/") + "#store"}]
     sameas = [v for v in SITE["social"].values() if v]
     if sameas:
         obj["sameAs"] = sameas
@@ -430,6 +436,7 @@ def _search_index():
         rows.append({"t": "Parts delivery in " + l["name"], "u": f"/locations/{l['slug']}/", "k": "Area", "x": " ".join(l.get("areas", []))})
     rows += [
         {"t": "Request a part", "u": "/request-a-part/", "k": "Page", "x": "quote order whatsapp vin enquiry price"},
+        {"t": "Branch 1, Al Sajaa", "u": "/branch-1/", "k": "Page", "x": "branch al sajaa tasheel roundabout al safi medical center mosque new auto spare parts 058 251 7009 range rover land rover jaguar bmw mercedes"},
         {"t": "Contact and opening hours", "u": "/contact/", "k": "Page", "x": "phone call address map location hours directions"},
         {"t": "Questions and answers", "u": "/faq/", "k": "Page", "x": "faq warranty delivery payment returns genuine oem"},
         {"t": "About Al Jawareh", "u": "/about/", "k": "Page", "x": "about shop story sharjah"},
@@ -526,6 +533,7 @@ def nav(active=""):
             </div>
           </div>
         </div>
+        <a class="nav__link{act('branch')}" href="/branch-1/">Branch 1</a>
         <a class="nav__link{act('contact')}" href="/contact/">Contact</a>
       </nav>
       <div class="nav__cta">
@@ -563,6 +571,7 @@ def nav(active=""):
         <a class="mobile__link" href="/">Home</a>
         <details class="mobile__acc"><summary>Brands {icon('chevron','ic ic--xs')}</summary><div class="mobile__sub">{m_brands}<a href="/brands/">All brands</a></div></details>
         <details class="mobile__acc"><summary>Parts {icon('chevron','ic ic--xs')}</summary><div class="mobile__sub">{m_parts}<a href="/parts/">All part categories</a></div></details>
+        <a class="mobile__link" href="/branch-1/">Branch 1, Al Sajaa</a>
         <a class="mobile__link" href="/contact/">Contact</a>
       </div>
       <div class="mobile__foot">
@@ -634,6 +643,7 @@ def footer():
       <h2 class="footer__h footer__h--mt">Company</h2>
       <ul class="footer__list">
         <li><a href="/about/">About us</a></li>
+        <li><a href="/branch-1/">Branch 1, Al Sajaa</a></li>
         <li><a href="/blog/">Blog &amp; guides</a></li>
         <li><a href="/faq/">FAQ</a></li>
         <li><a href="/request-a-part/">Request a part</a></li>
@@ -1621,6 +1631,18 @@ def build_contact():
         </aside>
       </div>
     </section>
+    <section class="section">
+      <div class="container">
+        <a class="branchcard" href="/branch-1/">
+          <picture><source srcset="/assets/images/site/branch1-800.webp?v={ASSET_VER}" type="image/webp"><img src="/assets/images/site/branch1.jpg?v={ASSET_VER}" alt="Al Jawareh New Auto Spare Parts Branch 1 shopfront" width="1360" height="765" loading="lazy" decoding="async"></picture>
+          <span class="branchcard__txt">
+            <span class="branchcard__t">Also visit Branch 1 in Al Sajaa</span>
+            <span class="branchcard__p">Near Tasheel Roundabout and Al Safi Medical Center, opposite the mosque. Call or WhatsApp 058 251 7009.</span>
+            <span class="branchcard__go">View Branch 1</span>
+          </span>
+        </a>
+      </div>
+    </section>
     {cta_banner('We reply during working hours', "Send your enquiry any time on WhatsApp and we'll reply as soon as we're open.")}"""
     ld = [breadcrumb_schema([('Home', '/'), ('Contact', '/contact/')]), store_schema()]
     render_page("Contact Al Jawareh Auto Spare Parts | Sharjah | 050 149 4916",
@@ -1718,6 +1740,175 @@ def build_post(p):
                 image=f'/assets/images/blog/{p["slug"]}.jpg', priority="0.6", changefreq="yearly",
                 lastmod=p["date"])
 
+
+
+# ---------------------------------------------------------------------------
+# PAGE: BRANCH 1
+# ---------------------------------------------------------------------------
+def build_branch():
+    br = BRANCH_1
+    path = "/" + br["slug"] + "/"
+    tel = "tel:" + br["phone_intl"]
+    wa = "https://wa.me/" + br["whatsapp"] + "?text=" + quote("Hello " + br["name"] + ", I'd like to enquire about a spare part.")
+    maps = br["maps_url"]
+    lat, lng = br["geo"]["lat"], br["geo"]["lng"]
+    embed = "https://maps.google.com/maps?q=" + str(lat) + "," + str(lng) + "&z=16&output=embed"
+    makes = [BRAND_BY_SLUG[s] for s in br["brands"]]
+    make_names = ", ".join(m["name"] for m in makes[:-1]) + " and " + makes[-1]["name"]
+    cats = [CAT_BY_SLUG[s] for s in br["categories"]]
+    about = "".join('<p class="prose">' + esc(p) + "</p>" for p in br["about"])
+    status = ('<span class="status" data-hours-status><span class="status__dot" aria-hidden="true"></span>'
+              '<span class="status__text"><b class="status__label">Opening hours</b> <span class="status__detail">Saturday to Thursday</span></span></span>')
+    hours_list = ('<ul class="hours__list">'
+                  '<li data-days="sat-thu"><span>Saturday to Thursday</span><span>8 AM to 1 PM<br>4 PM to 9 PM</span></li>'
+                  '<li data-days="fri"><span>Friday</span><span>Closed</span></li></ul>')
+    faqs = [
+        ("Where exactly is Branch 1?",
+         f"In {br['area']}, {br['city']}, {br['landmarks']}. The plus code is {br['plus_code']}, and Get directions opens the exact spot in Google Maps."),
+        ("Are the opening hours the same as the main shop?",
+         "Yes. Saturday to Thursday, 8 AM to 1 PM and 4 PM to 9 PM. Closed on Fridays."),
+        ("Which cars does Branch 1 specialise in?",
+         f"{make_names}, for both new and classic models. Genuine, OEM and quality aftermarket parts."),
+        ("Can Branch 1 deliver?",
+         "Yes. Delivery is available across Sharjah, Dubai and the wider UAE, or you can collect from the branch."),
+        ("How do I order from Branch 1?",
+         f"Walk in, call or WhatsApp {br['phone_display']} with your chassis or VIN number and the part you need. We match the exact part and quote you a fair price."),
+    ]
+    body = f"""{breadcrumbs([('Home', '/'), (br['menu'], None)])}
+    <section class="bhero">
+      <div class="container bhero__grid">
+        <div class="bhero__copy">
+          <div class="bhero__meta">{status}<span class="bhero__tag">{icon('location','ic ic--sm')} {esc(br['area'])}, {esc(br['city'])}</span></div>
+          <h1 class="bhero__title"><span class="hero__t1">Al Jawareh New Auto Spare Parts</span> <span class="hero__t2">Branch 1, {esc(br['area'])}</span></h1>
+          <p class="bhero__lead">{esc(make_names)} spare parts near Tasheel Roundabout, Sharjah. Genuine, OEM and quality aftermarket, matched to your VIN.</p>
+          <div class="bhero__actions">
+            <a class="btn btn--ink btn--lg" href="{tel}">{icon('phone','ic ic--sm')}<span>Call {esc(br['phone_display'])}</span></a>
+            <a class="btn btn--wa btn--lg" href="{wa}" target="_blank" rel="noopener">{icon('whatsapp','ic ic--sm')}<span>WhatsApp Branch 1</span></a>
+            <a class="btn btn--line btn--lg" href="{maps}" target="_blank" rel="noopener">{icon('location','ic ic--sm')}<span>Get directions</span></a>
+          </div>
+        </div>
+        <figure class="bhero__photo">
+          <picture>
+            <source srcset="/assets/images/site/branch1-800.webp?v={ASSET_VER} 800w, /assets/images/site/branch1-1360.webp?v={ASSET_VER} 1360w" sizes="(max-width: 1024px) 100vw, 600px" type="image/webp">
+            <img src="/assets/images/site/branch1.jpg?v={ASSET_VER}" alt="Shopfront of Al Jawareh New Auto Spare Parts Branch 1 in Al Sajaa, Sharjah" width="1360" height="765" fetchpriority="high" decoding="async">
+          </picture>
+          <figcaption>Branch 1 shopfront, near Tasheel Roundabout in {esc(br['area'])}</figcaption>
+        </figure>
+      </div>
+    </section>
+    <section class="bfacts" aria-label="Branch 1 details">
+      <div class="container bfacts__grid">
+        <div class="bfact">
+          <p class="bfact__k">{icon('location','ic ic--sm')} Find us</p>
+          <p class="bfact__v">{esc(br['area'])}, {esc(br['city'])}</p>
+          <p class="bfact__s">Near Tasheel Roundabout and Al Safi Medical Center, opposite the mosque</p>
+          <button type="button" class="bfact__copy" data-copy="{esc(br['plus_code'])}" aria-label="Copy plus code {esc(br['plus_code'])}">Plus code <b>{esc(br['plus_code'])}</b> <span data-copy-label>Copy</span></button>
+        </div>
+        <div class="bfact">
+          <p class="bfact__k">{icon('phone','ic ic--sm')} Call or WhatsApp</p>
+          <p class="bfact__v"><a href="{tel}">{esc(br['phone_display'])}</a></p>
+          <p class="bfact__s">Send your chassis or VIN number and the part you need</p>
+        </div>
+        <div class="bfact">
+          <p class="bfact__k">{icon('clock','ic ic--sm')} Opening hours</p>
+          <p class="bfact__v">Saturday to Thursday</p>
+          <p class="bfact__s">8 AM to 1 PM and 4 PM to 9 PM. Closed Fridays.</p>
+        </div>
+        <div class="bfact">
+          <p class="bfact__k">{icon('truck','ic ic--sm')} Delivery</p>
+          <p class="bfact__v">Sharjah, Dubai and the UAE</p>
+          <p class="bfact__s">Or collect from the branch</p>
+        </div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container bsplit">
+        <div>
+          <h2 class="sec-head__title">Specialists in {esc(make_names)}</h2>
+          <div class="bsplit__about">{about}</div>
+          <ul class="ticklist ticklist--cols">
+            <li>{icon('check','ic ic--sm')}<span>Genuine, OEM and quality aftermarket</span></li>
+            <li>{icon('check','ic ic--sm')}<span>New and classic models</span></li>
+            <li>{icon('check','ic ic--sm')}<span>Exact part matched to your VIN</span></li>
+            <li>{icon('check','ic ic--sm')}<span>Walk in, call or WhatsApp</span></li>
+          </ul>
+        </div>
+        <div class="bbrands">{"".join(brand_card(m) for m in makes)}</div>
+      </div>
+    </section>
+    <section class="section section--alt">
+      <div class="container">
+        {section_header('', 'Parts at Branch 1', 'Genuine, OEM and quality aftermarket, for new and classic models.')}
+        <div class="clist">{"".join(category_card(c) for c in cats)}</div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container">
+        {section_header('', 'How to find Branch 1')}
+        <div class="bmap">
+          <div class="bmap__frame"><iframe title="Map: Al Jawareh New Auto Spare Parts Branch 1, Al Sajaa" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="{embed}"></iframe></div>
+          <div class="bmap__info">
+            <ul class="bmap__list">
+              <li>{icon('location','ic ic--sm')}<span><b>{esc(br['area'])}, {esc(br['city'])}</b><br>Near Tasheel Roundabout</span></li>
+              <li>{icon('location','ic ic--sm')}<span>Near Al Safi Medical Center, opposite the mosque</span></li>
+              <li>{icon('vin','ic ic--sm')}<span>Plus code <b class="mono-code">{esc(br['plus_code'])}</b></span></li>
+              <li>{icon('clock','ic ic--sm')}<span>Saturday to Thursday, 8 AM to 1 PM and 4 PM to 9 PM</span></li>
+            </ul>
+            <div class="bmap__actions">
+              <a class="btn btn--ink" href="{maps}" target="_blank" rel="noopener">{icon('location','ic ic--sm')}<span>Open in Google Maps</span></a>
+              <a class="btn btn--line" href="{tel}">{icon('phone','ic ic--sm')}<span>{esc(br['phone_display'])}</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section section--alt">
+      <div class="container bpanels">
+        <div class="panel">
+          <h2 class="panel__t">{icon('clock','ic ic--sm')} Opening hours</h2>
+          {hours_list}
+          <p class="panel__note">Afternoon break from 1 PM to 4 PM. All times are UAE time.</p>
+        </div>
+        <div class="panel">
+          <h2 class="panel__t">{icon('location','ic ic--sm')} Our main shop</h2>
+          <p>{esc(SITE['address']['line1'])}, {esc(SITE['address']['line2'])}, {esc(SITE['address']['city'])}.</p>
+          <p>Call or WhatsApp <a class="textlink" href="{tel_link()}">{esc(SITE['phone_display'])}</a></p>
+          <a class="textlink" href="/contact/">Main shop details</a>
+        </div>
+      </div>
+    </section>
+    <section class="section"><div class="container container--narrow">{faq_block(faqs, title='Questions about Branch 1')}</div></section>
+    <section class="cta">
+      <div class="container cta__inner">
+        <div class="cta__text"><h2 class="cta__title">Visit Branch 1 or send your VIN</h2><p class="cta__p">Near Tasheel Roundabout in {esc(br['area'])}. Open Saturday to Thursday.</p></div>
+        <div class="cta__actions">
+          <a class="btn btn--wa btn--lg" href="{wa}" target="_blank" rel="noopener">{icon('whatsapp','ic ic--sm')}<span>WhatsApp Branch 1</span></a>
+          <a class="btn btn--line-light btn--lg" href="{tel}">{icon('phone','ic ic--sm')}<span>{esc(br['phone_display'])}</span></a>
+        </div>
+      </div>
+    </section>"""
+    store = {
+        "@context": "https://schema.org", "@type": "AutoPartsStore", "@id": abs_url(path) + "#store",
+        "name": br["name"], "legalName": br["legal"], "url": abs_url(path),
+        "image": abs_url("/assets/images/site/branch1.jpg"), "logo": abs_url("/assets/images/site/logo.png"),
+        "telephone": br["phone_intl"], "priceRange": SITE["price_range"], "currenciesAccepted": "AED",
+        "address": {"@type": "PostalAddress", "streetAddress": br["plus_code"] + ", near Tasheel Roundabout and Al Safi Medical Center",
+                    "addressLocality": br["area"], "addressRegion": br["city"], "addressCountry": "AE"},
+        "geo": {"@type": "GeoCoordinates", "latitude": lat, "longitude": lng},
+        "hasMap": maps,
+        "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": h["days"], "opens": h["opens"], "closes": h["closes"]} for h in SITE["hours_schema"]],
+        "brand": [{"@type": "Brand", "name": m["name"]} for m in makes],
+        "areaServed": [{"@type": "City", "name": n} for n in ("Sharjah", "Dubai")] + [{"@type": "Country", "name": "United Arab Emirates"}],
+        "parentOrganization": {"@id": SITE["base_url"] + "/#store"},
+    }
+    ld = [breadcrumb_schema([('Home', '/'), (br['menu'], path)]), store, faq_schema(faqs)]
+    title = "Al Jawareh Branch 1, Al Sajaa: Range Rover & Land Rover Parts"
+    desc = (f"Al Jawareh New Auto Spare Parts Branch 1 in Al Sajaa, Sharjah, near Tasheel Roundabout. "
+            f"Range Rover, Land Rover, Jaguar, BMW & Mercedes parts. Call {br['phone_display']}.")
+    preload = (f'<link rel="preload" as="image" type="image/webp" href="/assets/images/site/branch1-1360.webp?v={ASSET_VER}" '
+               f'imagesrcset="/assets/images/site/branch1-800.webp?v={ASSET_VER} 800w, /assets/images/site/branch1-1360.webp?v={ASSET_VER} 1360w" imagesizes="(max-width: 1024px) 100vw, 600px">\n')
+    render_page(title, desc, path, body, ld, active="branch", image="/assets/images/site/branch1-og.jpg",
+                priority="0.9", changefreq="monthly", preload=preload)
 
 # ---------------------------------------------------------------------------
 # PAGE: 404 (written raw, not in sitemap)
@@ -1829,6 +2020,11 @@ def build_llms():
     lines += [f"- [{c['name']}]({abs_url('/parts/' + c['slug'] + '/')}): {c['card']}" for c in CATEGORIES]
     lines += ["", "## Areas served"]
     lines += [f"- [{l['name']}]({abs_url('/locations/' + l['slug'] + '/')})" for l in LOCATIONS]
+    if BRANCH_1:
+        br = BRANCH_1
+        lines += ["", "## Branches",
+                  f"- [{br['name']}]({abs_url('/' + br['slug'] + '/')}): {br['area']}, {br['city']}, {br['landmarks']}. "
+                  f"Plus code {br['plus_code']}. Phone / WhatsApp {br['phone_display']}. Same opening hours."]
     lines += ["", "## Key pages",
               f"- [Request a part]({abs_url('/request-a-part/')})",
               f"- [FAQ]({abs_url('/faq/')})",
@@ -2063,6 +2259,8 @@ def main():
     build_faq()
     build_request()
     build_blog_index()
+    if BRANCH_1:
+        build_branch()
     for p in POSTS:
         build_post(p)
     build_404()
