@@ -370,8 +370,7 @@ def render_head(title, description, path, jsonld_objs, og_type="website", image=
 <link rel="icon" href="/assets/images/site/favicon.svg?v={ASSET_VER}" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/assets/images/site/apple-touch-icon.png?v={ASSET_VER}">
-<link rel="preload" href="/assets/fonts/sora-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
 {preload}<link rel="stylesheet" href="/assets/css/style.css?v={ASSET_VER}">
 {jsonld_tags(jsonld_objs)}</head>
 <body>
@@ -446,7 +445,7 @@ def nav(active=""):
       <span class="topbar__item topbar__loc">{icon('location','ic ic--sm')} {esc(SITE['address']['line2'])}, {esc(SITE['address']['city'])}</span>
       <span class="status" data-hours-status role="status" aria-live="polite">
         <span class="status__dot"></span>
-        <span class="status__text">Sat–Thu 8AM–9PM &middot; closed Fri</span>
+        <span class="status__text">Open Saturday to Thursday</span>
       </span>
       <span class="topbar__spacer"></span>
       <a class="topbar__item topbar__link topbar__wa" href="{wa_link(WA_GENERIC)}" target="_blank" rel="noopener">{icon('whatsapp','ic ic--sm')} WhatsApp</a>
@@ -490,7 +489,7 @@ def nav(active=""):
         <img class="brand__logo" src="/assets/images/site/logo-full.png?v={ASSET_VER}" alt="{esc(SITE['name'])}" width="495" height="160">
         <button class="mobile__close" data-menu-close aria-label="Close menu">{icon('close','ic')}</button>
       </div>
-      <div class="mobile__status"><span class="status" data-hours-status role="status"><span class="status__dot"></span><span class="status__text">Sat–Thu 8AM–9PM &middot; closed Fri</span></span></div>
+      <div class="mobile__status"><span class="status" data-hours-status role="status"><span class="status__dot"></span><span class="status__text">Open Saturday to Thursday</span></span></div>
       <div class="mobile__body">
         <a class="mobile__link" href="/">Home</a>
         <details class="mobile__acc"><summary>Brands {icon('chevron','ic ic--xs')}</summary><div class="mobile__sub">{m_brands}<a href="/brands/">All brands</a></div></details>
@@ -679,12 +678,9 @@ def whatsapp_widget():
 # REUSABLE UI SECTIONS
 # ---------------------------------------------------------------------------
 def section_header(eyebrow, title, sub=None, center=False, light=False):
-    c = " sec-head--center" if center else ""
     l = " sec-head--light" if light else ""
     subhtml = f'<p class="sec-head__sub">{sub}</p>' if sub else ""
-    return (f'<div class="sec-head{c}{l}">'
-            f'<span class="eyebrow">{esc(eyebrow)}</span>'
-            f'<h2 class="sec-head__title">{title}</h2>{subhtml}</div>')
+    return f'<div class="sec-head{l}"><h2 class="sec-head__title">{title}</h2>{subhtml}</div>'
 
 
 def btn_enquiry(label, make=None, cls="btn btn--wa", icon_name="whatsapp"):
@@ -715,35 +711,35 @@ def hero_quick_form():
 
 
 def brand_card(b):
-    return (f'<a class="bcard" href="/brands/{b["slug"]}/">'
-            f'<span class="bcard__logo">{brand_logo(b, "card")}</span>'
-            f'<span class="bcard__txt"><span class="bcard__name">{esc(b["name"])}</span>'
-            f'<span class="bcard__sub">{esc(b["origin"])}</span></span>'
-            f'<span class="bcard__go" aria-hidden="true">{icon("arrow","ic ic--sm")}</span></a>')
+    return (f'<a class="btile" href="/brands/{b["slug"]}/">{brand_logo(b, "tile")}'
+            f'<span class="btile__name">{esc(b["name"])}</span>'
+            f'<span class="btile__sub">{esc(b["origin"])}</span></a>')
 
 
 def brands_grid(limit=None, ids=None):
     items = BRANDS if ids is None else [BRAND_BY_SLUG[i] for i in ids]
     if limit:
         items = items[:limit]
-    return f'<div class="grid grid--brands">{"".join(brand_card(b) for b in items)}</div>'
+    return f'<div class="bwall">{"".join(brand_card(b) for b in items)}</div>'
 
 
 def category_card(c, brand=None):
     href = f'/brands/{brand["slug"]}/{c["slug"]}/' if brand else f'/parts/{c["slug"]}/'
-    name = f'{brand["name"]} {c["name"]}' if brand else c["name"]
-    tag = brand["name"] if brand else None
-    img = media("/assets/images/categories/" + c["slug"] + ".jpg", name, "16x9", c["name"], c["icon"], "ccard__img", tag=tag)
-    return (f'<a class="ccard" href="{href}">'
-            f'<span class="ccard__media">{img}</span>'
-            f'<span class="ccard__body"><span class="ccard__name">{esc(name)}</span>'
-            f'<span class="ccard__desc">{esc(c["card"])}</span>'
-            f'<span class="ccard__go">Browse parts {icon("arrow","ic ic--sm")}</span></span></a>')
+    name = f'{brand["name"]} {c["name"].lower()}' if brand else c["name"]
+    ex = c["items"][:3]
+    def _lc(x):  # lowercase the first letter, but leave acronyms (EAS, DSG, ABS) alone
+        return x if (len(x) > 1 and x[1].isupper()) else x[0].lower() + x[1:]
+    parts = ", ".join([ex[0]] + [_lc(x) for x in ex[1:]])
+    return (f'<a class="crow" href="{href}">'
+            f'<span class="crow__ic">{icon(c["icon"], "crow__icon")}</span>'
+            f'<span class="crow__name">{esc(name)}</span>'
+            f'<span class="crow__parts">{esc(parts)}</span>'
+            f'<span class="crow__cta">View parts</span></a>')
 
 
 def categories_grid(brand=None, limit=None):
     items = CATEGORIES[:limit] if limit else CATEGORIES
-    return f'<div class="grid grid--cats">{"".join(category_card(c, brand) for c in items)}</div>'
+    return f'<div class="clist">{"".join(category_card(c, brand) for c in items)}</div>'
 
 
 def features_why():
@@ -834,34 +830,25 @@ def coverage_block():
 
 
 def blog_card(p):
-    _ic = {"Buying Guide": "tag", "Fitment Guide": "wrench", "How-To": "vin", "Maintenance": "gauge"}.get(p["category"], "layers")
-    _img = media("/assets/images/blog/" + p["slug"] + ".jpg", p["title"], "16x9", p["category"], _ic, "pcard__media")
-    return (f'<article class="pcard"><a class="pcard__link" href="/blog/{p["slug"]}/">'
-            f'{_img}'
-            f'<span class="pcard__body"><span class="pcard__cat">{esc(p["category"])}</span>'
-            f'<span class="pcard__title">{esc(p["title"])}</span>'
-            f'<span class="pcard__excerpt">{esc(p["excerpt"])}</span>'
-            f'<span class="pcard__meta">{esc(p["read_time"])} {icon("arrow","ic ic--sm")}</span></span></a></article>')
+    return (f'<article class="gcard"><a class="gcard__link" href="/blog/{p["slug"]}/">'
+            f'<span class="gcard__cat">{esc(p["category"])}</span>'
+            f'<span class="gcard__title">{esc(p["title"])}</span>'
+            f'<span class="gcard__excerpt">{esc(p["excerpt"])}</span>'
+            f'<span class="gcard__meta">{esc(p["read_time"])}</span></a></article>')
 
 
 def blog_cards(limit=3):
     posts = sorted(POSTS, key=lambda p: p["date"], reverse=True)[:limit]
-    return f'<div class="grid grid--posts">{"".join(blog_card(p) for p in posts)}</div>'
+    return f'<div class="glist">{"".join(blog_card(p) for p in posts)}</div>'
 
 
-def cta_banner(title, text, make=None, label="Request a Part"):
+def cta_banner(title, text, make=None, label="Request a part"):
     return f"""<section class="cta">
-      <div class="container">
-        <div class="cta__card" data-reveal>
-          <span class="cta__photo" aria-hidden="true" style="background-image:url(/assets/images/site/shop-counter.webp?v={ASSET_VER})"></span>
-          <div class="cta__glow" aria-hidden="true"></div>
-          <div class="cta__inner">
-            <div class="cta__text"><h2 class="cta__title">{title}</h2><p class="cta__p">{text}</p></div>
-            <div class="cta__actions">
-              {btn_enquiry(label, make=make, cls="btn btn--wa btn--lg")}
-              <a class="btn btn--ghost-light btn--lg" href="{tel_link()}">{icon('phone','ic ic--sm')}<span>{esc(SITE['phone_display'])}</span></a>
-            </div>
-          </div>
+      <div class="container cta__inner">
+        <div class="cta__text"><h2 class="cta__title">{title}</h2><p class="cta__p">{text}</p></div>
+        <div class="cta__actions">
+          {btn_enquiry(label, make=make, cls="btn btn--wa btn--lg")}
+          <a class="btn btn--line-light btn--lg" href="{tel_link()}">{icon('phone','ic ic--sm')}<span>{esc(SITE['phone_display'])}</span></a>
         </div>
       </div>
     </section>"""
@@ -870,151 +857,123 @@ def cta_banner(title, text, make=None, label="Request a Part"):
 # ---------------------------------------------------------------------------
 # PAGE: HOME
 # ---------------------------------------------------------------------------
-def trust_strip():
-    items = [
-        ("shield", "Genuine &amp; OEM", "Manufacturer &amp; top OEM brands"),
-        ("vin", "VIN-matched", "The right part, first time"),
-        ("truck", "UAE-wide delivery", "Often same or next day"),
-        ("headset", "Real parts experts", "We know these cars"),
-    ]
-    cells = "".join(
-        f'<div class="trust"><span class="trust__ic">{icon(i,"trust__icon")}</span>'
-        f'<span class="trust__tx"><b>{t}</b><span>{s}</span></span></div>'
-        for i, t, s in items
-    )
-    return f'<section class="trustband-sec"><div class="container"><div class="trustband">{cells}</div></div></section>'
+def vin_form():
+    return f"""<form class="vinform" data-quick-form data-vin-form novalidate>
+      <label class="vinform__label" for="hero-vin">Your VIN (chassis number)</label>
+      <div class="vinplate">
+        <input id="hero-vin" class="vinplate__input" name="vin" maxlength="17" autocomplete="off" autocapitalize="characters"
+          spellcheck="false" placeholder="SALGA2AE9LA123456" aria-describedby="hero-vin-help" data-vin-input>
+        <span class="vinplate__count" data-vin-count aria-live="polite">0/17</span>
+      </div>
+      <p class="vinform__help" id="hero-vin-help" data-vin-help>17 characters, printed on your Mulkiya and at the bottom of the windscreen.</p>
+      <label class="vinform__label" for="hero-part">Part you need</label>
+      <input id="hero-part" class="vinform__part" name="part" required placeholder="Front air struts, brake pads, water pump">
+      <button type="submit" class="btn btn--wa btn--block btn--lg">{icon('whatsapp','ic ic--sm')}<span>Send on WhatsApp</span></button>
+      <p class="vinform__alt">No VIN to hand? <button type="button" class="linkbtn" data-enquiry-open>Choose your car instead</button></p>
+    </form>"""
 
 
 def specialist_block():
-    return f"""<section class="section section--feature">
-      <div class="container feature-split">
-        <div class="feature-split__media" data-reveal>
+    return f"""<section class="section spec">
+      <div class="container spec__grid">
+        <div class="spec__text">
+          <h2 class="sec-head__title">Range Rover and Land Rover are our speciality</h2>
+          <p class="spec__lead">Most of what comes through our door is air suspension, cooling and engine work on Range Rovers and Land Rovers, so those parts are on the shelf, not on order. The German makes follow close behind.</p>
+          <ul class="spec__list">
+            <li><b>Air suspension</b><span>Struts, EAS compressors, valve blocks and height sensors</span></li>
+            <li><b>Engine and cooling</b><span>Timing kits, water pumps, thermostats and radiators</span></li>
+            <li><b>Service parts</b><span>Filters, brake pads and discs, plugs and fluids</span></li>
+          </ul>
+          <div class="spec__actions">
+            {btn_enquiry('Request a Range Rover part', make='Range Rover', cls='btn btn--wa btn--lg')}
+            <a class="btn btn--line btn--lg" href="/brands/range-rover/">See Range Rover parts</a>
+          </div>
+        </div>
+        <figure class="spec__photo">
           <picture>
             <source srcset="/assets/images/site/shop-counter.webp?v={ASSET_VER}" type="image/webp">
-            <img src="/assets/images/site/shop-counter.jpg?v={ASSET_VER}" alt="Al Jawareh Auto Spare Parts shop counter in Industrial Area 12, Sharjah, with Range Rover and Land Rover parts" width="720" height="465" loading="lazy" decoding="async">
+            <img src="/assets/images/site/shop-counter.jpg?v={ASSET_VER}" alt="Range Rover and Land Rover panels on the counter at Al Jawareh Auto Spare Parts, Sharjah" width="720" height="465" loading="lazy" decoding="async">
           </picture>
-          <span class="feature-split__badge">{icon('location','ic ic--sm')} Visit the shop &middot; Industrial Area 12, Sharjah</span>
-        </div>
-        <div class="feature-split__text" data-reveal>
-          <span class="eyebrow">Range Rover &amp; Land Rover specialists</span>
-          <h2 class="sec-head__title">A real parts shop in Sharjah, stocked for the cars you drive</h2>
-          <p class="feature-split__lead">Walk in, call or WhatsApp. Our shelves carry the fast-moving parts for Range Rover, Land Rover and the German marques, and what isn't on the shelf we source through our supplier network with a clear timeline.</p>
-          <ul class="ticklist">
-            <li>{icon('check','ic ic--sm')}<span>Air suspension: struts, EAS compressors and height sensors</span></li>
-            <li>{icon('check','ic ic--sm')}<span>Engine, timing and cooling parts</span></li>
-            <li>{icon('check','ic ic--sm')}<span>Brakes, filters and complete service kits</span></li>
-            <li>{icon('check','ic ic--sm')}<span>Matched to your VIN so it fits the first time</span></li>
-          </ul>
-          <div class="feature-split__stats">
-            <div><b>{len(BRANDS)}</b><span>premium marques</span></div>
-            <div><b>{len(CATEGORIES)}</b><span>part categories</span></div>
-            <div><b>{len(LOCATIONS)}</b><span>emirates &amp; cities served</span></div>
-          </div>
-          <div class="feature-split__actions">
-            {btn_enquiry('Request a Range Rover part', make='Range Rover', cls='btn btn--wa btn--lg')}
-            <a class="btn btn--ghost btn--lg" href="/brands/range-rover/">Range Rover parts {icon('arrow','ic ic--sm')}</a>
-          </div>
-        </div>
+        </figure>
       </div>
     </section>"""
 
 
 def build_home():
-    chips = "".join(f'<a class="marquee__item" href="/brands/{b["slug"]}/" tabindex="-1">{brand_logo(b, "chip")}</a>' for b in BRANDS)
-    marquee = chips + chips  # duplicated for a seamless loop
     hero = f"""<section class="hero">
-      <div class="hero__bg" aria-hidden="true">
-        <picture>
-          <source media="(max-width: 700px)" srcset="/assets/images/site/hero-mobile.webp?v={ASSET_VER}" type="image/webp">
-          <source srcset="/assets/images/site/hero-900.webp?v={ASSET_VER} 900w, /assets/images/site/hero-1600.webp?v={ASSET_VER} 1600w" sizes="100vw" type="image/webp">
-          <img class="hero__photo" src="/assets/images/site/hero.jpg?v={ASSET_VER}" alt="" width="1600" height="613" fetchpriority="high" decoding="async">
-        </picture>
-        <span class="hero__scrim"></span><span class="hero__grid"></span><span class="hero__glow"></span>
-      </div>
-      <div class="container hero__inner">
-        <div class="hero__content">
-          <span class="hero__eyebrow"><span class="hero__eyebrow-dot"></span> Trusted Range Rover &amp; Land Rover spare parts in Sharjah</span>
-          <h1 class="hero__title">Genuine &amp; OEM car parts for <span class="grad">Europe's finest</span>, in stock in Sharjah</h1>
-          <p class="hero__lead">Range Rover, Land Rover, Mercedes-Benz, BMW, Audi, Porsche and more. Send your vehicle and the part on WhatsApp. We match it to your VIN, quote you honestly and deliver across the UAE.</p>
-          <div class="hero__actions">
-            {btn_enquiry('Request a Part', cls='btn btn--wa btn--lg')}
-            <a class="btn btn--ghost-light btn--lg" href="/brands/">Shop by brand {icon('arrow','ic ic--sm')}</a>
-          </div>
-          <ul class="hero__chips">
-            <li>{icon('check','ic ic--sm')} Genuine &amp; OEM</li>
-            <li>{icon('check','ic ic--sm')} VIN-matched</li>
-            <li>{icon('check','ic ic--sm')} UAE-wide delivery</li>
-          </ul>
+      <div class="container hero__top">
+        <div class="hero__copy">
+          <h1 class="hero__title">Range Rover, Land Rover and German car parts, in stock in Sharjah</h1>
+          <p class="hero__lead">Genuine and OEM parts from our shop in Industrial Area 12. Send your VIN and the part you need, we match the exact part number and deliver anywhere in the UAE.</p>
+          <p class="hero__call">Prefer to talk? Call <a href="{tel_link()}">{esc(SITE['phone_display'])}</a>, Saturday to Thursday.</p>
         </div>
-        <div class="hero__aside">{hero_quick_form()}</div>
+        {vin_form()}
       </div>
-      <div class="hero__marquee"><div class="marquee">{marquee}</div></div>
+      <div class="container">
+        <figure class="hero__photo">
+          <picture>
+            <source media="(max-width: 700px)" srcset="/assets/images/site/pano-mobile.webp?v={ASSET_VER}" type="image/webp">
+            <source srcset="/assets/images/site/pano-900.webp?v={ASSET_VER} 900w, /assets/images/site/pano-1600.webp?v={ASSET_VER} 1600w" sizes="(max-width: 1240px) 100vw, 1200px" type="image/webp">
+            <img src="/assets/images/site/pano.jpg?v={ASSET_VER}" alt="Inside Al Jawareh Auto Spare Parts: shelves of genuine parts and the Range Rover, Land Rover, Mercedes-Benz and BMW counter" width="1600" height="685" fetchpriority="high" decoding="async">
+          </picture>
+          <figcaption>Our shop in Industrial Area 12, Sharjah</figcaption>
+        </figure>
+      </div>
     </section>"""
 
-    brands = f"""<section class="section section--brands">
+    brands = f"""<section class="section" id="brands">
       <div class="container">
-        {section_header('Shop by marque', 'Parts for the cars you drive', 'Pick your brand to see what we stock, or send your VIN and we will match it for you.', center=True)}
+        {section_header('', 'Parts by car brand', 'Nine makes we stock and source every day.')}
         {brands_grid()}
       </div>
     </section>"""
 
     cats = f"""<section class="section section--alt">
       <div class="container">
-        {section_header('Part categories', 'Whatever your car needs', 'From engines and air suspension to brakes, filters and body panels, all genuine or quality OEM.', center=True)}
+        {section_header('', 'Parts by system', 'Every category comes in genuine and OEM. Tell us which you prefer and we quote both.')}
         {categories_grid()}
       </div>
     </section>"""
 
-    steps = f"""<section class="section section--dark section--steps">
+    steps = f"""<section class="section section--dark">
       <div class="container">
-        {section_header('How ordering works', 'From WhatsApp to your door in four steps', center=True, light=True)}
+        {section_header('', 'How ordering works', light=True)}
         {steps_order()}
-        <div class="section__cta">{btn_enquiry('Start your request', cls='btn btn--wa btn--lg')}</div>
       </div>
     </section>"""
 
-    why = f"""<section class="section">
+    popular = f"""<section class="section">
       <div class="container">
-        {section_header('Why buy from us', 'The right part, without the runaround', center=True)}
-        {features_why()}
-      </div>
-    </section>"""
-
-    popular = f"""<section class="section section--alt">
-      <div class="container">
-        {section_header('Popular searches', 'Frequently requested parts')}
+        {section_header('', 'Popular requests')}
         {popular_links()}
       </div>
     </section>"""
 
-    blog = f"""<section class="section">
+    guides = f"""<section class="section section--alt">
       <div class="container">
-        {section_header('Guides', 'Parts buying &amp; fitment advice')}
+        <div class="sec-row">{section_header('', 'Guides from the counter')}<a class="textlink" href="/blog/">All guides</a></div>
         {blog_cards(3)}
-        <div class="section__cta"><a class="btn btn--ghost btn--lg" href="/blog/">Read all guides {icon('arrow','ic ic--sm')}</a></div>
       </div>
     </section>"""
 
-    coverage = f'<section class="section section--alt"><div class="container">{coverage_block()}</div></section>'
-
-    faq = f'<section class="section"><div class="container container--narrow">{faq_block(FAQS[:6], center=True)}<div class="section__cta"><a class="btn btn--ghost btn--lg" href="/faq/">All questions {icon("arrow","ic ic--sm")}</a></div></div></section>'
-
+    coverage = f'<section class="section"><div class="container">{coverage_block()}</div></section>'
+    faq = f'<section class="section section--alt"><div class="container container--narrow">{faq_block(FAQS[:6], title="Questions we get asked")}<p class="more"><a class="textlink" href="/faq/">All questions</a></p></div></section>'
     cta = cta_banner("Can't find your part?",
-                     "Send us your vehicle and the part on WhatsApp. Genuine or OEM, we'll track it down and quote you.")
+                     "Send us your vehicle and the part on WhatsApp. If it's not on the shelf, we'll source it and give you a date.")
 
-    body = hero + trust_strip() + brands + specialist_block() + cats + steps + why + popular + blog + coverage + faq + cta
+    body = hero + brands + specialist_block() + cats + steps + popular + guides + coverage + faq + cta
     title = "Genuine & OEM Car Spare Parts in Sharjah | Al Jawareh"
     desc = ("Genuine & OEM spare parts for Range Rover, Land Rover, Mercedes-Benz, BMW, Audi, Porsche & more. "
-            "Shop in Sharjah, delivery across the UAE. Request a part on WhatsApp.")
+            "Shop in Sharjah, delivery across the UAE. Send your VIN on WhatsApp.")
     ld = [store_schema(),
           {"@context": "https://schema.org", "@type": "WebSite", "name": SITE["name"],
            "alternateName": "Al Jawareh", "url": SITE["base_url"] + "/", "inLanguage": "en-AE"},
           faq_schema(FAQS[:6])]
     preload = (
-        f'<link rel="preload" as="image" type="image/webp" href="/assets/images/site/hero-mobile.webp?v={ASSET_VER}" media="(max-width: 700px)" fetchpriority="high">\n'
-        f'<link rel="preload" as="image" type="image/webp" href="/assets/images/site/hero-1600.webp?v={ASSET_VER}" '
-        f'imagesrcset="/assets/images/site/hero-900.webp?v={ASSET_VER} 900w, /assets/images/site/hero-1600.webp?v={ASSET_VER} 1600w" '
-        f'imagesizes="100vw" media="(min-width: 701px)" fetchpriority="high">\n'
+        f'<link rel="preload" as="image" type="image/webp" href="/assets/images/site/pano-mobile.webp?v={ASSET_VER}" media="(max-width: 700px)">\n'
+        f'<link rel="preload" as="image" type="image/webp" href="/assets/images/site/pano-1600.webp?v={ASSET_VER}" '
+        f'imagesrcset="/assets/images/site/pano-900.webp?v={ASSET_VER} 900w, /assets/images/site/pano-1600.webp?v={ASSET_VER} 1600w" '
+        f'imagesizes="(max-width: 1240px) 100vw, 1200px" media="(min-width: 701px)">\n'
     )
     render_page(title, desc, "/", body, ld, active="home", og_type="website",
                 priority="1.0", changefreq="weekly", preload=preload)
@@ -1025,7 +984,7 @@ def build_home():
 # ---------------------------------------------------------------------------
 def build_brands_index():
     body = f"""{breadcrumbs([('Home', '/'), ('Brands', None)])}
-    <section class="pagehead"><span class="head__photo" aria-hidden="true" style="background-image:url(/assets/images/site/hero-900.webp?v={ASSET_VER})"></span>
+    <section class="pagehead">
       <div class="container">
         <span class="eyebrow">Brands we stock</span>
         <h1 class="pagehead__title">Spare parts for 9 premium marques</h1>
@@ -1049,7 +1008,7 @@ def build_brands_index():
 # ---------------------------------------------------------------------------
 def build_parts_index():
     body = f"""{breadcrumbs([('Home', '/'), ('Parts', None)])}
-    <section class="pagehead"><span class="head__photo" aria-hidden="true" style="background-image:url(/assets/images/site/hero-900.webp?v={ASSET_VER})"></span>
+    <section class="pagehead">
       <div class="container">
         <span class="eyebrow">Part categories</span>
         <h1 class="pagehead__title">Every part your car needs</h1>
@@ -1134,7 +1093,7 @@ def build_brand(b):
     faqs = brand_faqs(b)
     models = "".join(f'<li>{esc(m)}</li>' for m in b["models"])
     body = f"""{breadcrumbs(crumbs)}
-    <section class="brandhead"><span class="head__photo" aria-hidden="true" style="background-image:url(/assets/images/site/hero-900.webp?v={ASSET_VER})"></span>
+    <section class="brandhead">
       <div class="container brandhead__inner">
         <div class="brandhead__text">
           <span class="eyebrow">{esc(b['origin'])} &middot; Genuine &amp; OEM</span>
@@ -1145,7 +1104,7 @@ def build_brand(b):
             <a class="btn btn--ghost btn--lg" href="{tel_link()}">{icon('phone','ic ic--sm')}<span>{esc(SITE['phone_display'])}</span></a>
           </div>
         </div>
-        <div class="brandhead__media">{media(f'/assets/images/brands/{b["slug"]}-hero.jpg', f'{b["name"]} spare parts in Sharjah', '4x3', b['name'], 'box', logo_brand=b, tag='Genuine & OEM parts')}</div>
+        <div class="brandhead__media">{brand_logo(b, 'hero')}</div>
       </div>
     </section>
     <section class="section">
@@ -1189,7 +1148,7 @@ def build_category(c):
     crumbs = [('Home', '/'), ('Parts', '/parts/'), (c["name"], None)]
     faqs = category_faqs(c)
     body = f"""{breadcrumbs(crumbs)}
-    <section class="pagehead pagehead--cat"><span class="head__photo" aria-hidden="true" style="background-image:url(/assets/images/site/hero-900.webp?v={ASSET_VER})"></span>
+    <section class="pagehead pagehead--cat">
       <div class="container pagehead__cat-inner">
         <span class="pagehead__ic">{icon(c['icon'],'pagehead__icon')}</span>
         <div>
@@ -1285,7 +1244,7 @@ def build_brand_category(b, c):
     faqs = bc_faqs(b, c)
     models = "".join(f'<li>{esc(m)}</li>' for m in b["models"])
     body = f"""{breadcrumbs(crumbs)}
-    <section class="brandhead brandhead--bc"><span class="head__photo" aria-hidden="true" style="background-image:url(/assets/images/site/hero-900.webp?v={ASSET_VER})"></span>
+    <section class="brandhead brandhead--bc">
       <div class="container brandhead__inner">
         <div class="brandhead__text">
           <span class="eyebrow">{icon(c['icon'],'ic ic--sm')} {esc(b['name'])} &middot; {esc(c['name'])}</span>
@@ -1296,7 +1255,7 @@ def build_brand_category(b, c):
             <a class="btn btn--ghost btn--lg" href="{tel_link()}">{icon('phone','ic ic--sm')}<span>Call us</span></a>
           </div>
         </div>
-        <div class="brandhead__media">{media(f'/assets/images/categories/{c["slug"]}.jpg', f'{b["name"]} {c["name"]}', '4x3', f'{b["name"]} {c["short"]}', c['icon'], tag=b['name'])}</div>
+        <div class="brandhead__media">{brand_logo(b, 'hero')}</div>
       </div>
     </section>
     <section class="section">
@@ -1355,7 +1314,7 @@ def location_card(l):
 
 def build_locations_index():
     body = f"""{breadcrumbs([('Home', '/'), ('Areas', None)])}
-    <section class="pagehead"><span class="head__photo" aria-hidden="true" style="background-image:url(/assets/images/site/hero-900.webp?v={ASSET_VER})"></span>
+    <section class="pagehead">
       <div class="container">
         <span class="eyebrow">Areas we serve</span>
         <h1 class="pagehead__title">Auto spare parts across the UAE</h1>
@@ -1391,7 +1350,7 @@ def build_location(l):
     faqs = location_faqs(l)
     areas = "".join(f'<span class="tagpill">{esc(a)}</span>' for a in l["areas"])
     body = f"""{breadcrumbs(crumbs)}
-    <section class="pagehead"><span class="head__photo" aria-hidden="true" style="background-image:url(/assets/images/site/hero-900.webp?v={ASSET_VER})"></span>
+    <section class="pagehead">
       <div class="container">
         <span class="eyebrow">{icon('location','ic ic--sm')} {esc(l['name'])}, UAE</span>
         <h1 class="pagehead__title">Auto Spare Parts in {esc(l['name'])}</h1>
@@ -1451,7 +1410,7 @@ def build_about():
     ]
     val_html = "".join(f'<div class="feature"><span class="feature__ic">{icon(i,"feature__icon")}</span><h3 class="feature__t">{t}</h3><p class="feature__p">{p}</p></div>' for i, t, p in vals)
     body = f"""{breadcrumbs([('Home', '/'), ('About', None)])}
-    <section class="pagehead"><span class="head__photo" aria-hidden="true" style="background-image:url(/assets/images/site/hero-900.webp?v={ASSET_VER})"></span>
+    <section class="pagehead">
       <div class="container">
         <span class="eyebrow">About us</span>
         <h1 class="pagehead__title">Your parts partner in Sharjah</h1>
@@ -1515,7 +1474,7 @@ def enquiry_form_inline():
 # ---------------------------------------------------------------------------
 def build_request():
     body = f"""{breadcrumbs([('Home', '/'), ('Request a part', None)])}
-    <section class="pagehead"><span class="head__photo" aria-hidden="true" style="background-image:url(/assets/images/site/hero-900.webp?v={ASSET_VER})"></span>
+    <section class="pagehead">
       <div class="container">
         <span class="eyebrow">{icon('whatsapp','ic ic--sm')} WhatsApp enquiry</span>
         <h1 class="pagehead__title">Request a part / get a quote</h1>
@@ -1575,7 +1534,7 @@ def build_contact():
         for i, lbl, val, href, wa in cards
     )
     body = f"""{breadcrumbs([('Home', '/'), ('Contact', None)])}
-    <section class="pagehead"><span class="head__photo" aria-hidden="true" style="background-image:url(/assets/images/site/hero-900.webp?v={ASSET_VER})"></span>
+    <section class="pagehead">
       <div class="container">
         <span class="eyebrow">Contact</span>
         <h1 class="pagehead__title">Talk to us about your part</h1>
@@ -1618,7 +1577,7 @@ def build_contact():
 # ---------------------------------------------------------------------------
 def build_faq():
     body = f"""{breadcrumbs([('Home', '/'), ('FAQ', None)])}
-    <section class="pagehead"><span class="head__photo" aria-hidden="true" style="background-image:url(/assets/images/site/hero-900.webp?v={ASSET_VER})"></span>
+    <section class="pagehead">
       <div class="container">
         <span class="eyebrow">FAQ</span>
         <h1 class="pagehead__title">Ordering, delivery &amp; warranty</h1>
@@ -1652,7 +1611,7 @@ def render_blocks(blocks):
 def build_blog_index():
     posts = sorted(POSTS, key=lambda p: p["date"], reverse=True)
     body = f"""{breadcrumbs([('Home', '/'), ('Blog', None)])}
-    <section class="pagehead"><span class="head__photo" aria-hidden="true" style="background-image:url(/assets/images/site/hero-900.webp?v={ASSET_VER})"></span>
+    <section class="pagehead">
       <div class="container">
         <span class="eyebrow">Guides</span>
         <h1 class="pagehead__title">Parts buying &amp; fitment guides</h1>
@@ -1684,7 +1643,6 @@ def build_post(p):
           <h1 class="post__title">{esc(p['title'])}</h1>
           <p class="post__meta"><span>{esc(p['read_time'])}</span> &middot; <span>Al Jawareh Auto Spare Parts</span></p>
         </header>
-        {media(f'/assets/images/blog/{p["slug"]}.jpg', p['title'], '16x9', p['category'], 'layers', 'post__hero', tag=p['category'])}
         <div class="post__body">{render_blocks(p['body'])}</div>
         <div class="post__cta">
           <h3>Need this part for your car?</h3>
