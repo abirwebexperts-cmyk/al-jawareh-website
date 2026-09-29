@@ -604,6 +604,60 @@ input,select,textarea{accent-color:var(--gold);caret-color:var(--gold-dark)}
 .hero__call a{display:inline-block;padding:.5rem 0}
 .areachip,.chip{min-height:42px;display:inline-flex;align-items:center}
 @media (max-width:760px){.footer__list a,.footer__contact a{padding:.5rem 0}}
+
+/* ==========================================================================
+   Top bar v6: live hours control + panel, responsive to 320px
+   ========================================================================== */
+.topbar{overflow:visible;border-bottom:1px solid rgba(255,255,255,.05)}
+.topbar__inner{height:var(--topbar-h);min-height:0;gap:1rem;white-space:nowrap}
+.topbar__item{height:100%}
+.topbar__sep{flex:none;width:1px;height:16px;background:rgba(255,255,255,.14)}
+.topbar__dir{display:none}
+.topbar__link{padding:0 .15rem;transition:color .15s}
+.hours{position:relative;display:flex;align-items:center;height:100%;flex:none}
+.status{height:26px;padding:0 .55rem 0 .6rem;gap:.45rem;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);font-size:.82rem;line-height:1;white-space:nowrap}
+button.status{cursor:pointer;transition:background .15s,border-color .15s}
+button.status:hover,button.status[aria-expanded="true"]{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.2)}
+.status__label{color:#fff;font-weight:600}
+.status__detail{color:#b9c0c8}
+.status > .ic svg{width:12px;height:12px;color:#9aa2ab;transition:transform .2s}
+.status[aria-expanded="true"] > .ic svg{transform:rotate(180deg)}
+.status[data-state="open"] .status__dot{box-shadow:0 0 0 3px rgba(37,211,102,.18)}
+.mobile__status .status{height:auto;padding:0;background:none;border:0;font-size:.9rem}
+.hours__pop{position:absolute;top:calc(100% + 2px);left:0;z-index:140;width:300px;padding:1rem 1rem .9rem;background:#fff;color:var(--body);
+  border:1px solid var(--steel);border-radius:10px;box-shadow:0 18px 40px rgba(0,0,0,.28);white-space:normal}
+.hours__pop[hidden]{display:none}
+.hours__t{font-weight:650;color:var(--ink);font-size:.98rem;margin-bottom:.5rem}
+.hours__list li{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;padding:.55rem .6rem;border-radius:6px;font-size:.9rem}
+.hours__list li span:last-child{text-align:right;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.hours__list li.is-today{background:var(--chrome)}
+.hours__list li.is-today span:first-child::after{content:"Today";margin-left:.5rem;font-size:.72rem;font-weight:650;color:var(--gold-dark)}
+.hours__note{margin-top:.6rem;font-size:.82rem;color:var(--silver)}
+.hours__link{display:inline-flex;align-items:center;gap:.4rem;margin-top:.7rem;padding:.35rem 0;font-weight:620;font-size:.9rem;color:var(--ink);text-decoration:underline;text-decoration-color:var(--gold);text-decoration-thickness:2px;text-underline-offset:4px}
+.hours__link svg{color:var(--gold-dark)}
+@media (max-width:1200px){.topbar__note{display:none}}
+@media (max-width:980px){.topbar__wa{display:none}}
+@media (max-width:760px){
+  .topbar__inner{gap:.35rem}
+  .topbar__sep,.topbar__loc,.topbar__note,.topbar__wa{display:none}
+  .topbar__dir{display:inline-flex}
+  .topbar__dir,.topbar__tel{padding:0 .45rem;gap:.35rem}
+  .topbar__tel-t{display:none}
+  .topbar__tel{width:36px;justify-content:center;padding:0}
+  .status{font-size:.8rem}
+  .hours{position:static}
+  .hours__pop{position:absolute;left:var(--gutter);right:var(--gutter);width:auto;top:calc(100% + 2px)}
+  .topbar__inner{position:relative}
+}
+@media (max-width:374px){
+  .topbar__dir-t{display:none}
+  .topbar__dir{width:36px;justify-content:center;padding:0}
+  .status{padding:0 .5rem;gap:.35rem}
+}
+@media (max-width:330px){.status > .ic{display:none}}
+.hours__pop{width:360px}
+.hours__list li span:last-child{white-space:nowrap}
+@media (max-width:760px){.hours__pop{width:auto}}
 """
 
 MAIN_JS = r"""/* ==========================================================================
@@ -715,7 +769,7 @@ MAIN_JS = r"""/* ===============================================================
   function initHoursStatus() {
     var els = $$("[data-hours-status]");
     if (!els.length) return;
-    var OPEN = [[8 * 60, 13 * 60], [16 * 60, 21 * 60]]; // open windows, minutes from midnight (Sat–Thu)
+    var OPEN = [[8 * 60, 13 * 60], [16 * 60, 21 * 60]]; // Sat-Thu windows, minutes from midnight, UAE time
     function nowInfo() {
       try {
         var p = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Dubai", weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false }).formatToParts(new Date());
@@ -733,31 +787,42 @@ MAIN_JS = r"""/* ===============================================================
       return hh + (m ? ":" + (m < 10 ? "0" : "") + m : "") + " " + ap;
     }
     function compute() {
-      var info = nowInfo(), t = info.mins, wd = info.wd, i;
-      // Friday: closed all day
-      if (wd === "Fri") return { state: "closed", label: "Closed Fridays", sub: "opens Saturday 8:00 AM" };
-      // open windows (Sat–Thu)
-      for (i = 0; i < OPEN.length; i++) {
-        if (t >= OPEN[i][0] && t < OPEN[i][1]) return { state: "open", label: "Open now", sub: "until " + fmt(OPEN[i][1]) };
+      var i = nowInfo(), t = i.mins, wd = i.wd, k;
+      if (wd === "Fri") return { state: "closed", label: "Closed today", detail: "opens Saturday " + fmt(OPEN[0][0]) };
+      for (k = 0; k < OPEN.length; k++) {
+        if (t >= OPEN[k][0] && t < OPEN[k][1]) {
+          var left = OPEN[k][1] - t;
+          return { state: "open", label: left <= 30 ? "Closing soon" : "Open now", detail: "until " + fmt(OPEN[k][1]) };
+        }
       }
-      // afternoon break
-      if (t >= OPEN[0][1] && t < OPEN[1][0]) return { state: "break", label: "On break", sub: "reopens " + fmt(OPEN[1][0]) };
-      // before opening today
-      if (t < OPEN[0][0]) return { state: "closed", label: "Closed", sub: "opens " + fmt(OPEN[0][0]) };
-      // after evening close: Thursday night -> next is Saturday (Friday closed)
-      if (wd === "Thu") return { state: "closed", label: "Closed", sub: "opens Saturday 8:00 AM" };
-      return { state: "closed", label: "Closed", sub: "opens 8:00 AM" };
+      if (t >= OPEN[0][1] && t < OPEN[1][0]) return { state: "break", label: "On break", detail: "back at " + fmt(OPEN[1][0]) };
+      if (t < OPEN[0][0]) return { state: "closed", label: "Closed", detail: "opens " + fmt(OPEN[0][0]) };
+      if (wd === "Thu") return { state: "closed", label: "Closed", detail: "opens Saturday " + fmt(OPEN[0][0]) };
+      return { state: "closed", label: "Closed", detail: "opens " + fmt(OPEN[0][0]) + " tomorrow" };
     }
     function render() {
-      var s = compute();
+      var s = compute(), today = nowInfo().wd === "Fri" ? "fri" : "sat-thu";
       els.forEach(function (el) {
         el.setAttribute("data-state", s.state);
-        var txt = $(".status__text", el);
-        if (txt) { txt.innerHTML = "<b>" + s.label + "</b>, " + s.sub; }
+        var lab = $(".status__label", el), det = $(".status__detail", el);
+        if (lab) lab.textContent = s.label;
+        if (det) det.textContent = s.detail;
       });
+      $$(".hours__list li").forEach(function (li) { li.classList.toggle("is-today", li.getAttribute("data-days") === today); });
     }
     render();
     setInterval(render, 60000);
+
+    // opening-hours panel
+    $$("[data-hours-toggle]").forEach(function (btn) {
+      var pop = document.getElementById(btn.getAttribute("aria-controls"));
+      if (!pop) return;
+      function set(open) { pop.hidden = !open; btn.setAttribute("aria-expanded", open ? "true" : "false"); }
+      btn.addEventListener("click", function (e) { e.stopPropagation(); set(pop.hidden); });
+      document.addEventListener("click", function (e) { if (!pop.hidden && !pop.contains(e.target)) set(false); });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !pop.hidden) { set(false); btn.focus(); } });
+      window.addEventListener("scroll", function () { if (!pop.hidden && window.scrollY > 40) set(false); }, { passive: true });
+    });
   }
 
   /* ---------- multi-part builder (cascading dropdowns -> removable list) ---------- */

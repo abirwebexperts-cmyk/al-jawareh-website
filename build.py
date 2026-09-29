@@ -469,15 +469,29 @@ def nav(active=""):
     return f"""<header class="site-header" data-header>
   <div class="topbar">
     <div class="container topbar__inner">
-      <span class="status" data-hours-status role="status" aria-live="polite">
-        <span class="status__dot"></span>
-        <span class="status__text">Open Saturday to Thursday</span>
-      </span>
-      <a class="topbar__item topbar__link topbar__loc" href="{maps}" target="_blank" rel="noopener">{icon('location','ic ic--sm')} {esc(a['line1'])}, {esc(a['line2'])}, {esc(a['city'])}</a>
+      <div class="hours">
+        <button type="button" class="status" data-hours-status data-hours-toggle aria-expanded="false" aria-controls="hours-pop">
+          <span class="status__dot" aria-hidden="true"></span>
+          <span class="status__text" aria-live="polite"><b class="status__label">Opening hours</b> <span class="status__detail">Saturday to Thursday</span></span>
+          {icon('chevron','ic ic--xs')}
+        </button>
+        <div class="hours__pop" id="hours-pop" data-hours-pop hidden>
+          <p class="hours__t">Opening hours</p>
+          <ul class="hours__list">
+            <li data-days="sat-thu"><span>Saturday to Thursday</span><span>8 AM to 1 PM<br>4 PM to 9 PM</span></li>
+            <li data-days="fri"><span>Friday</span><span>Closed</span></li>
+          </ul>
+          <p class="hours__note">Afternoon break from 1 PM to 4 PM. All times are UAE time.</p>
+          <a class="hours__link" href="{maps}" target="_blank" rel="noopener">{icon('location','ic ic--sm')} Get directions to the shop</a>
+        </div>
+      </div>
+      <span class="topbar__sep" aria-hidden="true"></span>
+      <a class="topbar__item topbar__link topbar__loc" href="{maps}" target="_blank" rel="noopener" title="{esc(a['line1'])}, {esc(a['line2'])}, {esc(a['city'])}">{icon('location','ic ic--sm')} Shop #4, {esc(a['line2'])}, {esc(a['city'])}</a>
       <span class="topbar__spacer"></span>
       <span class="topbar__item topbar__note">{icon('truck','ic ic--sm')} Delivery across the UAE</span>
       <a class="topbar__item topbar__link topbar__wa" href="{wa_link(WA_GENERIC)}" target="_blank" rel="noopener">{icon('whatsapp','ic ic--sm')} WhatsApp</a>
-      <a class="topbar__item topbar__link" href="{tel_link()}">{icon('phone','ic ic--sm')} {esc(SITE['phone_display'])}</a>
+      <a class="topbar__item topbar__link topbar__dir" href="{maps}" target="_blank" rel="noopener" aria-label="Directions to the shop">{icon('location','ic ic--sm')}<span class="topbar__dir-t">Directions</span></a>
+      <a class="topbar__item topbar__link topbar__tel" href="{tel_link()}" aria-label="Call {esc(SITE['phone_display'])}">{icon('phone','ic ic--sm')}<span class="topbar__tel-t">{esc(SITE['phone_display'])}</span></a>
     </div>
   </div>
   <div class="nav">
@@ -544,7 +558,7 @@ def nav(active=""):
         <img class="brand__logo" src="/assets/images/site/logo-full.png?v={ASSET_VER}" alt="{esc(SITE['name'])}" width="495" height="160">
         <button type="button" class="mobile__close" data-menu-close aria-label="Close menu">{icon('close','ic')}</button>
       </div>
-      <div class="mobile__status"><span class="status" data-hours-status role="status"><span class="status__dot"></span><span class="status__text">Open Saturday to Thursday</span></span></div>
+      <div class="mobile__status"><span class="status" data-hours-status><span class="status__dot" aria-hidden="true"></span><span class="status__text"><b class="status__label">Opening hours</b> <span class="status__detail">Saturday to Thursday</span></span></span></div>
       <div class="mobile__body">
         <a class="mobile__link" href="/">Home</a>
         <details class="mobile__acc"><summary>Brands {icon('chevron','ic ic--xs')}</summary><div class="mobile__sub">{m_brands}<a href="/brands/">All brands</a></div></details>
