@@ -473,13 +473,6 @@ def nav(active=""):
             <a class="mega__all" href="/parts/">All part categories {icon('arrow','ic ic--sm')}</a>
           </div>
         </div>
-        <div class="nav__group has-dd">
-          <button class="nav__link nav__toggle{act('locations')}" aria-expanded="false" aria-haspopup="true">Areas {icon('chevron','ic ic--xs')}</button>
-          <div class="dd" role="menu">{loc_links}</div>
-        </div>
-        <a class="nav__link{act('blog')}" href="/blog/">Blog</a>
-        <a class="nav__link{act('about')}" href="/about/">About</a>
-        <a class="nav__link{act('faq')}" href="/faq/">FAQ</a>
         <a class="nav__link{act('contact')}" href="/contact/">Contact</a>
       </nav>
       <div class="nav__cta">
@@ -501,10 +494,6 @@ def nav(active=""):
         <a class="mobile__link" href="/">Home</a>
         <details class="mobile__acc"><summary>Brands {icon('chevron','ic ic--xs')}</summary><div class="mobile__sub">{m_brands}<a href="/brands/">All brands</a></div></details>
         <details class="mobile__acc"><summary>Parts {icon('chevron','ic ic--xs')}</summary><div class="mobile__sub">{m_parts}<a href="/parts/">All part categories</a></div></details>
-        <details class="mobile__acc"><summary>Areas {icon('chevron','ic ic--xs')}</summary><div class="mobile__sub">{m_locs}</div></details>
-        <a class="mobile__link" href="/blog/">Blog</a>
-        <a class="mobile__link" href="/about/">About</a>
-        <a class="mobile__link" href="/faq/">FAQ</a>
         <a class="mobile__link" href="/contact/">Contact</a>
       </div>
       <div class="mobile__foot">
