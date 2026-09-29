@@ -777,6 +777,21 @@ button.status:hover,button.status[aria-expanded="true"]{background:rgba(255,255,
   .nav__burger:hover,.mobile__close:hover,.mobile__link:hover,.mobile__acc summary:hover{background:transparent}
   .nav .btn--ghost:hover,.nav__call:hover,.mobile__foot .btn--ghost:hover,.mobile__foot .btn--ghost-light:hover{background:transparent;color:var(--ink)}
 }
+
+/* ---------- top bar matches the footer (charcoal) ---------- */
+.topbar{background:var(--gunmetal-2);color:#c7ccd2;border-bottom:1px solid rgba(255,255,255,.06)}
+.topbar__item svg{color:var(--gold-light)}
+.topbar__loc,.topbar__link{color:#c7ccd2}
+.topbar__link:hover{color:#fff}
+.topbar__note{color:#9aa2ab}
+.topbar__wa svg{color:var(--wa)}
+.topbar__sep{background:rgba(255,255,255,.14)}
+.topbar .status{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12);color:#c7ccd2;box-shadow:none}
+.topbar button.status:hover,.topbar button.status[aria-expanded="true"]{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.22)}
+.topbar .status__label{color:#fff}
+.topbar .status__detail{color:#b9c0c8}
+.topbar .status > .ic svg{color:#9aa2ab}
+.topbar .status[data-state="break"] .status__dot{background:var(--gold-light)}
 """
 
 MAIN_JS = r"""/* ==========================================================================
