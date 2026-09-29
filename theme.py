@@ -1313,6 +1313,17 @@ MAIN_JS = r"""/* ===============================================================
     });
   });
 
+  /* ---------- WhatsApp buttons: open wa.me directly (crawlers only see /go/) ---------- */
+  $$("a[data-wa-num]").forEach(function (a) {
+    a.addEventListener("click", function (e) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      var url = "https://wa.me/" + a.getAttribute("data-wa-num") + "?text=" + encodeURIComponent(a.getAttribute("data-wa-msg") || "");
+      var w = window.open(url, "_blank");
+      if (w) { try { w.opener = null; } catch (err) {} } else { window.location.href = url; }   // popup blocked: use this tab
+    });
+  });
+
   initHoursStatus();
   initSearch();
   initPartsBuilders();

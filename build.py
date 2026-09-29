@@ -138,6 +138,19 @@ def wa_link(text):
 WA_GENERIC = "Hello Al Jawareh Auto Spare Parts, I'd like to enquire about a spare part."
 
 
+# WhatsApp buttons point at an internal /go/ page (blocked in robots.txt) instead of
+# wa.me, so SEO crawlers never hammer wa.me (it answers them with 429 "Too Many Requests").
+# main.js opens WhatsApp directly on click; the /go/ page forwards anyone else.
+WA_GO = {"main": "/go/whatsapp/", "branch-1": "/go/whatsapp-branch-1/"}
+
+
+def wa_attrs(number=None, message=None, go="main"):
+    number = number or SITE["whatsapp"]
+    message = message or WA_GENERIC
+    return (f'href="{WA_GO[go]}" data-wa-num="{esc(number)}" data-wa-msg="{esc(message)}" '
+            f'target="_blank" rel="nofollow noopener"')
+
+
 def tel_link():
     return f'tel:{SITE["phone_href"]}'
 
@@ -496,7 +509,7 @@ def nav(active=""):
       <a class="topbar__item topbar__link topbar__loc" href="{maps}" target="_blank" rel="noopener" title="{esc(a['line1'])}, {esc(a['line2'])}, {esc(a['city'])}">{icon('location','ic ic--sm')} Shop #4, {esc(a['line2'])}, {esc(a['city'])}</a>
       <span class="topbar__spacer"></span>
       <span class="topbar__item topbar__note">{icon('truck','ic ic--sm')} Delivery across the UAE</span>
-      <a class="topbar__item topbar__link topbar__wa" href="{wa_link(WA_GENERIC)}" target="_blank" rel="noopener">{icon('whatsapp','ic ic--sm')} WhatsApp</a>
+      <a class="topbar__item topbar__link topbar__wa" {wa_attrs()}>{icon('whatsapp','ic ic--sm')} WhatsApp</a>
       <a class="topbar__item topbar__link topbar__dir" href="{maps}" target="_blank" rel="noopener" aria-label="Directions to the shop">{icon('location','ic ic--sm')}<span class="topbar__dir-t">Directions</span></a>
       <a class="topbar__item topbar__link topbar__tel" href="{tel_link()}" aria-label="Call {esc(SITE['phone_display'])}">{icon('phone','ic ic--sm')}<span class="topbar__tel-t">{esc(SITE['phone_display'])}</span></a>
     </div>
@@ -624,7 +637,7 @@ def footer():
       <p class="footer__blurb">Genuine &amp; OEM spare parts for premium European and American vehicles — supplied across the UAE from our shop in Sharjah.</p>
       <div class="footer__contact">
         <a href="{tel_link()}">{icon('phone','ic ic--sm')} {esc(SITE['phone_display'])}</a>
-        <a href="{wa_link(WA_GENERIC)}" target="_blank" rel="noopener">{icon('whatsapp','ic ic--sm')} WhatsApp us</a>
+        <a {wa_attrs()}>{icon('whatsapp','ic ic--sm')} WhatsApp us</a>
         <a href="mailto:{esc(SITE['email'])}">{icon('mail','ic ic--sm')} {esc(SITE['email'])}</a>
         <span>{icon('location','ic ic--sm')} {esc(a['line1'])}, {esc(a['line2'])}, {esc(a['city'])}</span>
       </div>
@@ -705,7 +718,7 @@ def whatsapp_widget():
     make_opts = "".join(f'<option value="{esc(b["name"])}">{esc(b["name"])}</option>' for b in BRANDS)
     return f"""<nav class="mbar" aria-label="Quick actions">
   <a class="mbar__btn mbar__btn--call" href="{tel_link()}">{icon('phone','ic ic--sm')}<span>Call</span></a>
-  <a class="mbar__btn mbar__btn--chat" href="{wa_link(WA_GENERIC)}" target="_blank" rel="noopener">{icon('chat','ic ic--sm')}<span>Chat</span></a>
+  <a class="mbar__btn mbar__btn--chat" {wa_attrs()}>{icon('chat','ic ic--sm')}<span>Chat</span></a>
   <button type="button" class="mbar__btn mbar__btn--wa" data-enquiry-open>{icon('whatsapp','ic ic--sm')}<span>Request a part</span></button>
 </nav>
 <button type="button" class="wa-fab" data-enquiry-open aria-label="Request a part on WhatsApp">
@@ -766,7 +779,7 @@ def btn_enquiry(label, make=None, cls="btn btn--wa", icon_name="whatsapp"):
 
 
 def btn_wa_link(label, message, cls="btn btn--wa", icon_name="whatsapp"):
-    return (f'<a class="{cls}" href="{wa_link(message)}" target="_blank" rel="noopener">'
+    return (f'<a class="{cls}" {wa_attrs(message=message)}>'
             f'{icon(icon_name,"ic ic--sm")}<span>{esc(label)}</span></a>')
 
 
@@ -1589,12 +1602,12 @@ def build_contact():
     a = SITE["address"]
     hours = "".join(f'<li><span>{esc(d)}</span><span>{esc(t)}</span></li>' for d, t in SITE["hours_display"])
     cards = [
-        ("whatsapp", "WhatsApp", SITE["phone_display"], wa_link(WA_GENERIC), True),
+        ("whatsapp", "WhatsApp", SITE["phone_display"], WA_GO["main"], True),
         ("phone", "Call us", SITE["phone_display"], tel_link(), False),
         ("mail", "Email", SITE["email"], f'mailto:{SITE["email"]}', False),
     ]
     card_html = "".join(
-        f'<a class="contactcard{" contactcard--wa" if wa else ""}" href="{href}"{" target=_blank rel=noopener" if wa else ""}>'
+        f'<a class="contactcard{" contactcard--wa" if wa else ""}" ' + (wa_attrs() if wa else f'href="{href}"') + '>'
         f'<span class="contactcard__ic">{icon(i,"contactcard__icon")}</span>'
         f'<span class="contactcard__label">{lbl}</span>'
         f'<span class="contactcard__val">{esc(val)}</span></a>'
@@ -1749,7 +1762,7 @@ def build_branch():
     br = BRANCH_1
     path = "/" + br["slug"] + "/"
     tel = "tel:" + br["phone_intl"]
-    wa = "https://wa.me/" + br["whatsapp"] + "?text=" + quote("Hello " + br["name"] + ", I'd like to enquire about a spare part.")
+    wa = wa_attrs(br["whatsapp"], "Hello " + br["name"] + ", I'd like to enquire about a spare part.", "branch-1")
     maps = br["maps_url"]
     lat, lng = br["geo"]["lat"], br["geo"]["lng"]
     embed = "https://maps.google.com/maps?q=" + str(lat) + "," + str(lng) + "&z=16&output=embed"
@@ -1783,7 +1796,7 @@ def build_branch():
           <p class="bhero__lead">{esc(make_names)} spare parts near Tasheel Roundabout, Sharjah. Genuine, OEM and quality aftermarket, matched to your VIN.</p>
           <div class="bhero__actions">
             <a class="btn btn--ink btn--lg" href="{tel}">{icon('phone','ic ic--sm')}<span>Call {esc(br['phone_display'])}</span></a>
-            <a class="btn btn--wa btn--lg" href="{wa}" target="_blank" rel="noopener">{icon('whatsapp','ic ic--sm')}<span>WhatsApp Branch 1</span></a>
+            <a class="btn btn--wa btn--lg" {wa}>{icon('whatsapp','ic ic--sm')}<span>WhatsApp Branch 1</span></a>
             <a class="btn btn--line btn--lg" href="{maps}" target="_blank" rel="noopener">{icon('location','ic ic--sm')}<span>Get directions</span></a>
           </div>
         </div>
@@ -1882,7 +1895,7 @@ def build_branch():
       <div class="container cta__inner">
         <div class="cta__text"><h2 class="cta__title">Visit Branch 1 or send your VIN</h2><p class="cta__p">Near Tasheel Roundabout in {esc(br['area'])}. Open Saturday to Thursday.</p></div>
         <div class="cta__actions">
-          <a class="btn btn--wa btn--lg" href="{wa}" target="_blank" rel="noopener">{icon('whatsapp','ic ic--sm')}<span>WhatsApp Branch 1</span></a>
+          <a class="btn btn--wa btn--lg" {wa}>{icon('whatsapp','ic ic--sm')}<span>WhatsApp Branch 1</span></a>
           <a class="btn btn--line-light btn--lg" href="{tel}">{icon('phone','ic ic--sm')}<span>{esc(br['phone_display'])}</span></a>
         </div>
       </div>
@@ -2046,10 +2059,34 @@ def build_sitemap():
         f.write(xml)
 
 
+def build_wa_redirects():
+    """Tiny forwarding pages behind the WhatsApp buttons (not in the sitemap, blocked in robots.txt)."""
+    targets = {"main": wa_link(WA_GENERIC)}
+    if BRANCH_1:
+        targets["branch-1"] = ("https://wa.me/" + BRANCH_1["whatsapp"] + "?text=" +
+                               quote("Hello " + BRANCH_1["name"] + ", I'd like to enquire about a spare part."))
+    for key, url in targets.items():
+        out = os.path.join(DIST, *WA_GO[key].strip("/").split("/"))
+        os.makedirs(out, exist_ok=True)
+        with open(os.path.join(out, "index.html"), "w", encoding="utf-8") as f:
+            f.write(f"""<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Opening WhatsApp</title>
+<meta http-equiv="refresh" content="0;url={esc(url)}">
+<script>location.replace({json.dumps(url)});</script>
+</head><body style="font-family:system-ui,sans-serif;padding:2rem">
+<p>Opening WhatsApp&hellip; <a href="{esc(url)}" rel="nofollow">Tap here if nothing happens</a>.</p>
+</body></html>
+""")
+
+
 def build_robots():
     txt = (f"User-agent: *\n"
            f"Allow: /\n"
-           f"Disallow: /404.html\n\n"
+           f"Disallow: /404.html\n"
+           f"Disallow: /go/\n\n"
            f"Sitemap: {SITE['base_url']}/sitemap.xml\n")
     with open(os.path.join(DIST, "robots.txt"), "w", encoding="utf-8") as f:
         f.write(txt)
@@ -2267,6 +2304,7 @@ def main():
 
     build_sitemap()
     build_robots()
+    build_wa_redirects()
     build_llms()
     with open(os.path.join(DIST, "assets", "search.json"), "w", encoding="utf-8") as f:
         f.write(SEARCH_JSON)
