@@ -497,7 +497,7 @@ def nav(active=""):
   <div class="nav">
     <div class="container nav__inner">
       <a class="brand" href="/" aria-label="{esc(SITE['name'])} home">
-        <img class="brand__logo" src="/assets/images/site/logo-full.png?v={ASSET_VER}" alt="{esc(SITE['name'])}" width="495" height="160">
+        <picture class="brand__pic"><source srcset="/assets/images/site/logo-full.webp?v={ASSET_VER}" type="image/webp"><img class="brand__logo" src="/assets/images/site/logo-full.png?v={ASSET_VER}" alt="{esc(SITE['name'])}" width="576" height="186"></picture>
       </a>
       <nav class="nav__links" aria-label="Primary navigation">
         <a class="nav__link{act('home')}" href="/">Home</a>
@@ -555,7 +555,7 @@ def nav(active=""):
     <div class="mobile__scrim" data-menu-close></div>
     <div class="mobile__panel">
       <div class="mobile__head">
-        <img class="brand__logo" src="/assets/images/site/logo-full.png?v={ASSET_VER}" alt="{esc(SITE['name'])}" width="495" height="160">
+        <picture class="brand__pic"><source srcset="/assets/images/site/logo-full.webp?v={ASSET_VER}" type="image/webp"><img class="brand__logo" src="/assets/images/site/logo-full.png?v={ASSET_VER}" alt="{esc(SITE['name'])}" width="576" height="186"></picture>
         <button type="button" class="mobile__close" data-menu-close aria-label="Close menu">{icon('close','ic')}</button>
       </div>
       <div class="mobile__status"><span class="status" data-hours-status><span class="status__dot" aria-hidden="true"></span><span class="status__text"><b class="status__label">Opening hours</b> <span class="status__detail">Saturday to Thursday</span></span></span></div>
@@ -610,7 +610,7 @@ def footer():
   <div class="container footer__grid">
     <div class="footer__col footer__brand">
       <a class="brand brand--footer" href="/">
-        <img class="brand__logo" src="/assets/images/site/logo-full.png?v={ASSET_VER}" alt="{esc(SITE['name'])}" width="495" height="160">
+        <picture class="brand__pic"><source srcset="/assets/images/site/logo-full.webp?v={ASSET_VER}" type="image/webp"><img class="brand__logo" src="/assets/images/site/logo-full.png?v={ASSET_VER}" alt="{esc(SITE['name'])}" width="576" height="186"></picture>
       </a>
       <p class="footer__blurb">Genuine &amp; OEM spare parts for premium European and American vehicles — supplied across the UAE from our shop in Sharjah.</p>
       <div class="footer__contact">
