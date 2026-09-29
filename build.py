@@ -415,9 +415,10 @@ def nav(active=""):
 
     # Brands mega panel
     brand_links = "".join(
-        f'<a class="mega__item" href="/brands/{b["slug"]}/">'
-        f'<span class="mega__name">{esc(b["name"])}</span>'
-        f'<span class="mega__sub">{esc(b["origin"])}</span></a>'
+        f'<a class="mega__item mega__item--brand" href="/brands/{b["slug"]}/">'
+        f'{brand_logo(b, "mega")}'
+        f'<span><span class="mega__name">{esc(b["name"])}</span>'
+        f'<span class="mega__sub">{esc(b["origin"])}</span></span></a>'
         for b in BRANDS
     )
     # Parts mega panel
