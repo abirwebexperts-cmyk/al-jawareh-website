@@ -714,6 +714,69 @@ button.status:hover,button.status[aria-expanded="true"]{background:rgba(255,255,
 .topbar .status > .ic svg{color:var(--silver)}
 .topbar .status[data-state="break"] .status__dot{background:#c8932c}
 .nav{border-top:0}
+
+/* ==========================================================================
+   Light header system: white nav (frosted when scrolled), light mobile menu,
+   frosted mobile action bar
+   ========================================================================== */
+.nav{background:#fff;border-bottom:1px solid var(--steel);transition:background .2s,box-shadow .2s}
+.site-header.is-stuck .nav{background:rgba(255,255,255,.9);-webkit-backdrop-filter:saturate(1.5) blur(14px);backdrop-filter:saturate(1.5) blur(14px);box-shadow:0 8px 24px rgba(23,25,28,.1)}
+.brand__logo{filter:drop-shadow(0 1px 1px rgba(23,25,28,.22)) drop-shadow(0 4px 10px rgba(23,25,28,.08))}
+.nav__link{color:var(--ink);font-weight:560}
+.nav__link:hover,.nav__link.is-active{color:var(--ink)}
+.nav__link::after{background:var(--gold);height:2px;bottom:.15rem}
+.nav__link .ic svg{color:var(--silver)}
+.nav__search{color:var(--ink);border-color:var(--steel-2)}
+.nav__search:hover,.nav__search[aria-expanded="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.nav .btn--ghost,.nav__call{border-color:var(--ink);color:var(--ink);background:transparent}
+.nav .btn--ghost:hover,.nav__call:hover{background:var(--ink);color:#fff}
+.nav__burger{color:var(--ink);border-color:var(--steel-2)}
+.nav__burger:hover{background:var(--chrome)}
+.mega{border-top:1px solid var(--steel);box-shadow:0 22px 44px rgba(23,25,28,.14)}
+.search__panel{border-top:1px solid var(--steel)}
+
+/* mobile menu: light */
+.mobile__scrim{background:rgba(23,25,28,.45)}
+.mobile__panel{background:#fff;color:var(--body);border-left:1px solid var(--steel);box-shadow:-18px 0 40px rgba(23,25,28,.18)}
+.mobile__head{border-bottom:1px solid var(--steel)}
+.mobile__close{color:var(--ink);border-color:var(--steel-2)}
+.mobile__close:hover{background:var(--chrome)}
+.mobile__status{background:#f7f8f9;border-bottom:1px solid var(--steel)}
+.mobile__status .status__label{color:var(--ink)}
+.mobile__status .status__detail{color:var(--silver)}
+.mobile__status .status[data-state="break"] .status__dot{background:#c8932c}
+.mobile__link,.mobile__acc summary{color:var(--ink);border-bottom-color:var(--steel)}
+.mobile__link:hover,.mobile__acc summary:hover{background:var(--chrome)}
+.mobile__acc summary svg{color:var(--gold-dark)}
+.mobile__sub a{color:var(--body);border-radius:6px}
+.mobile__sub a:hover{color:var(--ink);background:var(--chrome)}
+.mobile__foot{background:#f7f8f9;border-top-color:var(--steel)}
+.mobile__foot .btn--ghost,.mobile__foot .btn--ghost-light{border-color:var(--ink);color:var(--ink);background:#fff}
+.mobile__foot .btn--ghost:hover,.mobile__foot .btn--ghost-light:hover{background:var(--ink);color:#fff}
+
+/* mobile action bar: frosted white card, app-style buttons */
+@media (max-width:760px){
+  .mbar{background:rgba(255,255,255,.94);-webkit-backdrop-filter:saturate(1.5) blur(16px);backdrop-filter:saturate(1.5) blur(16px);
+    border:1px solid var(--steel);border-radius:16px;padding:6px;gap:6px;grid-template-columns:1fr 1fr 2fr;
+    box-shadow:0 14px 34px rgba(23,25,28,.18),0 2px 6px rgba(23,25,28,.06)}
+  .mbar__btn{height:52px;border-radius:11px;color:var(--ink);background:#f1f3f5;border:1px solid var(--steel);font-size:.9rem}
+  .mbar__btn--call,.mbar__btn--chat{flex-direction:column;gap:3px;font-size:.72rem;font-weight:620}
+  .mbar__btn--call svg,.mbar__btn--chat svg{color:var(--gold-dark);width:19px;height:19px}
+  .mbar__btn:active{transform:scale(.97)}
+  .mbar__btn--wa{background:var(--wa);border-color:var(--wa);color:var(--wa-ink);font-size:.95rem}
+  .mbar__btn--wa svg{color:var(--wa-ink)}
+  .mbar__btn--wa:active{background:var(--wa-hover)}
+}
+/* neutral frosted glass: no colour bleed from content underneath */
+.site-header.is-stuck .nav{background:rgba(255,255,255,.96);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+@media (max-width:760px){.mbar{background:rgba(255,255,255,.96);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}}
+/* touch screens: no "stuck" hover colours after a tap */
+@media (hover:none){
+  .nav__search:hover{background:transparent;color:var(--ink);border-color:var(--steel-2)}
+  .nav__search[aria-expanded="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .nav__burger:hover,.mobile__close:hover,.mobile__link:hover,.mobile__acc summary:hover{background:transparent}
+  .nav .btn--ghost:hover,.nav__call:hover,.mobile__foot .btn--ghost:hover,.mobile__foot .btn--ghost-light:hover{background:transparent;color:var(--ink)}
+}
 """
 
 MAIN_JS = r"""/* ==========================================================================
