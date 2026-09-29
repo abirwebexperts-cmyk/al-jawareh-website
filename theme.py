@@ -698,6 +698,22 @@ button.status:hover,button.status[aria-expanded="true"]{background:rgba(255,255,
 .hero__t2{background-image:
     linear-gradient(105deg,transparent 42%,rgba(255,250,235,.9) 50%,transparent 58%),
     linear-gradient(180deg,#e4bb58 0%,#d3a13c 38%,#c08d2c 49%,#a27419 51%,#b08125 70%,#83600f 100%)}
+
+/* ---------- top bar: light steel utility bar ---------- */
+.topbar{background:#f1f3f5;color:var(--body);border-bottom:1px solid var(--steel)}
+.topbar__item svg{color:var(--gold-dark)}
+.topbar__loc,.topbar__link{color:var(--body)}
+.topbar__link:hover{color:var(--ink)}
+.topbar__note{color:var(--silver)}
+.topbar__wa svg{color:#15803d}
+.topbar__sep{background:var(--steel-2)}
+.topbar .status{background:#fff;border-color:var(--steel);color:var(--body);box-shadow:0 1px 1px rgba(23,25,28,.04)}
+.topbar button.status:hover,.topbar button.status[aria-expanded="true"]{background:#fff;border-color:var(--steel-2)}
+.topbar .status__label{color:var(--ink)}
+.topbar .status__detail{color:var(--silver)}
+.topbar .status > .ic svg{color:var(--silver)}
+.topbar .status[data-state="break"] .status__dot{background:#c8932c}
+.nav{border-top:0}
 """
 
 MAIN_JS = r"""/* ==========================================================================

@@ -353,7 +353,7 @@ def render_head(title, description, path, jsonld_objs, og_type="website", image=
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(description)}">
 <link rel="canonical" href="{esc(canonical)}">
-<meta name="theme-color" content="#2a2f35">
+<meta name="theme-color" content="#f1f3f5">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="format-detection" content="telephone=no">
 <meta name="geo.region" content="AE-SH">
