@@ -488,7 +488,7 @@ def nav(active=""):
       <nav class="nav__links" aria-label="Primary navigation">
         <a class="nav__link{act('home')}" href="/">Home</a>
         <div class="nav__group has-mega">
-          <button class="nav__link nav__toggle{act('brands')}" aria-expanded="false" aria-haspopup="true">Brands {icon('chevron','ic ic--xs')}</button>
+          <button type="button" class="nav__link nav__toggle{act('brands')}" aria-expanded="false" aria-haspopup="true">Brands {icon('chevron','ic ic--xs')}</button>
           <div class="mega mega--brands" role="menu">
             <div class="mega__main">
               <div class="mega__grid">{brand_links}</div>
@@ -502,23 +502,23 @@ def nav(active=""):
           </div>
         </div>
         <div class="nav__group has-mega">
-          <button class="nav__link nav__toggle{act('parts')}" aria-expanded="false" aria-haspopup="true">Parts {icon('chevron','ic ic--xs')}</button>
+          <button type="button" class="nav__link nav__toggle{act('parts')}" aria-expanded="false" aria-haspopup="true">Parts {icon('chevron','ic ic--xs')}</button>
           <div class="mega mega--parts" role="menu">
             <div class="mega__grid mega__grid--icon">{cat_links}</div>
             <div class="mega__foot">
               <a class="mega__all" href="/parts/">All part categories</a>
               <span class="mega__vin">Know your VIN? We'll match the exact part number.
-                <button class="btn btn--wa btn--sm" data-enquiry-open>{icon('whatsapp','ic ic--sm')}<span>Send your VIN</span></button></span>
+                <button type="button" class="btn btn--wa btn--sm" data-enquiry-open>{icon('whatsapp','ic ic--sm')}<span>Send your VIN</span></button></span>
             </div>
           </div>
         </div>
         <a class="nav__link{act('contact')}" href="/contact/">Contact</a>
       </nav>
       <div class="nav__cta">
-        <button class="nav__search" data-search-open aria-label="Search brands and parts (press /)" aria-expanded="false" aria-controls="site-search">{icon('search','ic')}</button>
+        <button type="button" class="nav__search" data-search-open aria-label="Search brands and parts (press /)" aria-expanded="false" aria-controls="site-search">{icon('search','ic')}</button>
         <a class="btn btn--ghost btn--sm nav__call" href="{tel_link()}" aria-label="Call {esc(SITE['phone_display'])}">{icon('phone','ic ic--sm')}<span class="nav__call-t">Call</span></a>
-        <button class="btn btn--wa btn--sm nav__req" data-enquiry-open>{icon('whatsapp','ic ic--sm')}<span>Request a part</span></button>
-        <button class="nav__burger" data-menu-open aria-label="Open menu" aria-expanded="false">{icon('menu','ic')}</button>
+        <button type="button" class="btn btn--wa btn--sm nav__req" data-enquiry-open>{icon('whatsapp','ic ic--sm')}<span>Request a part</span></button>
+        <button type="button" class="nav__burger" data-menu-open aria-label="Open menu" aria-expanded="false">{icon('menu','ic')}</button>
       </div>
     </div>
   </div>
@@ -530,7 +530,7 @@ def nav(active=""):
           {icon('search','ic')}
           <input type="search" class="search__input" data-search-input placeholder="Search a brand, part or model, or paste your VIN"
             autocomplete="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="search-results" aria-autocomplete="list" aria-label="Search the site">
-          <button class="search__close" data-search-close aria-label="Close search">Esc</button>
+          <button type="button" class="search__close" data-search-close aria-label="Close search">Esc</button>
         </div>
         <ul class="search__results" id="search-results" role="listbox" data-search-results></ul>
         <p class="search__hint">Try <b>Defender</b>, <b>water pump</b>, <b>BMW brakes</b>, or paste a 17-character VIN.</p>
@@ -542,7 +542,7 @@ def nav(active=""):
     <div class="mobile__panel">
       <div class="mobile__head">
         <img class="brand__logo" src="/assets/images/site/logo-full.png?v={ASSET_VER}" alt="{esc(SITE['name'])}" width="495" height="160">
-        <button class="mobile__close" data-menu-close aria-label="Close menu">{icon('close','ic')}</button>
+        <button type="button" class="mobile__close" data-menu-close aria-label="Close menu">{icon('close','ic')}</button>
       </div>
       <div class="mobile__status"><span class="status" data-hours-status role="status"><span class="status__dot"></span><span class="status__text">Open Saturday to Thursday</span></span></div>
       <div class="mobile__body">
@@ -552,7 +552,7 @@ def nav(active=""):
         <a class="mobile__link" href="/contact/">Contact</a>
       </div>
       <div class="mobile__foot">
-        <button class="btn btn--wa btn--block" data-enquiry-open>{icon('whatsapp','ic ic--sm')} Request a Part</button>
+        <button type="button" class="btn btn--wa btn--block" data-enquiry-open>{icon('whatsapp','ic ic--sm')} Request a part</button>
         <a class="btn btn--ghost-light btn--block" href="{tel_link()}">{icon('phone','ic ic--sm')} {esc(SITE['phone_display'])}</a>
       </div>
     </div>
@@ -607,17 +607,17 @@ def footer():
       </div>
     </div>
     <div class="footer__col">
-      <h3 class="footer__h">Brands</h3>
+      <h2 class="footer__h">Brands</h2>
       <ul class="footer__list">{brand_cols}</ul>
     </div>
     <div class="footer__col">
-      <h3 class="footer__h">Parts</h3>
+      <h2 class="footer__h">Parts</h2>
       <ul class="footer__list">{cat_cols}</ul>
     </div>
     <div class="footer__col">
-      <h3 class="footer__h">Areas we serve</h3>
+      <h2 class="footer__h">Areas we serve</h2>
       <ul class="footer__list">{loc_cols}</ul>
-      <h3 class="footer__h footer__h--mt">Company</h3>
+      <h2 class="footer__h footer__h--mt">Company</h2>
       <ul class="footer__list">
         <li><a href="/about/">About us</a></li>
         <li><a href="/blog/">Blog &amp; guides</a></li>
@@ -627,7 +627,7 @@ def footer():
       </ul>
     </div>
     <div class="footer__col">
-      <h3 class="footer__h">Opening hours</h3>
+      <h2 class="footer__h">Opening hours</h2>
       <ul class="footer__hours">{hours}</ul>
       <div class="footer__socials">{socials}</div>
     </div>
@@ -636,7 +636,7 @@ def footer():
     <div class="container footer__bar-inner">
       <p>&copy; <span data-year>{date.today().year}</span> {esc(SITE['name'])}. All rights reserved.</p>
       <p class="footer__note">Genuine &amp; OEM parts. Brand names are used for reference only; all trademarks belong to their respective owners.</p>
-      <button class="footer__top" data-scroll-top aria-label="Back to top">{icon('chevron','ic')}<span>Top</span></button>
+      <button type="button" class="footer__top" data-scroll-top aria-label="Back to top">{icon('chevron','ic')}<span>Top</span></button>
     </div>
   </div>
 </footer>
@@ -682,11 +682,11 @@ def whatsapp_widget():
     return f"""<nav class="mbar" aria-label="Quick actions">
   <a class="mbar__btn mbar__btn--call" href="{tel_link()}">{icon('phone','ic ic--sm')}<span>Call</span></a>
   <a class="mbar__btn mbar__btn--chat" href="{wa_link(WA_GENERIC)}" target="_blank" rel="noopener">{icon('chat','ic ic--sm')}<span>Chat</span></a>
-  <button class="mbar__btn mbar__btn--wa" data-enquiry-open>{icon('whatsapp','ic ic--sm')}<span>Request a Part</span></button>
+  <button type="button" class="mbar__btn mbar__btn--wa" data-enquiry-open>{icon('whatsapp','ic ic--sm')}<span>Request a part</span></button>
 </nav>
-<button class="wa-fab" data-enquiry-open aria-label="Request a part on WhatsApp">
+<button type="button" class="wa-fab" data-enquiry-open aria-label="Request a part on WhatsApp">
   {icon('whatsapp','wa-fab__icon')}
-  <span class="wa-fab__label">Request a Part</span>
+  <span class="wa-fab__label">Request a part</span>
 </button>
 <div class="enquiry" data-enquiry hidden>
   <div class="enquiry__scrim" data-enquiry-close></div>
@@ -694,9 +694,9 @@ def whatsapp_widget():
     <header class="enquiry__head">
       <div>
         <p class="enquiry__eyebrow">{icon('whatsapp','ic ic--sm')} WhatsApp enquiry</p>
-        <h2 class="enquiry__title" id="enq-title">Request a part / get a quote</h2>
+        <h2 class="enquiry__title" id="enq-title">Request a part and get a quote</h2>
       </div>
-      <button class="enquiry__close" data-enquiry-close aria-label="Close">{icon('close','ic')}</button>
+      <button type="button" class="enquiry__close" data-enquiry-close aria-label="Close">{icon('close','ic')}</button>
     </header>
     <p class="enquiry__intro">Add one or more parts to your list, tell us your vehicle, and we'll open WhatsApp with everything ready to send. We confirm the exact parts and quote you.</p>
     <form class="enquiry__form" data-enquiry-form>
@@ -737,7 +737,7 @@ def section_header(eyebrow, title, sub=None, center=False, light=False):
 
 def btn_enquiry(label, make=None, cls="btn btn--wa", icon_name="whatsapp"):
     data = f' data-make="{esc(make)}"' if make else ""
-    return (f'<button class="{cls}" data-enquiry-open{data}>'
+    return (f'<button type="button" class="{cls}" data-enquiry-open{data}>'
             f'{icon(icon_name,"ic ic--sm")}<span>{esc(label)}</span></button>')
 
 
@@ -819,7 +819,7 @@ def features_why():
 
 def steps_order():
     steps = [
-        ("Send us the details", "Message your vehicle make, model, year, VIN and the part you need — or just describe the fault. Use the Request a Part button anywhere on this site.", "chat"),
+        ("Send us the details", "Send your make, model, year, VIN and the part you need, or just describe the fault.", "chat"),
         ("We source &amp; quote", "We confirm the exact part, tell you whether it's genuine or OEM, and send you a clear price. No obligation.", "quote"),
         ("You approve", "Happy with the part and price? Give us the go-ahead and choose delivery or collection.", "check"),
         ("Delivered or collected", "Collect from our Sharjah shop, or we deliver anywhere in the UAE — often same or next day.", "truck"),
@@ -1038,14 +1038,13 @@ def build_brands_index():
     body = f"""{breadcrumbs([('Home', '/'), ('Brands', None)])}
     <section class="pagehead">
       <div class="container">
-        <span class="eyebrow">Brands we stock</span>
         <h1 class="pagehead__title">Spare parts for 9 premium marques</h1>
         <p class="pagehead__lead">We specialise in genuine and OEM parts for premium European and select American vehicles. Pick your marque to see the parts we supply — or just send us your VIN on WhatsApp.</p>
-        <div class="pagehead__actions">{btn_enquiry('Request a Part', cls='btn btn--wa btn--lg')}</div>
+        <div class="pagehead__actions">{btn_enquiry('Request a part', cls='btn btn--wa btn--lg')}</div>
       </div>
     </section>
     <section class="section"><div class="container">{brands_grid()}</div></section>
-    {cta_banner('Not sure which part you need?', 'Describe the fault and your vehicle — we speak these cars fluently and will point you right.')}"""
+    {cta_banner('Not sure which part you need?', 'Describe the fault and your vehicle. We know these cars and will point you to the right part.')}"""
     ld = [breadcrumb_schema([('Home', '/'), ('Brands', '/brands/')]),
           {"@context": "https://schema.org", "@type": "ItemList",
            "itemListElement": [{"@type": "ListItem", "position": i, "name": b["name"],
@@ -1062,14 +1061,13 @@ def build_parts_index():
     body = f"""{breadcrumbs([('Home', '/'), ('Parts', None)])}
     <section class="pagehead">
       <div class="container">
-        <span class="eyebrow">Part categories</span>
         <h1 class="pagehead__title">Every part your car needs</h1>
         <p class="pagehead__lead">From engines and air suspension to brakes, filters, electrical and body panels — all genuine or quality OEM, matched to your vehicle. Browse a category or send us the part on WhatsApp.</p>
-        <div class="pagehead__actions">{btn_enquiry('Request a Part', cls='btn btn--wa btn--lg')}</div>
+        <div class="pagehead__actions">{btn_enquiry('Request a part', cls='btn btn--wa btn--lg')}</div>
       </div>
     </section>
     <section class="section"><div class="container">{categories_grid()}</div></section>
-    {cta_banner("Can't find the category?", "Tell us the part or the symptom on WhatsApp and we'll sort it — genuine or OEM.")}"""
+    {cta_banner("Can't find the category?", "Tell us the part or the symptom on WhatsApp and we'll find it, genuine or OEM.")}"""
     ld = [breadcrumb_schema([('Home', '/'), ('Parts', '/parts/')]),
           {"@context": "https://schema.org", "@type": "ItemList",
            "itemListElement": [{"@type": "ListItem", "position": i, "name": c["name"],
@@ -1148,7 +1146,6 @@ def build_brand(b):
     <section class="brandhead">
       <div class="container brandhead__inner">
         <div class="brandhead__text">
-          <span class="eyebrow">{esc(b['origin'])} &middot; Genuine &amp; OEM</span>
           <h1 class="brandhead__title">{esc(b['name'])} Spare Parts in Sharjah &amp; the UAE</h1>
           <p class="brandhead__lead">{esc(b['intro'])}</p>
           <div class="brandhead__actions">
@@ -1168,7 +1165,7 @@ def build_brand(b):
         </div>
         <aside class="split__aside">
           <div class="panel">
-            <h3 class="panel__t">Models we cover</h3>
+            <h2 class="panel__t">Models we cover</h2>
             <ul class="panel__list">{models}</ul>
             <p class="panel__note">Don't see your exact model? Message us — we cover more than we can list.</p>
             {btn_enquiry('Check my model', make=b['name'], cls='btn btn--wa btn--block')}
@@ -1182,8 +1179,8 @@ def build_brand(b):
         {categories_grid(brand=b)}
       </div>
     </section>
-    <section class="section"><div class="container container--narrow">{faq_block(faqs, eyebrow='FAQ', title=f'{esc(b["name"])} parts — questions')}</div></section>
-    {cta_banner(f'Need a {b["name"]} part today?', f'Send your VIN and the part on WhatsApp. We stock the fast-movers and can source the rest — genuine or OEM.', make=b['name'])}"""
+    <section class="section"><div class="container container--narrow">{faq_block(faqs, eyebrow='FAQ', title=f'Questions about {esc(b["name"])} parts')}</div></section>
+    {cta_banner(f'Need a {b["name"]} part today?', f'Send your VIN and the part on WhatsApp. We stock the fast movers and source the rest, genuine or OEM.', make=b['name'])}"""
     ld = [breadcrumb_schema([('Home', '/'), ('Brands', '/brands/'), (b['name'], f'/brands/{b["slug"]}/')]),
           store_schema(), faq_schema(faqs)]
     title = f'{b["name"]} Spare Parts in Sharjah & UAE | Genuine & OEM | Al Jawareh'
@@ -1204,7 +1201,6 @@ def build_category(c):
       <div class="container pagehead__cat-inner">
         <span class="pagehead__ic">{icon(c['icon'],'pagehead__icon')}</span>
         <div>
-          <span class="eyebrow">Part category &middot; Genuine &amp; OEM</span>
           <h1 class="pagehead__title">{esc(c['name'])} in Sharjah &amp; the UAE</h1>
           <p class="pagehead__lead">{esc(c['intro'])}</p>
           <div class="pagehead__actions">{btn_enquiry(f'Request {low(c["name"])}', cls='btn btn--wa btn--lg')}</div>
@@ -1219,7 +1215,7 @@ def build_category(c):
         </div>
         <aside class="split__aside">
           <div class="panel panel--accent">
-            <h3 class="panel__t">{icon('vin','ic ic--sm')} Match it to your VIN</h3>
+            <h2 class="panel__t">{icon('vin','ic ic--sm')} Match it to your VIN</h2>
             <p>{esc(c['name'])} vary by model and year. Send your chassis number and we'll confirm the exact part before you buy.</p>
             {btn_enquiry('Send my VIN', cls='btn btn--wa btn--block')}
           </div>
@@ -1232,8 +1228,8 @@ def build_category(c):
         {brand_grid_for_category(c)}
       </div>
     </section>
-    <section class="section"><div class="container container--narrow">{faq_block(faqs, eyebrow='FAQ', title=f'{esc(c["name"])} — questions')}</div></section>
-    {cta_banner(f'Need {low(c["name"])} for your car?', 'Send us your vehicle and the part on WhatsApp — genuine or OEM, matched to your VIN.')}"""
+    <section class="section"><div class="container container--narrow">{faq_block(faqs, eyebrow='FAQ', title=f'Questions about {esc(low(c["name"]))}')}</div></section>
+    {cta_banner(f'Need {low(c["name"])} for your car?', 'Send us your vehicle and the part on WhatsApp. Genuine or OEM, matched to your VIN.')}"""
     ld = [breadcrumb_schema([('Home', '/'), ('Parts', '/parts/'), (c['name'], f'/parts/{c["slug"]}/')]),
           store_schema(), faq_schema(faqs)]
     title = f'{c["name"]} in Sharjah & UAE | Genuine & OEM | Al Jawareh Auto Spare Parts'
@@ -1247,7 +1243,7 @@ def brand_grid_for_category(c):
         f'<a class="minicard" href="/brands/{b["slug"]}/{c["slug"]}/">'
         f'<span class="minicard__logo">{brand_logo(b, "mini")}</span>'
         f'<span class="minicard__name">{esc(b["name"])} {esc(low(c["short"]))}</span>'
-        f'{icon("arrow","ic ic--sm")}</a>'
+        f'</a>'
         for b in BRANDS
     )
     return f'<div class="grid grid--mini">{cards}</div>'
@@ -1299,7 +1295,6 @@ def build_brand_category(b, c):
     <section class="brandhead brandhead--bc">
       <div class="container brandhead__inner">
         <div class="brandhead__text">
-          <span class="eyebrow">{icon(c['icon'],'ic ic--sm')} {esc(b['name'])} &middot; {esc(c['name'])}</span>
           <h1 class="brandhead__title">{esc(b['name'])} {esc(c['name'])} in Sharjah &amp; the UAE</h1>
           {bc_intro(b, c)}
           <div class="brandhead__actions">
@@ -1319,12 +1314,12 @@ def build_brand_category(b, c):
         </div>
         <aside class="split__aside">
           <div class="panel panel--accent">
-            <h3 class="panel__t">{icon('vin','ic ic--sm')} Send your VIN</h3>
+            <h2 class="panel__t">{icon('vin','ic ic--sm')} Send your VIN</h2>
             <p>The fastest way to the right {esc(low(c['name']))} for your {esc(b['name'])} is your chassis number. Send it on WhatsApp and we'll confirm the exact part.</p>
             {btn_enquiry('Get a quote', make=b['name'], cls='btn btn--wa btn--block')}
           </div>
           <div class="panel">
-            <h3 class="panel__t">{esc(b['name'])} models we cover</h3>
+            <h2 class="panel__t">{esc(b['name'])} models we cover</h2>
             <ul class="panel__list">{models}</ul>
           </div>
         </aside>
@@ -1340,8 +1335,8 @@ def build_brand_category(b, c):
         </div>
       </div>
     </section>
-    <section class="section"><div class="container container--narrow">{faq_block(faqs, eyebrow='FAQ', title=f'{esc(b["name"])} {esc(low(c["name"]))} — questions')}</div></section>
-    {cta_banner(f'Need {b["name"]} {low(c["short"])} now?', f'Send your VIN and the part on WhatsApp — genuine or OEM, delivered across the UAE.', make=b['name'])}"""
+    <section class="section"><div class="container container--narrow">{faq_block(faqs, eyebrow='FAQ', title=f'Questions about {esc(b["name"])} {esc(low(c["name"]))}')}</div></section>
+    {cta_banner(f'Need {b["name"]} {low(c["short"])} now?', f'Send your VIN and the part on WhatsApp. Genuine or OEM, delivered across the UAE.', make=b['name'])}"""
     ld = [breadcrumb_schema([('Home', '/'), ('Brands', '/brands/'), (b['name'], f'/brands/{b["slug"]}/'),
                              (c['name'], f'/brands/{b["slug"]}/{c["slug"]}/')]),
           store_schema(), faq_schema(faqs)]
@@ -1361,22 +1356,21 @@ def location_card(l):
             f'<span class="loccard__ic">{icon("location","loccard__icon")}</span>'
             f'<span class="loccard__name">{esc(l["name"])}</span>'
             f'<span class="loccard__tag">{tag}</span>'
-            f'<span class="loccard__go">Parts in {esc(l["name"])} {icon("arrow","ic ic--sm")}</span></a>')
+            f'<span class="loccard__go">Parts in {esc(l["name"])}</span></a>')
 
 
 def build_locations_index():
     body = f"""{breadcrumbs([('Home', '/'), ('Areas', None)])}
     <section class="pagehead">
       <div class="container">
-        <span class="eyebrow">Areas we serve</span>
         <h1 class="pagehead__title">Auto spare parts across the UAE</h1>
         <p class="pagehead__lead">We're based in Sharjah and deliver genuine &amp; OEM parts right across the Emirates. Pick your area or send us your VIN on WhatsApp.</p>
-        <div class="pagehead__actions">{btn_enquiry('Request a Part', cls='btn btn--wa btn--lg')}</div>
+        <div class="pagehead__actions">{btn_enquiry('Request a part', cls='btn btn--wa btn--lg')}</div>
       </div>
     </section>
     <section class="section"><div class="container"><div class="grid grid--locs">{"".join(location_card(l) for l in LOCATIONS)}</div></div></section>
     <section class="section section--alt"><div class="container">{coverage_block()}</div></section>
-    {cta_banner('Anywhere in the UAE', "Tell us where you are and the part you need — we'll get it to you.")}"""
+    {cta_banner('Anywhere in the UAE', "Tell us where you are and the part you need, and we'll get it to you.")}"""
     ld = [breadcrumb_schema([('Home', '/'), ('Areas', '/locations/')]), store_schema()]
     render_page("Auto Spare Parts Across the UAE | Sharjah, Dubai, Ajman & More | Al Jawareh",
                 "Genuine & OEM auto spare parts delivered across the UAE — Sharjah, Dubai, Ajman, Abu Dhabi, Ras Al Khaimah, Umm Al Quwain, Fujairah and Al Ain. Request a part on WhatsApp.",
@@ -1404,11 +1398,10 @@ def build_location(l):
     body = f"""{breadcrumbs(crumbs)}
     <section class="pagehead">
       <div class="container">
-        <span class="eyebrow">{icon('location','ic ic--sm')} {esc(l['name'])}, UAE</span>
         <h1 class="pagehead__title">Auto Spare Parts in {esc(l['name'])}</h1>
         <p class="pagehead__lead">{esc(l['intro'])}</p>
         <div class="pagehead__actions">
-          {btn_enquiry('Request a Part', cls='btn btn--wa btn--lg')}
+          {btn_enquiry('Request a part', cls='btn btn--wa btn--lg')}
           <a class="btn btn--ghost btn--lg" href="{tel_link()}">{icon('phone','ic ic--sm')}<span>{esc(SITE['phone_display'])}</span></a>
         </div>
       </div>
@@ -1417,13 +1410,13 @@ def build_location(l):
       <div class="container split">
         <div class="split__main">
           <p class="prose">{esc(l['detail'])}</p>
-          <h3 class="mini-h">Areas we cover in {esc(l['name'])}</h3>
+          <h2 class="mini-h">Areas we cover in {esc(l['name'])}</h2>
           <div class="tagpills">{areas}</div>
           <p class="note">{icon('truck','ic ic--sm')} {esc(l['delivery'])}</p>
         </div>
         <aside class="split__aside">
           <div class="panel panel--accent">
-            <h3 class="panel__t">Fast parts in {esc(l['name'])}</h3>
+            <h2 class="panel__t">Fast parts in {esc(l['name'])}</h2>
             <p>Genuine &amp; OEM parts for Range Rover, Mercedes, BMW, Audi, Porsche and more — matched to your VIN.</p>
             {btn_enquiry('Send my VIN', cls='btn btn--wa btn--block')}
           </div>
@@ -1437,8 +1430,8 @@ def build_location(l):
       </div>
     </section>
     <section class="section"><div class="container">{coverage_block()}</div></section>
-    <section class="section section--alt"><div class="container container--narrow">{faq_block(faqs, eyebrow='FAQ', title=f'Parts in {esc(l["name"])} — questions')}</div></section>
-    {cta_banner(f'Need a part in {l["name"]}?', 'Send us your vehicle and the part on WhatsApp — we deliver across the UAE.')}"""
+    <section class="section section--alt"><div class="container container--narrow">{faq_block(faqs, eyebrow='FAQ', title=f'Ordering parts in {esc(l["name"])}')}</div></section>
+    {cta_banner(f'Need a part in {l["name"]}?', 'Send us your vehicle and the part on WhatsApp. We deliver across the UAE.')}"""
     ld = [breadcrumb_schema([('Home', '/'), ('Areas', '/locations/'), (l['name'], f'/locations/{l["slug"]}/')]),
           store_schema(), faq_schema(faqs)]
     title = f'Auto Spare Parts in {l["name"]} | Genuine & OEM | Al Jawareh'
@@ -1464,7 +1457,6 @@ def build_about():
     body = f"""{breadcrumbs([('Home', '/'), ('About', None)])}
     <section class="pagehead">
       <div class="container">
-        <span class="eyebrow">About us</span>
         <h1 class="pagehead__title">Your parts partner in Sharjah</h1>
         <p class="pagehead__lead">Al Jawareh Auto Spare Parts supplies genuine and OEM parts for premium European and American vehicles — from a Range Rover air strut to a Mercedes service kit — with fast delivery across the UAE.</p>
       </div>
@@ -1480,16 +1472,16 @@ def build_about():
         </div>
         <aside class="split__aside">
           <div class="panel panel--accent">
-            <h3 class="panel__t">{icon('location','ic ic--sm')} Find us</h3>
+            <h2 class="panel__t">{icon('location','ic ic--sm')} Find us</h2>
             <p>{esc(SITE['address']['line1'])}, {esc(SITE['address']['line2'])}, {esc(SITE['address']['city'])}, UAE.</p>
-            <p class="panel__note">Daily 8AM–1PM &amp; 4PM–9PM &middot; closed 1–4 PM</p>
+            <p class="panel__note">Saturday to Thursday, 8 AM to 1 PM and 4 PM to 9 PM. Closed Fridays.</p>
             {btn_wa_link('Message us', WA_GENERIC, cls='btn btn--wa btn--block')}
           </div>
         </aside>
       </div>
     </section>
     <section class="section section--alt"><div class="container">{section_header('What we stand for', 'How we do business', center=True)}<div class="grid grid--features">{val_html}</div></div></section>
-    {cta_banner('Ready when you are', 'Send your vehicle and the part on WhatsApp — genuine or OEM, matched to your VIN and delivered across the UAE.')}"""
+    {cta_banner('Ready when you are', 'Send your vehicle and the part on WhatsApp. Genuine or OEM, matched to your VIN and delivered across the UAE.')}"""
     ld = [breadcrumb_schema([('Home', '/'), ('About', '/about/')]), store_schema()]
     render_page("About Al Jawareh Auto Spare Parts | Sharjah Parts Specialists",
                 "Al Jawareh Auto Spare Parts supplies genuine & OEM parts for Range Rover, Mercedes-Benz, BMW, Audi, Porsche and more — from our shop in Industrial Area 12, Sharjah, across the UAE.",
@@ -1528,8 +1520,7 @@ def build_request():
     body = f"""{breadcrumbs([('Home', '/'), ('Request a part', None)])}
     <section class="pagehead">
       <div class="container">
-        <span class="eyebrow">{icon('whatsapp','ic ic--sm')} WhatsApp enquiry</span>
-        <h1 class="pagehead__title">Request a part / get a quote</h1>
+        <h1 class="pagehead__title">Request a part and get a quote</h1>
         <p class="pagehead__lead">Fill in the details below and we'll open WhatsApp with your message ready to send. We confirm the exact part, tell you whether it's genuine or OEM, and quote you — no obligation.</p>
       </div>
     </section>
@@ -1540,7 +1531,7 @@ def build_request():
         </div>
         <aside class="split__aside">
           <div class="panel">
-            <h3 class="panel__t">What happens next</h3>
+            <h2 class="panel__t">What happens next</h2>
             <ol class="ministeps">
               <li><b>You send</b> — vehicle, VIN and the part (or the fault).</li>
               <li><b>We confirm &amp; quote</b> — exact part, genuine or OEM, clear price.</li>
@@ -1549,12 +1540,12 @@ def build_request():
             </ol>
           </div>
           <div class="panel panel--accent">
-            <h3 class="panel__t">{icon('vin','ic ic--sm')} Have your VIN ready</h3>
+            <h2 class="panel__t">{icon('vin','ic ic--sm')} Have your VIN ready</h2>
             <p>Your chassis number is on your Mulkiya, the windscreen base, or the driver's door jamb. It's the fastest route to the right part.</p>
-            <a class="linkbtn" href="/blog/find-the-right-part-using-vin-chassis-number/">How to find your VIN {icon('arrow','ic ic--sm')}</a>
+            <a class="linkbtn" href="/blog/find-the-right-part-using-vin-chassis-number/">How to find your VIN</a>
           </div>
           <div class="panel">
-            <h3 class="panel__t">Prefer to talk?</h3>
+            <h2 class="panel__t">Prefer to talk?</h2>
             <p>Call or WhatsApp us directly.</p>
             <a class="btn btn--ghost btn--block" href="{tel_link()}">{icon('phone','ic ic--sm')} {esc(SITE['phone_display'])}</a>
           </div>
@@ -1562,7 +1553,7 @@ def build_request():
       </div>
     </section>"""
     ld = [breadcrumb_schema([('Home', '/'), ('Request a part', '/request-a-part/')]), store_schema()]
-    render_page("Request a Part / Get a Quote | Al Jawareh Auto Spare Parts",
+    render_page("Request a part / Get a Quote | Al Jawareh Auto Spare Parts",
                 "Request a genuine or OEM car part in the UAE. Send your vehicle, VIN and the part you need — we confirm the exact part and quote you on WhatsApp. Delivery across the UAE.",
                 "/request-a-part/", body, ld, active="", priority="0.8", changefreq="monthly")
 
@@ -1588,7 +1579,6 @@ def build_contact():
     body = f"""{breadcrumbs([('Home', '/'), ('Contact', None)])}
     <section class="pagehead">
       <div class="container">
-        <span class="eyebrow">Contact</span>
         <h1 class="pagehead__title">Talk to us about your part</h1>
         <p class="pagehead__lead">The fastest way to reach us is WhatsApp — send your vehicle and the part and we'll take it from there. Or call, email, or drop by the shop in Sharjah.</p>
       </div>
@@ -1606,7 +1596,7 @@ def build_contact():
             <p class="prose">{esc(a['line1'])}<br>{esc(a['line2'])}<br>{esc(a['city'])}, {esc(a['country'])}</p>
             <h2 class="mini-h">{icon('clock','ic ic--sm')} Opening hours</h2>
             <ul class="footer__hours contactinfo__hours">{hours}</ul>
-            <div class="contactinfo__cta">{btn_enquiry('Request a Part', cls='btn btn--wa btn--lg')}</div>
+            <div class="contactinfo__cta">{btn_enquiry('Request a part', cls='btn btn--wa btn--lg')}</div>
           </div>
         </div>
         <aside class="split__aside">
@@ -1617,7 +1607,7 @@ def build_contact():
         </aside>
       </div>
     </section>
-    {cta_banner('We reply during working hours', "Send your enquiry any time on WhatsApp — we'll get back to you as soon as we're open.")}"""
+    {cta_banner('We reply during working hours', "Send your enquiry any time on WhatsApp and we'll reply as soon as we're open.")}"""
     ld = [breadcrumb_schema([('Home', '/'), ('Contact', '/contact/')]), store_schema()]
     render_page("Contact Al Jawareh Auto Spare Parts | Sharjah | 050 149 4916",
                 "Contact Al Jawareh Auto Spare Parts in Industrial Area 12, Sharjah. WhatsApp or call 050 149 4916 for genuine & OEM parts, delivered across the UAE.",
@@ -1631,13 +1621,12 @@ def build_faq():
     body = f"""{breadcrumbs([('Home', '/'), ('FAQ', None)])}
     <section class="pagehead">
       <div class="container">
-        <span class="eyebrow">FAQ</span>
         <h1 class="pagehead__title">Ordering, delivery &amp; warranty</h1>
         <p class="pagehead__lead">Everything you might want to know before you send us a part request. Still stuck? Message us on WhatsApp — we're happy to help.</p>
       </div>
     </section>
     <section class="section"><div class="container container--narrow">{faq_block(FAQS, eyebrow='Questions', title='Frequently asked questions')}</div></section>
-    {cta_banner('Question not answered?', 'Ask us directly on WhatsApp — real answers, no call centre.')}"""
+    {cta_banner('Question not answered?', 'Ask us on WhatsApp. You get a real answer from the shop, not a call centre.')}"""
     ld = [breadcrumb_schema([('Home', '/'), ('FAQ', '/faq/')]), faq_schema(FAQS), store_schema()]
     render_page("FAQ | Al Jawareh Auto Spare Parts | Ordering, Delivery & Warranty",
                 "Answers on ordering car parts, genuine vs OEM, VIN matching, UAE delivery, warranty and payment — from Al Jawareh Auto Spare Parts, Sharjah.",
@@ -1665,12 +1654,11 @@ def build_blog_index():
     body = f"""{breadcrumbs([('Home', '/'), ('Blog', None)])}
     <section class="pagehead">
       <div class="container">
-        <span class="eyebrow">Guides</span>
         <h1 class="pagehead__title">Parts buying &amp; fitment guides</h1>
         <p class="pagehead__lead">Straight-talking advice on buying the right part — VIN matching, genuine vs OEM, and marque-specific fitment guides from the shop floor.</p>
       </div>
     </section>
-    <section class="section"><div class="container"><div class="grid grid--posts">{"".join(blog_card(p) for p in posts)}</div></div></section>
+    <section class="section"><div class="container"><div class="glist">{"".join(blog_card(p) for p in posts)}</div></div></section>
     {cta_banner("Reading up before you buy?", "When you're ready, send us your vehicle and the part on WhatsApp for a quote.")}"""
     ld = [breadcrumb_schema([('Home', '/'), ('Blog', '/blog/')]),
           {"@context": "https://schema.org", "@type": "Blog", "name": f'{SITE["name"]} Blog',
@@ -1693,20 +1681,20 @@ def build_post(p):
         <header class="post__head">
           <span class="post__cat">{esc(p['category'])}</span>
           <h1 class="post__title">{esc(p['title'])}</h1>
-          <p class="post__meta"><span>{esc(p['read_time'])}</span> &middot; <span>Al Jawareh Auto Spare Parts</span></p>
+          <p class="post__meta">{esc(p['read_time'])}</p>
         </header>
         <div class="post__body">{render_blocks(p['body'])}</div>
         <div class="post__cta">
           <h3>Need this part for your car?</h3>
           <p>Send us your vehicle and VIN on WhatsApp — genuine or OEM, matched and quoted.</p>
-          {btn_enquiry('Request a Part', cls='btn btn--wa btn--lg')}
+          {btn_enquiry('Request a part', cls='btn btn--wa btn--lg')}
         </div>
       </div>
     </article>
     <section class="section section--alt">
       <div class="container">
         {section_header('Keep reading', 'More guides')}
-        <div class="grid grid--posts">{rel_html}</div>
+        <div class="glist">{rel_html}</div>
       </div>
     </section>"""
     ld = [breadcrumb_schema([('Home', '/'), ('Blog', '/blog/'), (p['title'], f'/blog/{p["slug"]}/')]),

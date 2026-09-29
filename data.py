@@ -585,7 +585,7 @@ POSTS = [
             ("h2", "Step 4 — Delivery or collection"),
             ("p", "Once you approve, we deliver anywhere in the UAE or hold it for collection at our "
                   "Sharjah shop. Nearby emirates are often same or next day."),
-            ("p", "Use the \"Request a Part\" button anywhere on this site — it opens WhatsApp with the "
+            ("p", "Use the \"Request a part\" button anywhere on this site — it opens WhatsApp with the "
                   "details already filled in for you."),
         ],
     },
