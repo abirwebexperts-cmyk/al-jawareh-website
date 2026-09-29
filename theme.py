@@ -670,6 +670,34 @@ button.status:hover,button.status[aria-expanded="true"]{background:rgba(255,255,
   .nav__cta{gap:.4rem}
 }
 @media (max-width:340px){.brand__logo{height:52px}}
+
+/* ---------- hero headline: ink + metallic gold (from the logo) ---------- */
+.hero__title{font-size:clamp(2.2rem,4.7vw,3.8rem);line-height:1.04;letter-spacing:-.015em;max-width:none}
+.hero__t1{display:block;color:var(--ink);max-width:14.5em}
+.hero__t2{display:block;margin-top:.1em;width:fit-content;padding-bottom:.06em;
+  background-image:
+    linear-gradient(105deg,transparent 42%,rgba(255,250,235,.85) 50%,transparent 58%),
+    linear-gradient(180deg,#e2b24a 0%,#c8932c 42%,#a8781d 70%,#7f5a12 100%);
+  background-size:260% 100%,100% 100%;background-position:160% 0,0 0;background-repeat:no-repeat;
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 1px 0 rgba(127,90,18,.18))}
+@media (prefers-reduced-motion:no-preference){
+  .hero__t2{animation:heroSheen 1.5s cubic-bezier(.3,.6,.3,1) .45s 1 both}
+  @keyframes heroSheen{from{background-position:160% 0,0 0}to{background-position:-60% 0,0 0}}
+}
+@media (max-width:760px){.hero__title{font-size:clamp(2.05rem,9.2vw,2.7rem)}}
+/* per-line metallic gold with a reflection line; tighter desktop size */
+.hero__title{font-size:clamp(2.2rem,4.1vw,3.35rem)}
+.hero__t2{display:inline;width:auto;margin:0;padding-bottom:.04em;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;
+  background-image:
+    linear-gradient(105deg,transparent 42%,rgba(255,250,235,.9) 50%,transparent 58%),
+    linear-gradient(180deg,#f2d27c 0%,#dcad48 38%,#c89532 49%,#a97a1e 51%,#b8872a 70%,#8a6317 100%)}
+.hero__t1{margin-bottom:.08em}
+@media (max-width:760px){.hero__title{font-size:clamp(2.05rem,9.2vw,2.7rem)}}
+.hero__t2{background-image:
+    linear-gradient(105deg,transparent 42%,rgba(255,250,235,.9) 50%,transparent 58%),
+    linear-gradient(180deg,#e4bb58 0%,#d3a13c 38%,#c08d2c 49%,#a27419 51%,#b08125 70%,#83600f 100%)}
 """
 
 MAIN_JS = r"""/* ==========================================================================

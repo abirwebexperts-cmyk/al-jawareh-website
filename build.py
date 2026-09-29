@@ -969,7 +969,7 @@ def build_home():
     hero = f"""<section class="hero">
       <div class="container hero__top">
         <div class="hero__copy">
-          <h1 class="hero__title">Range Rover, Land Rover and German car parts, in stock in Sharjah</h1>
+          <h1 class="hero__title"><span class="hero__t1">Range&nbsp;Rover, Land&nbsp;Rover and German car parts,</span> <span class="hero__t2">in stock in Sharjah</span></h1>
           <p class="hero__lead">Genuine and OEM parts from our shop in Industrial Area 12. Send your VIN and the part you need, we match the exact part number and deliver anywhere in the UAE.</p>
           <p class="hero__call">Prefer to talk? Call <a href="{tel_link()}">{esc(SITE['phone_display'])}</a>, Saturday to Thursday.</p>
         </div>
