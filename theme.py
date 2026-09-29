@@ -792,6 +792,13 @@ button.status:hover,button.status[aria-expanded="true"]{background:rgba(255,255,
 .topbar .status__detail{color:#b9c0c8}
 .topbar .status > .ic svg{color:#9aa2ab}
 .topbar .status[data-state="break"] .status__dot{background:var(--gold-light)}
+
+/* ---------- header matches the hero VIN card (chrome) ---------- */
+.nav{background:var(--chrome);border-bottom:1px solid var(--steel)}
+.site-header.is-stuck .nav{background:rgba(238,240,242,.96)}
+.nav__search,.nav .btn--ghost,.nav__call,.nav__burger{background:transparent}
+.nav__burger:hover{background:#e1e4e8}
+@media (hover:none){.nav__burger:hover{background:transparent}}
 """
 
 MAIN_JS = r"""/* ==========================================================================
