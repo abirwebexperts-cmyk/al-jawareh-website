@@ -2075,7 +2075,6 @@ def build_wa_redirects():
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Opening WhatsApp</title>
 <meta http-equiv="refresh" content="0;url={esc(url)}">
-<script>location.replace({json.dumps(url)});</script>
 </head><body style="font-family:system-ui,sans-serif;padding:2rem">
 <p>Opening WhatsApp&hellip; <a href="{esc(url)}" rel="nofollow">Tap here if nothing happens</a>.</p>
 </body></html>
@@ -2110,6 +2109,10 @@ ServerSignature Off
     RewriteCond %{HTTP_HOST} !^www\. [NC]
     RewriteCond %{HTTP_HOST} ^(?:www\.)?(.+)$ [NC]
     RewriteRule ^ https://www.%1%{REQUEST_URI} [L,R=301]
+
+    # Static site: refuse POST/PUT/etc. so no request body ever reaches a handler
+    RewriteCond %{REQUEST_METHOD} !^(GET|HEAD|OPTIONS)$
+    RewriteRule ^ - [F,L]
 </IfModule>
 
 # Custom error page
@@ -2163,8 +2166,11 @@ ErrorDocument 404 /404.html
     Header always set X-Content-Type-Options "nosniff"
     Header always set X-Frame-Options "SAMEORIGIN"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
-    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
-    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=HTTPS
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=(), browsing-topics=()"
+    Header always set Strict-Transport-Security "max-age=31536000"
+    Header always set Cross-Origin-Opener-Policy "same-origin-allow-popups"
+    Header always set X-Permitted-Cross-Domain-Policies "none"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
     Header unset X-Powered-By
     Header unset Server
 </IfModule>
@@ -2181,6 +2187,17 @@ ErrorDocument 404 /404.html
 
 # Protect dotfiles (except .well-known)
 <FilesMatch "^\.(?!well-known)">
+    Require all denied
+</FilesMatch>
+
+# No PHP or other server-side scripts run on this static site: deny them outright,
+# so requests never reach the PHP engine (PHP2Shell CVE-2026-109618/109619 and future PHP bugs)
+<FilesMatch "\.(php[0-9]?|phtml|phar|phps|pht|cgi|pl|py|pyc|sh|asp|aspx|jsp)$">
+    Require all denied
+</FilesMatch>
+
+# Never serve configs, logs, backups or archives that might land in the web root
+<FilesMatch "(\.(sql|bak|old|orig|swp|log|env|ini|yml|yaml|lock|zip|tar|gz|tgz|7z|rar)|^(error_log|composer\.json|package\.json|package-lock\.json))$">
     Require all denied
 </FilesMatch>
 """
