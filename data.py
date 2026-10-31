@@ -695,11 +695,11 @@ BRANCH_1 = {
 # ---------------------------------------------------------------------------
 GOOGLE_ADS = {
     "tag_id": "AW-16556820606",
-    # Both lead types report into "Website leads (WhatsApp + calls)" (action 7884153800,
-    # Contacts goal, Primary, Count One). The "Page view" action is deliberately NOT fired.
+    # Both lead types report into "Website leads (code)" (code-based action, Contacts goal,
+    # Primary, Count One, AED 1). The old URL-rule action 7884153800 is Secondary.
     "conversions": {
-        "whatsapp": "1RQ7CMjHuq8dEP6Q9NY9",   # WhatsApp buttons, VIN form, request drawer, search shortcuts
-        "call": "1RQ7CMjHuq8dEP6Q9NY9",       # phone-number clicks
+        "whatsapp": "H_RoCPm2wa8dEP6Q9NY9",   # WhatsApp buttons, VIN form, request drawer, search shortcuts
+        "call": "H_RoCPm2wa8dEP6Q9NY9",       # phone-number clicks
     },
     "value": 1.0,          # matches the action's value
     "currency": "AED",
