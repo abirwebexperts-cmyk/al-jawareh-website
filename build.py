@@ -648,8 +648,15 @@ def nav(active=""):
 """
 
 
+# Visible breadcrumb bar switched off site-wide. Google still gets the trail from the
+# BreadcrumbList structured data (breadcrumb_schema), so search results keep showing it.
+SHOW_BREADCRUMBS = False
+
+
 def breadcrumbs(items):
     """items: list of (label, path|None). Returns HTML string."""
+    if not SHOW_BREADCRUMBS:
+        return ""
     parts = []
     for i, (label, path) in enumerate(items):
         last = i == len(items) - 1
