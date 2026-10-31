@@ -381,17 +381,20 @@ ADS_VER = hashlib.md5(ADS_JS.encode("utf-8")).hexdigest()[:10] if ADS_JS else ""
 def ads_head():
     if not ADS_JS:
         return ""
-    return (f'<script src="/assets/js/ads.js?v={ADS_VER}"></script>\n'
+    return (f'<script src="/assets/js/site-init.js?v={ADS_VER}"></script>\n'
             f'<script async src="https://www.googletagmanager.com/gtag/js?id={esc(ADS_ID)}"></script>\n')
 
 
 def csp_policy():
     g = ADS_JS != ""
-    G_SCRIPT = " https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://www.google.com"
-    G_IMG = " https://www.googletagmanager.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://www.google.com https://www.google.ae https://*.google-analytics.com"
+    G_SCRIPT = (" https://www.googletagmanager.com https://*.googletagmanager.com https://www.googleadservices.com"
+                " https://googleads.g.doubleclick.net https://www.google.com https://tagassistant.google.com")
+    G_IMG = (" https://www.googletagmanager.com https://googleads.g.doubleclick.net https://www.googleadservices.com"
+             " https://www.google.com https://www.google.ae https://*.google-analytics.com https://ssl.gstatic.com https://www.gstatic.com")
     G_CONNECT = (" https://www.googletagmanager.com https://www.google.com https://www.google.ae https://googleads.g.doubleclick.net"
-                 " https://www.googleadservices.com https://pagead2.googlesyndication.com https://*.google-analytics.com https://*.analytics.google.com")
-    G_FRAME = " https://www.googletagmanager.com https://td.doubleclick.net"
+                 " https://www.googleadservices.com https://pagead2.googlesyndication.com https://*.google-analytics.com https://*.analytics.google.com"
+                 " https://*.googletagmanager.com https://tagassistant.google.com")
+    G_FRAME = " https://www.googletagmanager.com https://td.doubleclick.net https://bid.g.doubleclick.net https://tagassistant.google.com"
     return ("default-src 'self'; "
             "script-src 'self'" + (G_SCRIPT if g else "") + "; "
             "style-src 'self'; "
@@ -2311,7 +2314,6 @@ ErrorDocument 404 /404.html
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
     Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=(), browsing-topics=()"
     Header always set Strict-Transport-Security "max-age=31536000"
-    Header always set Cross-Origin-Opener-Policy "same-origin-allow-popups"
     Header always set X-Permitted-Cross-Domain-Policies "none"
     Header always set Content-Security-Policy "__CSP__"
     Header unset X-Powered-By
@@ -2467,7 +2469,7 @@ def main():
     build_wa_redirects()
     if ADS_JS:
         os.makedirs(os.path.join(DIST, "assets", "js"), exist_ok=True)
-        with open(os.path.join(DIST, "assets", "js", "ads.js"), "w", encoding="utf-8") as f:
+        with open(os.path.join(DIST, "assets", "js", "site-init.js"), "w", encoding="utf-8") as f:
             f.write(ADS_JS)
     build_llms()
     with open(os.path.join(DIST, "assets", "search.json"), "w", encoding="utf-8") as f:
