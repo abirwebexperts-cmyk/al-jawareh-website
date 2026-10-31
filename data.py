@@ -694,9 +694,14 @@ BRANCH_1 = {
 # Leave tag_id empty and nothing is loaded (and the security policy stays closed to Google).
 # ---------------------------------------------------------------------------
 GOOGLE_ADS = {
-    "tag_id": "",
+    "tag_id": "AW-16556820606",
+    # Both lead actions report into the "Contact" conversion action (category Contacts, Primary).
+    # The "Page view" action (iW6eCMfqruIZEP6Q9NY9) is deliberately NOT fired: it is set as Primary
+    # and would make bidding optimise for visits instead of customers.
     "conversions": {
-        "whatsapp": "",   # conversion action for WhatsApp clicks / VIN form / request drawer
-        "call": "",       # conversion action for phone-number clicks
+        "whatsapp": "qP_sCLv8oeAZEP6Q9NY9",   # WhatsApp buttons, VIN form, request drawer, search shortcuts
+        "call": "qP_sCLv8oeAZEP6Q9NY9",       # phone-number clicks
     },
+    "value": 1.0,          # matches the Contact action's snippet
+    "currency": "AED",
 }

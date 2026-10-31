@@ -370,7 +370,8 @@ def _ads_js():
             "window.gtag = gtag;\n"
             "gtag('js', new Date());\n"
             "gtag('config', " + json.dumps(ADS_ID) + ");\n"
-            "window.AJ_ADS = " + json.dumps(sends) + ";\n")
+            "window.AJ_ADS = " + json.dumps(sends) + ";\n"
+            "window.AJ_ADS_VALUE = " + json.dumps({"value": GOOGLE_ADS.get("value"), "currency": GOOGLE_ADS.get("currency")}) + ";\n")
 
 
 ADS_JS = _ads_js()

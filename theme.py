@@ -1504,7 +1504,11 @@ MAIN_JS = r"""/* ===============================================================
     var c = window.AJ_ADS;
     if (!c || typeof window.gtag !== "function") return;
     try {
-      if (c[kind]) window.gtag("event", "conversion", { send_to: c[kind], transport_type: "beacon" });
+      if (c[kind]) {
+        var ev = { send_to: c[kind], transport_type: "beacon" }, v = window.AJ_ADS_VALUE;
+        if (v && v.value != null) { ev.value = v.value; ev.currency = v.currency || "AED"; }
+        window.gtag("event", "conversion", ev);
+      }
       window.gtag("event", kind === "call" ? "click_to_call" : "whatsapp_click", { link_page: location.pathname });
     } catch (err) {}
   }
