@@ -157,7 +157,9 @@ def wa_attrs(number=None, message=None, go="main"):
 
 
 def tel_link():
-    return f'tel:{SITE["phone_href"]}'
+    # always dial in international format (+971...), which works from any phone
+    num = "".join(ch for ch in str(SITE["phone_href"]) if ch.isdigit())
+    return "tel:+" + num
 
 
 def media(path, alt, ratio="4x3", label=None, icon_name="box", cls="", logo_brand=None, tag=None):
@@ -779,10 +781,6 @@ def whatsapp_widget():
   <a class="mbar__btn mbar__btn--chat" {wa_attrs()}>{icon('chat','ic ic--sm')}<span>Chat</span></a>
   <button type="button" class="mbar__btn mbar__btn--wa" data-enquiry-open>{icon('whatsapp','ic ic--sm')}<span>Request a part</span></button>
 </nav>
-<button type="button" class="wa-fab" data-enquiry-open aria-label="Request a part on WhatsApp">
-  {icon('whatsapp','wa-fab__icon')}
-  <span class="wa-fab__label">Request a part</span>
-</button>
 <div class="enquiry" data-enquiry hidden>
   <div class="enquiry__scrim" data-enquiry-close></div>
   <aside class="enquiry__panel" role="dialog" aria-modal="true" aria-labelledby="enq-title">
@@ -1012,9 +1010,9 @@ def vin_form():
           spellcheck="false" placeholder="SALGA2AE9LA123456" aria-describedby="hero-vin-help" data-vin-input>
         <span class="vinplate__count" data-vin-count aria-live="polite">0/17</span>
       </div>
-      <p class="vinform__help" id="hero-vin-help" data-vin-help>17 characters, printed on your Mulkiya and at the bottom of the windscreen.</p>
+      <p class="vinform__help" id="hero-vin-help" data-vin-help>17 characters. Find it on your Mulkiya (vehicle registration card) or at the bottom corner of the windscreen.</p>
       <label class="vinform__label" for="hero-part">Part you need</label>
-      <input id="hero-part" class="vinform__part" name="part" required placeholder="Front air struts, brake pads, water pump">
+      <input id="hero-part" class="vinform__part" name="part" required placeholder="For example: front air strut, brake pads">
       <button type="submit" class="btn btn--wa btn--block btn--lg">{icon('whatsapp','ic ic--sm')}<span>Send on WhatsApp</span></button>
       <p class="vinform__alt">No VIN to hand? <button type="button" class="linkbtn" data-enquiry-open>Choose your car instead</button></p>
     </form>"""
@@ -1073,29 +1071,36 @@ def build_home():
         <div class="xhero__copy">
           <p class="xhero__tag"><span class="xhero__where">{icon('location','ic ic--sm')} Industrial Area 12 and Al Sajaa, Sharjah</span></p>
           <h1 class="xhero__title"><span class="hero__t1">Range&nbsp;Rover, Land&nbsp;Rover and German car parts,</span> <span class="hero__t2">in stock in Sharjah</span></h1>
-          <p class="xhero__lead">Genuine and OEM parts from two shops in Sharjah. Send your VIN and the part you need, and we match the exact part number and deliver anywhere in the UAE.</p>
+          <p class="xhero__lead">Range Rover and Land Rover specialists with two shops in Sharjah. We also supply Mercedes-Benz, Audi, BMW, Porsche, Volkswagen and GMC parts. Send your VIN and the part you need, and we match the exact part number.</p>
           <div class="xhero__actions">
-            {btn_enquiry('Request a part', cls='btn btn--wa btn--xl')}
-            <a class="btn btn--line-light btn--xl" href="{tel_link()}">{icon('phone','ic ic--sm')}<span>Call {esc(SITE['phone_display'])}</span></a>
+            {btn_enquiry('Request a part', cls='btn btn--wa btn--lg')}
+            <a class="btn btn--quiet btn--lg" href="{tel_link()}">{icon('phone','ic ic--sm')}<span>Call {esc(SITE['phone_display'])}</span></a>
           </div>
-          <ul class="xhero__proof">
-            <li><b>9</b><span>premium marques</span></li>
-            <li><b>2</b><span>shops in Sharjah</span></li>
-            <li><b>UAE</b><span>wide delivery</span></li>
-            <li><b>VIN</b><span>matched parts</span></li>
-          </ul>
         </div>
         <div class="xhero__card">{vin_form()}</div>
       </div>
     </section>"""
 
-    marques = "".join(
-        f'<a class="xbrand" href="/brands/{bb["slug"]}/"><span class="xbrand__logo">{brand_logo(bb, "band")}</span>'
-        f'<span class="xbrand__name">{esc(bb["name"])}</span></a>' for bb in BRANDS)
-    brands = f"""<section class="xbrands" id="brands">
+    def _feat(bb):
+        models = [m.replace(bb["name"] + " ", "") for m in bb.get("models", [])][:4]
+        pop = "".join("<li>" + esc(p) + "</li>" for p in (bb.get("popular") or [])[:3])
+        return (f'<a class="xfeat" href="/brands/{bb["slug"]}/">'
+                f'<span class="xfeat__logo">{brand_logo(bb, "band")}</span>'
+                f'<span class="xfeat__body"><span class="xfeat__name">{esc(bb["name"])} parts</span>'
+                f'<span class="xfeat__models">{esc(", ".join(models))}</span>'
+                f'<ul class="xfeat__list">{pop}</ul>'
+                f'<span class="xfeat__go">View {esc(bb["name"])} parts</span></span></a>')
+    featured = [bb for bb in BRANDS if bb["slug"] in ("range-rover", "land-rover")]
+    others = [bb for bb in BRANDS if bb["slug"] not in ("range-rover", "land-rover")]
+    minis = "".join(
+        f'<a class="xmini" href="/brands/{bb["slug"]}/"><span class="xmini__logo">{brand_logo(bb, "band")}</span>'
+        f'<span class="xmini__name">{esc(bb["name"])}</span></a>' for bb in others)
+    brands = f"""<section class="section xmakes" id="brands">
       <div class="container">
-        <div class="xhead xhead--light"><div><h2 class="xhead__t">Parts for the marques you drive</h2><p class="xhead__p">Nine makes we stock and source every day.</p></div><a class="xlink xlink--light" href="/brands/">All brands</a></div>
-        <div class="xbrands__row">{marques}</div>
+        <div class="xhead"><div><h2 class="xhead__t">Parts by make</h2><p class="xhead__p">Range Rover and Land Rover are our speciality. We also supply parts for the European and American makes below.</p></div><a class="xlink" href="/brands/">All brands</a></div>
+        <div class="xmakes__feature">{"".join(_feat(bb) for bb in featured)}</div>
+        <h3 class="xmakes__sub">We also supply parts for</h3>
+        <div class="xmakes__row">{minis}</div>
       </div>
     </section>"""
 
@@ -1165,12 +1170,21 @@ def build_home():
       <div class="container">
         <div class="xhead"><div><h2 class="xhead__t">Parts by system</h2><p class="xhead__p">Every category in genuine and OEM. Tell us which you prefer and we quote both.</p></div><a class="xlink" href="/parts/">All categories</a></div>
         <div class="xparts__grid">{tiles}</div>
+        <div class="xgrades">
+          <h3 class="xgrades__t">Know what you're buying</h3>
+          <dl class="xgrades__list">
+            <div><dt>Genuine</dt><dd>Made for the car maker and sold in its own branded packaging.</dd></div>
+            <div><dt>OEM supplier</dt><dd>Made by the company that supplies the factory, sold in that supplier's packaging.</dd></div>
+            <div><dt>Aftermarket</dt><dd>Made by other manufacturers. Branch 1 also supplies quality aftermarket parts.</dd></div>
+          </dl>
+          <p class="xgrades__note">Every quote tells you whether the part is genuine or OEM. <a class="xlink" href="/blog/genuine-vs-oem-vs-aftermarket-parts/">Read the full guide</a></p>
+        </div>
       </div>
     </section>"""
 
-    steps = f"""<section class="section section--dark xsteps">
+    steps = f"""<section class="section xsteps">
       <div class="container">
-        <div class="xhead xhead--light"><div><h2 class="xhead__t">How ordering works</h2><p class="xhead__p">From WhatsApp to your door, usually the same or next day.</p></div></div>
+        <div class="xhead"><div><h2 class="xhead__t">How ordering works</h2><p class="xhead__p">From WhatsApp to your door, usually the same or next day.</p></div></div>
         {steps_order()}
       </div>
     </section>"""
@@ -1192,14 +1206,14 @@ def build_home():
     coverage = f'<section class="section xcoverage"><div class="container">{coverage_block()}</div></section>'
     faq = f'<section class="section section--alt xfaq"><div class="container">{faq_block(FAQS[:6], title="Questions we get asked")}<p class="more"><a class="xlink" href="/faq/">All questions</a></p></div></section>'
     cta = f"""<section class="xcta">
-      <div class="xcta__bg">{_pic(pano_set, f"/assets/images/site/pano.jpg?v={V}", "", 1600, 685)}</div>
-      <div class="xcta__shade" aria-hidden="true"></div>
       <div class="container xcta__inner">
-        <h2 class="xcta__t">Can't find your part?</h2>
-        <p class="xcta__p">Send us your vehicle and the part on WhatsApp. If it's not on the shelf, we'll source it and give you a date.</p>
+        <div>
+          <h2 class="xcta__t">Can't find your part?</h2>
+          <p class="xcta__p">Send us your vehicle and the part on WhatsApp. If it's not on the shelf, we'll source it and give you a date.</p>
+        </div>
         <div class="xcta__actions">
-          {btn_enquiry('Request a part', cls='btn btn--wa btn--xl')}
-          <a class="btn btn--line-light btn--xl" href="{tel_link()}">{icon('phone','ic ic--sm')}<span>{esc(SITE['phone_display'])}</span></a>
+          {btn_enquiry('Request a part', cls='btn btn--invert btn--lg')}
+          <a class="btn btn--line-light btn--lg" href="{tel_link()}">{icon('phone','ic ic--sm')}<span>{esc(SITE['phone_display'])}</span></a>
         </div>
       </div>
     </section>"""

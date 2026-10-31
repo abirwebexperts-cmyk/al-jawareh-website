@@ -704,3 +704,9 @@ GOOGLE_ADS = {
     "value": 1.0,          # matches the action's value
     "currency": "AED",
 }
+
+
+# Display priority: Range Rover and Land Rover first, then the secondary marques.
+# Order only; every brand page and URL is unchanged.
+_BRAND_ORDER = ["range-rover", "land-rover", "mercedes-benz", "audi", "bmw", "porsche", "volkswagen", "gmc", "jaguar"]
+BRANDS.sort(key=lambda b: _BRAND_ORDER.index(b["slug"]) if b["slug"] in _BRAND_ORDER else len(_BRAND_ORDER))
