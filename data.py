@@ -695,13 +695,12 @@ BRANCH_1 = {
 # ---------------------------------------------------------------------------
 GOOGLE_ADS = {
     "tag_id": "AW-16556820606",
-    # Both lead actions report into the "Contact" conversion action (category Contacts, Primary).
-    # The "Page view" action (iW6eCMfqruIZEP6Q9NY9) is deliberately NOT fired: it is set as Primary
-    # and would make bidding optimise for visits instead of customers.
+    # Both lead types report into "Website leads (WhatsApp + calls)" (action 7884153800,
+    # Contacts goal, Primary, Count One). The "Page view" action is deliberately NOT fired.
     "conversions": {
-        "whatsapp": "qP_sCLv8oeAZEP6Q9NY9",   # WhatsApp buttons, VIN form, request drawer, search shortcuts
-        "call": "qP_sCLv8oeAZEP6Q9NY9",       # phone-number clicks
+        "whatsapp": "1RQ7CMjHuq8dEP6Q9NY9",   # WhatsApp buttons, VIN form, request drawer, search shortcuts
+        "call": "1RQ7CMjHuq8dEP6Q9NY9",       # phone-number clicks
     },
-    "value": 1.0,          # matches the Contact action's snippet
+    "value": 1.0,          # matches the action's value
     "currency": "AED",
 }
