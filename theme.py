@@ -1324,6 +1324,7 @@ MAIN_JS = r"""/* ===============================================================
       }
     } else if (form.reportValidity && !form.reportValidity()) { return; }
     var text = buildMessage(form);
+    track("whatsapp");
     window.open("https://wa.me/" + WA_NUMBER + "?text=" + encodeURIComponent(text), "_blank", "noopener");
     closeEnquiry();
   }
@@ -1497,6 +1498,24 @@ MAIN_JS = r"""/* ===============================================================
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(done, fallback); else fallback();
     });
   });
+
+  /* ---------- Google Ads conversions (active only when the site has a Google tag ID) ---------- */
+  function track(kind) {
+    var c = window.AJ_ADS;
+    if (!c || typeof window.gtag !== "function") return;
+    try {
+      if (c[kind]) window.gtag("event", "conversion", { send_to: c[kind], transport_type: "beacon" });
+      window.gtag("event", kind === "call" ? "click_to_call" : "whatsapp_click", { link_page: location.pathname });
+    } catch (err) {}
+  }
+  // every call link and WhatsApp link on every page, including ones added later (search shortcuts)
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+    if (!a) return;
+    var href = a.getAttribute("href") || "";
+    if (href.indexOf("tel:") === 0) track("call");
+    else if (a.hasAttribute("data-wa-num") || href.indexOf("wa.me/") !== -1 || href.indexOf("/go/whatsapp") === 0) track("whatsapp");
+  }, true);
 
   /* ---------- WhatsApp buttons: open wa.me directly (crawlers only see /go/) ---------- */
   $$("a[data-wa-num]").forEach(function (a) {

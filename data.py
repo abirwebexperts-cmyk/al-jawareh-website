@@ -684,3 +684,19 @@ BRANCH_1 = {
         "on WhatsApp. Delivery available across Sharjah, Dubai and the wider UAE.",
     ],
 }
+
+
+# ---------------------------------------------------------------------------
+# GOOGLE ADS CONVERSION TRACKING
+# Google Ads > Goals > Conversions > Summary > (action) > Tag setup > "Install the tag yourself":
+#   tag_id   = the ID in the Google tag:  gtag('config', 'AW-XXXXXXXXXX')
+#   label    = the part after the slash in the event snippet:  send_to: 'AW-XXXXXXXXXX/<label>'
+# Leave tag_id empty and nothing is loaded (and the security policy stays closed to Google).
+# ---------------------------------------------------------------------------
+GOOGLE_ADS = {
+    "tag_id": "",
+    "conversions": {
+        "whatsapp": "",   # conversion action for WhatsApp clicks / VIN form / request drawer
+        "call": "",       # conversion action for phone-number clicks
+    },
+}
