@@ -988,81 +988,176 @@ def specialist_block():
     </section>"""
 
 
+def _status_chip():
+    return ('<span class="status" data-hours-status><span class="status__dot" aria-hidden="true"></span>'
+            '<span class="status__text"><b class="status__label">Opening hours</b> <span class="status__detail">Saturday to Thursday</span></span></span>')
+
+
+def _pic(webp_srcset, fallback, alt, w, h, sizes="100vw", cls="", lazy=True, prio=False):
+    attrs = (' loading="lazy"' if lazy else '') + (' fetchpriority="high"' if prio else '')
+    return (f'<picture class="{cls}"><source srcset="{webp_srcset}" sizes="{sizes}" type="image/webp">'
+            f'<img src="{fallback}" alt="{esc(alt)}" width="{w}" height="{h}" decoding="async"{attrs}></picture>')
+
+
 def build_home():
-    hero = f"""<section class="hero">
-      <div class="container hero__top">
-        <div class="hero__copy">
-          <h1 class="hero__title"><span class="hero__t1">Range&nbsp;Rover, Land&nbsp;Rover and German car parts,</span> <span class="hero__t2">in stock in Sharjah</span></h1>
-          <p class="hero__lead">Genuine and OEM parts from our shop in Industrial Area 12. Send your VIN and the part you need, we match the exact part number and deliver anywhere in the UAE.</p>
-          <p class="hero__call">Prefer to talk? Call <a href="{tel_link()}">{esc(SITE['phone_display'])}</a>, Saturday to Thursday.</p>
+    V = ASSET_VER
+    pano_set = f"/assets/images/site/pano-900.webp?v={V} 900w, /assets/images/site/pano-1600.webp?v={V} 1600w"
+    maps_main = "https://www.google.com/maps/search/?api=1&query=" + quote(SITE["maps_query"])
+
+    hero = f"""<section class="xhero">
+      <picture class="xhero__bg">
+        <source media="(max-width: 760px)" srcset="/assets/images/site/pano-mobile.webp?v={V}" type="image/webp">
+        <source srcset="{pano_set}" sizes="100vw" type="image/webp">
+        <img src="/assets/images/site/pano.jpg?v={V}" alt="" width="1600" height="685" fetchpriority="high" decoding="async">
+      </picture>
+      <div class="xhero__shade" aria-hidden="true"></div>
+      <div class="container xhero__grid">
+        <div class="xhero__copy">
+          <p class="xhero__tag"><span class="xhero__where">{icon('location','ic ic--sm')} Industrial Area 12 and Al Sajaa, Sharjah</span></p>
+          <h1 class="xhero__title"><span class="hero__t1">Range&nbsp;Rover, Land&nbsp;Rover and German car parts,</span> <span class="hero__t2">in stock in Sharjah</span></h1>
+          <p class="xhero__lead">Genuine and OEM parts from two shops in Sharjah. Send your VIN and the part you need, and we match the exact part number and deliver anywhere in the UAE.</p>
+          <div class="xhero__actions">
+            {btn_enquiry('Request a part', cls='btn btn--wa btn--xl')}
+            <a class="btn btn--line-light btn--xl" href="{tel_link()}">{icon('phone','ic ic--sm')}<span>Call {esc(SITE['phone_display'])}</span></a>
+          </div>
+          <ul class="xhero__proof">
+            <li><b>9</b><span>premium marques</span></li>
+            <li><b>2</b><span>shops in Sharjah</span></li>
+            <li><b>UAE</b><span>wide delivery</span></li>
+            <li><b>VIN</b><span>matched parts</span></li>
+          </ul>
         </div>
-        {vin_form()}
-      </div>
-      <div class="container">
-        <figure class="hero__photo">
-          <picture>
-            <source media="(max-width: 700px)" srcset="/assets/images/site/pano-mobile.webp?v={ASSET_VER}" type="image/webp">
-            <source srcset="/assets/images/site/pano-900.webp?v={ASSET_VER} 900w, /assets/images/site/pano-1600.webp?v={ASSET_VER} 1600w" sizes="(max-width: 1240px) 100vw, 1200px" type="image/webp">
-            <img src="/assets/images/site/pano.jpg?v={ASSET_VER}" alt="Inside Al Jawareh Auto Spare Parts: shelves of genuine parts and the Range Rover, Land Rover, Mercedes-Benz and BMW counter" width="1600" height="685" fetchpriority="high" decoding="async">
-          </picture>
-          <figcaption>Our shop in Industrial Area 12, Sharjah</figcaption>
-        </figure>
+        <div class="xhero__card">{vin_form()}</div>
       </div>
     </section>"""
 
-    brands = f"""<section class="section" id="brands">
+    marques = "".join(
+        f'<a class="xbrand" href="/brands/{bb["slug"]}/"><span class="xbrand__logo">{brand_logo(bb, "band")}</span>'
+        f'<span class="xbrand__name">{esc(bb["name"])}</span></a>' for bb in BRANDS)
+    brands = f"""<section class="xbrands" id="brands">
       <div class="container">
-        {section_header('', 'Parts by car brand', 'Nine makes we stock and source every day.')}
-        {brands_grid()}
+        <div class="xhead xhead--light"><div><h2 class="xhead__t">Parts for the marques you drive</h2><p class="xhead__p">Nine makes we stock and source every day.</p></div><a class="xlink xlink--light" href="/brands/">All brands</a></div>
+        <div class="xbrands__row">{marques}</div>
       </div>
     </section>"""
 
-    cats = f"""<section class="section section--alt">
+    br = BRANCH_1
+    branch_card = ""
+    if br:
+        branch_card = f"""<article class="xshop">
+          <a class="xshop__media" href="/{br['slug']}/">{_pic(f"/assets/images/site/branch1-800.webp?v={V} 800w, /assets/images/site/branch1-1360.webp?v={V} 1360w", f"/assets/images/site/branch1.jpg?v={V}", "Shopfront of Al Jawareh New Auto Spare Parts Branch 1 in Al Sajaa", 1360, 765, "(max-width: 900px) 100vw, 50vw")}<span class="xshop__badge">Branch 1</span></a>
+          <div class="xshop__body">
+            <h3 class="xshop__t">Al Jawareh New Auto Spare Parts</h3>
+            <p class="xshop__addr">{icon('location','ic ic--sm')} Al Sajaa, near Tasheel Roundabout and Al Safi Medical Center</p>
+            <p class="xshop__meta">{_status_chip()}<a href="tel:{br['phone_intl']}">{esc(br['phone_display'])}</a></p>
+            <div class="xshop__actions">
+              <a class="btn btn--ink" href="/{br['slug']}/">View Branch 1</a>
+              <a class="btn btn--wa" {wa_attrs(br['whatsapp'], "Hello " + br['name'] + ", I'd like to enquire about a spare part.", 'branch-1')}>{icon('whatsapp','ic ic--sm')}<span>WhatsApp</span></a>
+              <a class="btn btn--line" href="{br['maps_url']}" target="_blank" rel="noopener">{icon('location','ic ic--sm')}<span>Directions</span></a>
+            </div>
+          </div>
+        </article>"""
+    shops = f"""<section class="section xshops">
       <div class="container">
-        {section_header('', 'Parts by system', 'Every category comes in genuine and OEM. Tell us which you prefer and we quote both.')}
-        {categories_grid()}
+        <div class="xhead"><div><h2 class="xhead__t">Two parts shops in Sharjah</h2><p class="xhead__p">Same opening hours at both. Walk in, call or WhatsApp either shop.</p></div></div>
+        <div class="xshops__grid">
+          <article class="xshop">
+            <a class="xshop__media" href="/contact/">{_pic(pano_set, f"/assets/images/site/pano.jpg?v={V}", "Inside the Al Jawareh main shop in Industrial Area 12, Sharjah", 1600, 685, "(max-width: 900px) 100vw, 50vw")}<span class="xshop__badge">Main shop</span></a>
+            <div class="xshop__body">
+              <h3 class="xshop__t">Al Jawareh Auto Spare Parts</h3>
+              <p class="xshop__addr">{icon('location','ic ic--sm')} {esc(SITE['address']['line1'])}, {esc(SITE['address']['line2'])}</p>
+              <p class="xshop__meta">{_status_chip()}<a href="{tel_link()}">{esc(SITE['phone_display'])}</a></p>
+              <div class="xshop__actions">
+                <a class="btn btn--ink" href="/contact/">Shop details</a>
+                <a class="btn btn--wa" {wa_attrs()}>{icon('whatsapp','ic ic--sm')}<span>WhatsApp</span></a>
+                <a class="btn btn--line" href="{maps_main}" target="_blank" rel="noopener">{icon('location','ic ic--sm')}<span>Directions</span></a>
+              </div>
+            </div>
+          </article>
+          {branch_card}
+        </div>
       </div>
     </section>"""
 
-    steps = f"""<section class="section section--dark">
+    spec = f"""<section class="xspec">
+      <div class="xspec__media">{_pic(pano_set, f"/assets/images/site/pano.jpg?v={V}", "Range Rover and Land Rover panels at the Al Jawareh parts counter", 1600, 685, "(max-width: 900px) 100vw, 50vw")}</div>
+      <div class="xspec__body">
+        <h2 class="xhead__t">Range Rover and Land Rover are our speciality</h2>
+        <p class="xspec__lead">Most of what comes through our door is air suspension, cooling and engine work on Range Rovers and Land Rovers, so those parts are on the shelf, not on order. The German makes follow close behind.</p>
+        <ul class="spec__list">
+          <li><b>Air suspension</b><span>Struts, EAS compressors, valve blocks and height sensors</span></li>
+          <li><b>Engine and cooling</b><span>Timing kits, water pumps, thermostats and radiators</span></li>
+          <li><b>Service parts</b><span>Filters, brake pads and discs, plugs and fluids</span></li>
+        </ul>
+        <div class="spec__actions">
+          {btn_enquiry('Request a Range Rover part', make='Range Rover', cls='btn btn--wa btn--lg')}
+          <a class="btn btn--line btn--lg" href="/brands/range-rover/">See Range Rover parts</a>
+        </div>
+      </div>
+    </section>"""
+
+    def _lc(x):
+        return x if (len(x) > 1 and x[1].isupper()) else x[0].lower() + x[1:]
+    tiles = "".join(
+        f'<a class="xpart" href="/parts/{c["slug"]}/"><span class="xpart__ic">{icon(c["icon"], "xpart__icon")}</span>'
+        f'<span class="xpart__name">{esc(c["name"])}</span>'
+        f'<span class="xpart__list">{"".join("<span>" + esc(i) + "</span>" for i in c["items"][:3])}</span>'
+        f'<span class="xpart__go">View parts</span></a>' for c in CATEGORIES)
+    parts = f"""<section class="section section--alt xparts">
       <div class="container">
-        {section_header('', 'How ordering works', light=True)}
+        <div class="xhead"><div><h2 class="xhead__t">Parts by system</h2><p class="xhead__p">Every category in genuine and OEM. Tell us which you prefer and we quote both.</p></div><a class="xlink" href="/parts/">All categories</a></div>
+        <div class="xparts__grid">{tiles}</div>
+      </div>
+    </section>"""
+
+    steps = f"""<section class="section section--dark xsteps">
+      <div class="container">
+        <div class="xhead xhead--light"><div><h2 class="xhead__t">How ordering works</h2><p class="xhead__p">From WhatsApp to your door, usually the same or next day.</p></div></div>
         {steps_order()}
       </div>
     </section>"""
 
-    popular = f"""<section class="section">
+    popular = f"""<section class="section xpopular">
       <div class="container">
-        {section_header('', 'Popular requests')}
+        <div class="xhead"><div><h2 class="xhead__t">Popular requests</h2></div></div>
         {popular_links()}
       </div>
     </section>"""
 
     guides = f"""<section class="section section--alt">
       <div class="container">
-        <div class="sec-row">{section_header('', 'Guides from the counter')}<a class="textlink" href="/blog/">All guides</a></div>
+        <div class="xhead"><div><h2 class="xhead__t">Guides from the counter</h2></div><a class="xlink" href="/blog/">All guides</a></div>
         {blog_cards(3)}
       </div>
     </section>"""
 
-    coverage = f'<section class="section"><div class="container">{coverage_block()}</div></section>'
-    faq = f'<section class="section section--alt"><div class="container container--narrow">{faq_block(FAQS[:6], title="Questions we get asked")}<p class="more"><a class="textlink" href="/faq/">All questions</a></p></div></section>'
-    cta = cta_banner("Can't find your part?",
-                     "Send us your vehicle and the part on WhatsApp. If it's not on the shelf, we'll source it and give you a date.")
+    coverage = f'<section class="section xcoverage"><div class="container">{coverage_block()}</div></section>'
+    faq = f'<section class="section section--alt xfaq"><div class="container">{faq_block(FAQS[:6], title="Questions we get asked")}<p class="more"><a class="xlink" href="/faq/">All questions</a></p></div></section>'
+    cta = f"""<section class="xcta">
+      <div class="xcta__bg">{_pic(pano_set, f"/assets/images/site/pano.jpg?v={V}", "", 1600, 685)}</div>
+      <div class="xcta__shade" aria-hidden="true"></div>
+      <div class="container xcta__inner">
+        <h2 class="xcta__t">Can't find your part?</h2>
+        <p class="xcta__p">Send us your vehicle and the part on WhatsApp. If it's not on the shelf, we'll source it and give you a date.</p>
+        <div class="xcta__actions">
+          {btn_enquiry('Request a part', cls='btn btn--wa btn--xl')}
+          <a class="btn btn--line-light btn--xl" href="{tel_link()}">{icon('phone','ic ic--sm')}<span>{esc(SITE['phone_display'])}</span></a>
+        </div>
+      </div>
+    </section>"""
 
-    body = hero + brands + specialist_block() + cats + steps + popular + guides + coverage + faq + cta
+    body = hero + brands + shops + spec + parts + steps + popular + guides + coverage + faq + cta
     title = "Genuine & OEM Car Spare Parts in Sharjah | Al Jawareh"
     desc = ("Genuine & OEM spare parts for Range Rover, Land Rover, Mercedes-Benz, BMW, Audi, Porsche & more. "
-            "Shop in Sharjah, delivery across the UAE. Send your VIN on WhatsApp.")
+            "Two shops in Sharjah, delivery across the UAE. Send your VIN on WhatsApp.")
     ld = [store_schema(),
           {"@context": "https://schema.org", "@type": "WebSite", "name": SITE["name"],
            "alternateName": "Al Jawareh", "url": SITE["base_url"] + "/", "inLanguage": "en-AE"},
           faq_schema(FAQS[:6])]
     preload = (
-        f'<link rel="preload" as="image" type="image/webp" href="/assets/images/site/pano-mobile.webp?v={ASSET_VER}" media="(max-width: 700px)">\n'
-        f'<link rel="preload" as="image" type="image/webp" href="/assets/images/site/pano-1600.webp?v={ASSET_VER}" '
-        f'imagesrcset="/assets/images/site/pano-900.webp?v={ASSET_VER} 900w, /assets/images/site/pano-1600.webp?v={ASSET_VER} 1600w" '
-        f'imagesizes="(max-width: 1240px) 100vw, 1200px" media="(min-width: 701px)">\n'
+        f'<link rel="preload" as="image" type="image/webp" href="/assets/images/site/pano-mobile.webp?v={V}" media="(max-width: 760px)">\n'
+        f'<link rel="preload" as="image" type="image/webp" href="/assets/images/site/pano-1600.webp?v={V}" '
+        f'imagesrcset="{pano_set}" imagesizes="100vw" media="(min-width: 761px)">\n'
     )
     render_page(title, desc, "/", body, ld, active="home", og_type="website",
                 priority="1.0", changefreq="weekly", preload=preload)
