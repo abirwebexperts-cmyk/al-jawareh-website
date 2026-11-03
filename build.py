@@ -272,6 +272,9 @@ def store_schema():
             for c in CATEGORIES
         ],
     }
+    if SITE.get("landline_href"):
+        obj["contactPoint"] = [{"@type": "ContactPoint", "telephone": "+" + SITE["landline_href"],
+                                "contactType": "customer service", "areaServed": "AE"}]
     if BRANCH_1:
         obj["department"] = [{"@id": abs_url("/" + BRANCH_1["slug"] + "/") + "#store"}]
     sameas = [v for v in SITE["social"].values() if v]
@@ -1770,7 +1773,8 @@ def build_contact():
     hours = "".join(f'<li><span>{esc(d)}</span><span>{esc(t)}</span></li>' for d, t in SITE["hours_display"])
     cards = [
         ("whatsapp", "WhatsApp", SITE["phone_display"], WA_GO["main"], True),
-        ("phone", "Call us", SITE["phone_display"], tel_link(), False),
+        ("phone", "Mobile", SITE["phone_display"], tel_link(), False),
+        ("phone", "Landline", SITE["landline_display"], "tel:+" + SITE["landline_href"], False),
         ("mail", "Email", SITE["email"], f'mailto:{SITE["email"]}', False),
     ]
     card_html = "".join(
@@ -1813,14 +1817,15 @@ def build_contact():
     </section>
     <section class="section">
       <div class="container">
-        <a class="branchcard" href="/branch-1/">
-          <picture><source srcset="/assets/images/site/branch1-800.webp?v={ASSET_VER}" type="image/webp"><img src="/assets/images/site/branch1.jpg?v={ASSET_VER}" alt="Al Jawareh New Auto Spare Parts Branch 1 shopfront" width="1360" height="765" loading="lazy" decoding="async"></picture>
-          <span class="branchcard__txt">
-            <span class="branchcard__t">Also visit Branch 1 in Al Sajaa</span>
-            <span class="branchcard__p">Near Tasheel Roundabout and Al Safi Medical Center, opposite the mosque. Call or WhatsApp 058 251 7009.</span>
-            <span class="branchcard__go">View Branch 1</span>
-          </span>
-        </a>
+        <div class="branchcard">
+          <a class="branchcard__media" href="/branch-1/"><picture><source srcset="/assets/images/site/branch1-800.webp?v={ASSET_VER}" type="image/webp"><img src="/assets/images/site/branch1.jpg?v={ASSET_VER}" alt="Al Jawareh New Auto Spare Parts Branch 1 shopfront" width="1360" height="765" loading="lazy" decoding="async"></picture></a>
+          <div class="branchcard__txt">
+            <a class="branchcard__t" href="/branch-1/">Also visit Branch 1 in Al Sajaa</a>
+            <p class="branchcard__p">Near Tasheel Roundabout and Al Safi Medical Center, opposite the mosque.</p>
+            <p class="branchcard__phones"><span>Mobile and WhatsApp <a href="tel:+971582517009">058 251 7009</a></span><span>Landline <a href="tel:+97165301012">06 530 1012</a></span></p>
+            <a class="branchcard__go" href="/branch-1/">View Branch 1</a>
+          </div>
+        </div>
       </div>
     </section>
     {cta_banner('We reply during working hours', "Send your enquiry any time on WhatsApp and we'll reply as soon as we're open.")}"""
@@ -1987,7 +1992,7 @@ def build_branch():
         <div class="bfact">
           <p class="bfact__k">{icon('phone','ic ic--sm')} Call or WhatsApp</p>
           <p class="bfact__v"><a href="{tel}">{esc(br['phone_display'])}</a></p>
-          <p class="bfact__s">Send your chassis or VIN number and the part you need</p>
+          <p class="bfact__s">Landline <a href="tel:{esc(br['landline_intl'])}">{esc(br['landline_display'])}</a></p>
         </div>
         <div class="bfact">
           <p class="bfact__k">{icon('clock','ic ic--sm')} Opening hours</p>
@@ -2053,6 +2058,7 @@ def build_branch():
           <h2 class="panel__t">{icon('location','ic ic--sm')} Our main shop</h2>
           <p>{esc(SITE['address']['line1'])}, {esc(SITE['address']['line2'])}, {esc(SITE['address']['city'])}.</p>
           <p>Call or WhatsApp <a class="textlink" href="{tel_link()}">{esc(SITE['phone_display'])}</a></p>
+          <p>Landline <a class="textlink" href="tel:+{esc(SITE['landline_href'])}">{esc(SITE['landline_display'])}</a></p>
           <a class="textlink" href="/contact/">Main shop details</a>
         </div>
       </div>
@@ -2080,6 +2086,7 @@ def build_branch():
         "brand": [{"@type": "Brand", "name": m["name"]} for m in makes],
         "areaServed": [{"@type": "City", "name": n} for n in ("Sharjah", "Dubai")] + [{"@type": "Country", "name": "United Arab Emirates"}],
         "parentOrganization": {"@id": SITE["base_url"] + "/#store"},
+        "contactPoint": [{"@type": "ContactPoint", "telephone": br["landline_intl"], "contactType": "customer service", "areaServed": "AE"}],
     }
     ld = [breadcrumb_schema([('Home', '/'), (br['menu'], path)]), store, faq_schema(faqs)]
     title = "Al Jawareh Branch 1, Al Sajaa: Range Rover & Land Rover Parts"

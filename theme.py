@@ -1290,6 +1290,17 @@ h1,h2,.xhead__t,.sec-head__title{font-stretch:112%;font-weight:700;letter-spacin
 @media (max-width:380px){.xmakes__row{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .pb__add{background:#fff;color:var(--green);border:1px solid var(--green)}
 .pb__add:hover{background:var(--green-tint);color:var(--green-hover)}
+/* contact page: four contact cards, Branch 1 card with its own phone links */
+.contactgrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:1024px){.contactgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.contactgrid{grid-template-columns:1fr}}
+.branchcard__media{display:block}
+.branchcard__t{font-stretch:112%;font-weight:700;font-size:1.3rem;color:var(--ink)}
+.branchcard__t:hover{color:var(--green)}
+.branchcard__phones{display:flex;flex-wrap:wrap;gap:.35rem 1.4rem;margin:.2rem 0 0}
+.branchcard__phones a,.bfact__s a{font-weight:650;color:inherit;text-decoration:underline;text-decoration-color:var(--champagne);text-underline-offset:4px}
+.branchcard__phones a{color:var(--green)}
+.branchcard__go{align-self:flex-start}
 """
 
 MAIN_JS = r"""/* ==========================================================================

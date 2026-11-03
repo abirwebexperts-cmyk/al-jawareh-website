@@ -18,6 +18,8 @@ SITE = {
     "phone_display": "050 149 4916",
     "phone_intl": "+971 50 149 4916",
     "phone_href": "971501494916",        # tel: value (no +, no spaces)
+    "landline_display": "06 533 3129",   # main shop landline, Industrial Area 12
+    "landline_href": "97165333129",
     "whatsapp": "971501494916",          # wa.me value
     "email": "sales@jawarehautoparts.ae",  # placeholder — confirm real inbox
     "address": {
@@ -667,6 +669,8 @@ BRANCH_1 = {
     "plus_code": "8JJH+J6W",
     "landmarks": "near Tasheel Roundabout and Al Safi Medical Center, opposite the mosque",
     "phone_display": "058 251 7009",
+    "landline_display": "06 530 1012",
+    "landline_intl": "+97165301012",
     "phone_intl": "+971582517009",
     "whatsapp": "971582517009",
     "maps_url": "https://maps.app.goo.gl/iDTUedbicwWgKeV49",
